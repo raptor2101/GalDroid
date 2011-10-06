@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:visible="true" android:id="@+id/item_edit_gallery" android:enabled="true" android:title="@string/menu_edit_gallery" android:checkable="false" android:checked="false" />
+    <item android:visible="true" android:id="@+id/item_delete_gallery" android:enabled="true" android:title="@string/menu_delete_gallery" android:checkable="false" android:checked="false" />
+</menu>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:orientation="vertical"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent">
+  	<TextView android:textAppearance="?android:attr/textAppearanceLarge" 
+    		  android:layout_height="wrap_content" 
+    		  android:layout_width="match_parent" 
+    		  android:text="@string/gallery_name" 
+    		  android:gravity="center_horizontal"/>
+ 	<EditText android:id="@+id/editGallery"
+ 			  android:layout_width="match_parent"
+ 			  android:layout_height="wrap_content"
+ 			  android:gravity="center_horizontal">
+ 	</EditText>
+    <TextView android:textAppearance="?android:attr/textAppearanceLarge" 
+    		  android:layout_height="wrap_content" 
+    		  android:layout_width="match_parent" 
+    		  android:text="@string/gallery_type" 
+    		  android:gravity="center_horizontal"/>
+    <Spinner android:id="@+id/spinnerGalleryType" 
+    		 android:layout_width="match_parent"
+    		 android:layout_height="wrap_content"
+    		 android:prompt="@string/gallery_types_prompt"
+    		 android:gravity="center_horizontal"/>
+ 	<TextView android:textAppearance="?android:attr/textAppearanceLarge" 
+    		  android:layout_height="wrap_content" 
+    		  android:layout_width="match_parent" 
+    		  android:text="@string/gallery_host" 
+    		  android:gravity="center_horizontal"/>
+ 	<EditText android:id="@+id/editServer"
+ 			  android:layout_width="match_parent"
+ 			  android:layout_height="wrap_content"
+ 			  android:gravity="center_horizontal">
+ 	</EditText>
+    <TextView android:textAppearance="?android:attr/textAppearanceLarge" 
+    		  android:layout_height="wrap_content" 
+    		  android:layout_width="match_parent" 
+    		  android:text="@string/gallery_username" 
+    		  android:gravity="center_horizontal"/>
+    <EditText android:id="@+id/editUsername"
+    		  android:layout_width="match_parent" 
+    		  android:layout_height="wrap_content"
+    		  android:gravity="center_horizontal"
+    		  android:inputType="textPersonName"></EditText>
+    <TextView android:textAppearance="?android:attr/textAppearanceLarge" 
+    		  android:layout_height="wrap_content" 
+    		  android:layout_width="match_parent" 
+    		  android:text="@string/gallery_password" 
+    		  android:gravity="center_horizontal"/>
+    <EditText android:id="@+id/editPassword"
+    		  android:layout_width="match_parent"
+    		  android:layout_height="wrap_content"
+    		  android:gravity="center_horizontal"
+    		  android:inputType="textPassword"></EditText>
+    <Button android:text="Button"
+    		android:id="@+id/buttonCreate" 
+    		android:layout_width="match_parent"
+    		android:gravity="center_horizontal" 
+    		android:layout_height="wrap_content"></Button>
+    
+    
+</LinearLayout>

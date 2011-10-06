@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="gen"/>
+	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
+	<classpathentry kind="lib" path="/media/Workspace/eclipse_workspace/Libraries/httpcomponents-client-4.1.1/lib/commons-codec-1.4.jar"/>
+	<classpathentry kind="lib" path="/media/Workspace/eclipse_workspace/Libraries/httpcomponents-client-4.1.1/lib/commons-logging-1.1.1.jar"/>
+	<classpathentry kind="lib" path="/media/Workspace/eclipse_workspace/Libraries/httpcomponents-client-4.1.1/lib/httpclient-4.1.1.jar"/>
+	<classpathentry kind="lib" path="/media/Workspace/eclipse_workspace/Libraries/httpcomponents-client-4.1.1/lib/httpclient-cache-4.1.1.jar"/>
+	<classpathentry kind="lib" path="/media/Workspace/eclipse_workspace/Libraries/httpcomponents-client-4.1.1/lib/httpcore-4.1.jar"/>
+	<classpathentry kind="lib" path="/media/Workspace/eclipse_workspace/Libraries/httpcomponents-client-4.1.1/lib/httpmime-4.1.1.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

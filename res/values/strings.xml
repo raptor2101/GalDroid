@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">GalDroid</string>
+    <string name="menu_create_gallery">Add Gallery</string>
+    <string name="menu_edit_gallery">Edit Gallery</string>
+    <string name="menu_delete_gallery">Delete Gallery</string>
+    <string name="menu_synchronize_cache">Synchronize</string>
+    <string name="button_create">Create</string>
+    <string name="button_edit">Edit</string>
+    <string name="progress_title_verify">Verify Usercredentials</string>
+    <string name="progress_title_load">Load Gallery</string>
+    <string name="gallery_type">Gallery Type</string>
+    <string name="gallery_host">Server</string>
+    <string name="gallery_username">User</string>
+    <string name="gallery_password">Password</string>
+    <string-array name="gallery_types">
+        <item>Gallery 3</item>
+    </string-array>
+    <string name="gallery_types_prompt">Choose a gallery type</string>
+    <string name="gallery_name">Gallery name</string>
+</resources>

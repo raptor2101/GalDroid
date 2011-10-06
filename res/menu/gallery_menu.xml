@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:visible="true" android:id="@+id/item_create_new" android:enabled="true" android:title="@string/menu_create_gallery" android:checkable="false" android:checked="false" />
+    <item android:visible="true" android:id="@+id/item_synchronize_cache" android:enabled="true" android:title="@string/menu_synchronize_cache" android:checkable="false" android:checked="false" />
+</menu>
