@@ -21,6 +21,7 @@ package de.raptor2101.GalDroid.Activities;
 import java.security.NoSuchAlgorithmException;
 
 import android.app.ListActivity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.ContextMenu;
@@ -36,8 +37,13 @@ import android.widget.TextView;
 import de.raptor2101.GalDroid.R;
 import de.raptor2101.GalDroid.Config.GalDroidPreference;
 import de.raptor2101.GalDroid.WebGallery.GalleryCache;
+import de.raptor2101.GalDroid.WebGallery.Tasks.CleanUpCacheTask;
+import de.raptor2101.GalDroid.WebGallery.Tasks.SyncronizeCacheTask;
+import de.raptor2101.GalDroid.WebGallery.Tasks.CacheTaskListener;
 
-public class GalleryListingActivitiy extends ListActivity {
+public class GalleryListingActivitiy extends ListActivity implements CacheTaskListener {
+	private ProgressDialog mProgressDialog;
+
 	@Override
     public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -81,9 +87,21 @@ public class GalleryListingActivitiy extends ListActivity {
 		if(item.getItemId() == R.id.item_create_new) {
 			Intent intent = new Intent(this, EditGalleryActivity.class);
 			this.startActivity(intent);
+		} else {
+			CreateProgressDialog(R.string.menu_synchronize_cache);
+		    GalDroidApp app = (GalDroidApp) getApplication();
+		    SyncronizeCacheTask task = new SyncronizeCacheTask(app.getGalleryCache(),this);
+		    task.execute();
 		}
-		
 		return true;
+	}
+
+	private void CreateProgressDialog(int titleRecouceId) {
+		mProgressDialog = new ProgressDialog(this);
+		mProgressDialog.setTitle(titleRecouceId);
+		mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+		mProgressDialog.setCancelable(false);
+		mProgressDialog.dismiss();
 	}
 	
 	@Override
@@ -102,17 +120,35 @@ public class GalleryListingActivitiy extends ListActivity {
 		try {
 			GalDroidApp app = (GalDroidApp) getApplication();
 			app.Initialize(this);
-			GalleryCache cache = app.getGalleryCache();
-			
-			cache.cleanup(50);
-			
-			
 			setListAdapter(new ArrayAdapter<String>(this, R.layout.gallery_listing_activity, GalDroidPreference.getGalleryNames()));
 			
+			GalleryCache cache = app.getGalleryCache();
+			if (cache.isCleanUpNeeded()) {
+				CreateProgressDialog(R.string.menu_cleanup_cache);
+				CleanUpCacheTask task = new CleanUpCacheTask(cache, this);
+				task.execute();
+			}			
 		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
 		}
 		
 		super.onResume();
+	}
+
+	public void onCacheOperationStart(int elementCount) {
+		mProgressDialog.setMax(elementCount);
+		mProgressDialog.setProgress(0);
+		mProgressDialog.show();
+		
+	}
+
+	public void onCacheOperationProgress(int elementCount) {
+		mProgressDialog.setProgress(elementCount);
+		
+	}
+
+	public void onCacheOperationDone() {
+		mProgressDialog.dismiss();
+		mProgressDialog = null;
 	}
 }

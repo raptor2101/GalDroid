@@ -51,7 +51,7 @@ public class ImageViewActivity extends GalleryActivity implements OnTouchListene
 	private Gallery mGalleryFullscreen;
 	private Gallery mGalleryThumbnails;
 	private PointF mScalePoint = new PointF();
-	private Integer mCurrentIndex;
+	
 	private float mTouchStartY, mTouchStartX,  mOldDist=1, minDragHeight;
 	private GalleryImageAdapter mAdapterFullscreen,mAdapterThumbnails;
 	
@@ -85,16 +85,6 @@ public class ImageViewActivity extends GalleryActivity implements OnTouchListene
     	mGalleryFullscreen.setOnItemSelectedListener(this);
     	mGalleryThumbnails.setOnItemSelectedListener(this);
     	
-    	mCurrentIndex = (Integer) getLastNonConfigurationInstance();
-        
-    	if(mCurrentIndex == null)
-        {
-	    	mCurrentIndex = getIntent().getExtras().getInt("Current Index");
-        }
-        
-        mGalleryFullscreen.setSelection(mCurrentIndex);
-        mGalleryThumbnails.setSelection(mCurrentIndex);
-        
         super.onCreate(savedInstanceState);
     }
 
@@ -195,6 +185,7 @@ public class ImageViewActivity extends GalleryActivity implements OnTouchListene
 
 	public void onItemSelected(AdapterView<?> gallery, View view, int position,
 			long arg3) {
+		setCurrentIndex(position);
 		if(gallery == mGalleryFullscreen){
 			mGalleryThumbnails.setSelection(position);
 		}
@@ -211,7 +202,15 @@ public class ImageViewActivity extends GalleryActivity implements OnTouchListene
 	@Override
 	public void onGalleryObjectsLoaded(List<GalleryObject> galleryObjects) {
 		mAdapterFullscreen.setGalleryObjects(galleryObjects);
-    	mAdapterThumbnails.setGalleryObjects(galleryObjects);		
+    	mAdapterThumbnails.setGalleryObjects(galleryObjects);
+    	
+    	int currentIndex = getCurrentIndex();
+        if(currentIndex == -1){
+        	currentIndex = getIntent().getExtras().getInt("Current Index");
+        }
+        
+        mGalleryFullscreen.setSelection(currentIndex);
+        mGalleryThumbnails.setSelection(currentIndex);
 	}
 }
 
