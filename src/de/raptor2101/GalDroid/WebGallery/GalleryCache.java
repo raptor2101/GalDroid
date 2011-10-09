@@ -38,6 +38,7 @@ import android.graphics.Bitmap;
 import android.util.Log;
 
 public class GalleryCache {
+	private static long mMaxCacheSize = 50 * 1024 *1024; // convert MByte to Byte
 	private File mCacheDir; 
 	private MessageDigest mDigester;
 	private Hashtable<String,WeakReference<Bitmap>> mCachedBitmaps;
@@ -142,24 +143,25 @@ public class GalleryCache {
 	}
 
 	public void cleanup(long maxCacheSize) {
-		maxCacheSize *= 1024 *1024; // convert MByte to Byte
-		long currentCacheSize = GalDroidPreference.getCacheSpaceNeeded();
-		if(currentCacheSize > maxCacheSize){
-			List<String> cachedObjects = GalDroidPreference.getCacheOjectsOrderedByAccessTime();
-			maxCacheSize = maxCacheSize - (maxCacheSize / 3);
-			for(int i=0;currentCacheSize>maxCacheSize;i++){
-				String hash = cachedObjects.get(i);
-				File cacheFile = new File(mCacheDir, hash);
-				if (cacheFile.exists()){
-					currentCacheSize -= cacheFile.length(); 
-					cacheFile.delete();
-				}
-				GalDroidPreference.deleteCacheObject(hash);
-			}
-		}
+		
+		
+		
 	}
 	
-	public void syncronize(){
-		GalDroidPreference.syncronizeCacheObject(mCacheDir.listFiles());
+	public File[] ListCachedFiles(){
+		return mCacheDir.listFiles();
+	}
+
+	public long getMaxCacheSize() {
+		return mMaxCacheSize;
+	}
+	
+	public boolean isCleanUpNeeded() {
+		long currentCacheSize = GalDroidPreference.getCacheSpaceNeeded();
+		return currentCacheSize > mMaxCacheSize;
+	}
+
+	public File getCacheDir() {
+		return mCacheDir;
 	}
 }

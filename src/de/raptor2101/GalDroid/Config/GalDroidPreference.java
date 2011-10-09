@@ -185,22 +185,39 @@ public class GalDroidPreference {
 		}
 	}
 	
-	public static void syncronizeCacheObject(File[] files){
-	
+	public static GalDroidPreference GetAsyncAccess(){
 		synchronized (mContext) {
-			SQLiteDatabase database = createConnection();
-			
-			
-			database.delete(CACHE_TABLE, null,null);
-			for(File file:files){
-				ContentValues values = new ContentValues(3);
-				values.put("hash", file.getName());
-				values.put("lastAccessed", System.currentTimeMillis());
-				values.put("size", file.length());
-				database.insert(CACHE_TABLE, null, values);
-			}
-			
-			database.close();
+			return new GalDroidPreference(createConnection());
 		}
+	}
+	
+	private SQLiteDatabase mDbObject;
+	
+	private GalDroidPreference(SQLiteDatabase dbObject) {
+		mDbObject = dbObject;
+	}
+	
+	public void clearCacheTable() {
+		mDbObject.delete(CACHE_TABLE, null,null);
+	}
+	
+	public void insertCacheObject(File file) {
+		ContentValues values = new ContentValues(3);
+		values.put("hash", file.getName());
+		values.put("lastAccessed", file.lastModified());
+		values.put("size", file.length());
+		mDbObject.insert(CACHE_TABLE, null, values);
+	}
+	
+	@Override
+	protected void finalize() throws Throwable {
+		if(mDbObject != null) {
+			close();
+		}
+	}
+
+	public void close() {
+		mDbObject.close();
+		mDbObject = null;
 	}
 }
