@@ -119,11 +119,11 @@ public class ImageViewActivity extends GalleryActivity implements OnTouchListene
 			case MotionEvent.ACTION_POINTER_3_DOWN:
 			case MotionEvent.ACTION_POINTER_2_DOWN:
 			case MotionEvent.ACTION_POINTER_DOWN:
-				mOldDist = getSpacing(event);
+				/*mOldDist = getSpacing(event);
 				if(mOldDist > 10f) {
 					mTouchMode = TouchMode.Zoom;
 					setScalePoint(event);
-				}
+				}*/
 				break;
 			case MotionEvent.ACTION_POINTER_3_UP:
 			case MotionEvent.ACTION_POINTER_2_UP:
