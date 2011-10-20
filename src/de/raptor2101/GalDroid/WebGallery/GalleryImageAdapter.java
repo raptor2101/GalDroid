@@ -45,6 +45,11 @@ public class GalleryImageAdapter extends BaseAdapter {
 		ShowTitle,
 		HideTitle
 	}
+	
+	public enum ScaleMode {
+		ScaleSource,
+		DontScale
+	}
 
 	private GalleryCache mCache;
 	private WebGallery mWebGallery;
@@ -53,12 +58,14 @@ public class GalleryImageAdapter extends BaseAdapter {
 	private List<GalleryObject> mGalleryObjects;
 	private TitleConfig mTitleConfig;
 	private LayoutParams mLayoutParams;
+	private ScaleMode mScaleMode;
 	private ImageSize mImageSize;
+	
 	
 	private ArrayList<WeakReference<GalleryImageView>> mImageViews;
 	
 	
-	public GalleryImageAdapter(Context context, LayoutParams layoutParams) {
+	public GalleryImageAdapter(Context context, LayoutParams layoutParams, ScaleMode scaleMode) {
 		super();
 		GalDroidApp appContext = (GalDroidApp)context.getApplicationContext();
 		this.mContext = context;
@@ -71,6 +78,7 @@ public class GalleryImageAdapter extends BaseAdapter {
 		
 		mTitleConfig = TitleConfig.ShowTitle;
 		mImageSize = ImageSize.Thumbnail;
+		mScaleMode = scaleMode;
 	}
 	
 	public void setGalleryObjects(List<GalleryObject> galleryObjects) {
@@ -153,6 +161,9 @@ public class GalleryImageAdapter extends BaseAdapter {
 			ImageLoaderTask downloadTask = new ImageLoaderTask(mWebGallery, mCache, dowbloadObject);
 			imageView.setImageLoaderTask(downloadTask);
 			downloadTask.setListener(imageView);
+			if (mScaleMode == ScaleMode.ScaleSource) {
+				downloadTask.setLayoutParams(mLayoutParams);
+			}
 			downloadTask.execute();
 		}
 		else

@@ -29,6 +29,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.GridView;
 import de.raptor2101.GalDroid.R;
 import de.raptor2101.GalDroid.WebGallery.GalleryImageAdapter;
+import de.raptor2101.GalDroid.WebGallery.GalleryImageAdapter.ScaleMode;
 import de.raptor2101.GalDroid.WebGallery.GalleryImageView;
 
 import de.raptor2101.GalDroid.WebGallery.GalleryImageAdapter.TitleConfig;
@@ -48,7 +49,7 @@ public class GridViewActivity extends GalleryActivity implements OnItemClickList
     	mGridView.setWillNotCacheDrawing(true);
         mGridView.setOnItemClickListener(this);
         
-        mAdapter = new GalleryImageAdapter(this, new GridView.LayoutParams(295, 295));
+        mAdapter = new GalleryImageAdapter(this, new GridView.LayoutParams(295, 295), ScaleMode.ScaleSource);
         mAdapter.setTitleConfig(TitleConfig.ShowTitle);
 		
         mGridView.setAdapter(mAdapter);

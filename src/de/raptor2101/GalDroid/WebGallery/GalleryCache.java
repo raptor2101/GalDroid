@@ -23,6 +23,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.ref.WeakReference;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -43,7 +44,7 @@ public class GalleryCache {
 	private MessageDigest mDigester;
 	private Hashtable<String,WeakReference<Bitmap>> mCachedBitmaps;
 	
-	public GalleryCache(Context context) throws NoSuchAlgorithmException{
+	public GalleryCache(Context context) throws NoSuchAlgorithmException {
 		if (mCacheDir == null) {
 			mCacheDir = context.getExternalCacheDir();
 			
@@ -56,8 +57,7 @@ public class GalleryCache {
 		mDigester = MessageDigest.getInstance("MD5");
 	}
 	
-	public void storeBitmap(String sourceUrl, Bitmap bitmap)
-	{
+	public void storeBitmap(String sourceUrl, Bitmap bitmap) {
 		String hash = buildHash(sourceUrl);
 		File cacheFile = new File(mCacheDir, hash);
 		mCachedBitmaps.put(hash, new WeakReference<Bitmap>(bitmap));
@@ -78,13 +78,12 @@ public class GalleryCache {
 		}	
 	}
 	
-	public void cacheBitmap(String sourceUrl, Bitmap bitmap){
+	public void cacheBitmap(String sourceUrl, Bitmap bitmap) {
 		String hash = buildHash(sourceUrl);
 		mCachedBitmaps.put(hash, new WeakReference<Bitmap>(bitmap));
 	}
 	
-	public InputStream getFileStream(String sourceUrl)
-	{
+	public FileInputStream getFileStream(String sourceUrl) {
 		String hash = buildHash(sourceUrl);
 		File cacheFile = new File(mCacheDir, hash);
 		if (cacheFile.exists()) {
@@ -100,6 +99,34 @@ public class GalleryCache {
 		}
 		Log.d("GalleryCache", "Cache Mis " + sourceUrl);
 		return null;
+	}
+	
+	public OutputStream createFileStream(String sourceUrl) {
+		String hash = buildHash(sourceUrl);
+		File cacheFile = new File(mCacheDir, hash);
+		
+		if (!cacheFile.exists()) {
+			try {
+				Log.d("GalleryCache", "Create CacheFile " + sourceUrl);
+				cacheFile.createNewFile();
+				return new FileOutputStream(cacheFile);
+				
+			} catch (IOException e) {
+				Log.e("GalleryCache", "Error while accessing");
+				return null;				
+			}	
+		}
+		Log.d("GalleryCache", "File exist " + sourceUrl);
+		return null;
+	}
+	
+	public void refreshCacheFile(String sourceUrl) {
+		String hash = buildHash(sourceUrl);
+		File cacheFile = new File(mCacheDir, hash);
+		
+		if (cacheFile.exists()) {
+			GalDroidPreference.AccessCacheObject(hash, cacheFile.length());
+		}
 	}
 	
 	public Bitmap getBitmap(String sourceUrl)
