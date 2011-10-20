@@ -37,6 +37,7 @@ public interface WebGallery {
 	public List<GalleryObject> getDisplayObjects(GalleryProgressListener progressListener);
 	public List<GalleryObject> getDisplayObjects(String path, GalleryProgressListener progressListener);
 	
+	public void setPreferedDimensions(int height, int width);
 	public InputStream getImageRawData(GalleryObject galleryObject, ImageSize imageSize)throws ClientProtocolException, IOException;
 	
 	public String getSecurityToken(String user, String password) throws SecurityException;

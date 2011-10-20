@@ -29,6 +29,7 @@ import de.raptor2101.GalDroid.WebGallery.Tasks.GalleryLoaderTaskListener;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.os.Bundle;
+import android.view.ViewGroup.LayoutParams;
 
 public abstract class GalleryActivity extends Activity {
 	
@@ -96,7 +97,8 @@ public abstract class GalleryActivity extends Activity {
 			    
 			    WebGallery gallery = app.getWebGallery();
 			    if(gallery != null) {
-					
+			    	LayoutParams params = this.getWindow().getAttributes();
+					gallery.setPreferedDimensions(params.height, params.width);
 					mListener = new GalleryLoadingListener();
 					GalleryLoaderTask task = new GalleryLoaderTask(gallery, mListener);
 					task.execute(uniqueId);

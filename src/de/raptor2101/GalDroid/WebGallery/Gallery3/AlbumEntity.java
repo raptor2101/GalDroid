@@ -31,7 +31,7 @@ public class AlbumEntity extends Entity {
 
 	private final List<String> mMembers;
 	
-	public AlbumEntity(JSONObject jsonObject, Gallery3Imp gallery3)
+	public AlbumEntity(JSONObject jsonObject, Gallery3Imp gallery3, float maxImageDiag)
 			throws JSONException, ClientProtocolException, IOException {
 		super(jsonObject, gallery3);
 		JSONArray memberArray = jsonObject.getJSONArray("members");

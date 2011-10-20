@@ -38,19 +38,23 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.util.FloatMath;
+
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryObject;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryProgressListener;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.WebGallery;
 
 public class Gallery3Imp implements WebGallery {
 	private HttpClient mHttpClient;
-	private String mSecurityToken; 
+	private String mSecurityToken;
+	private float mMaxImageDiag;
 	public final String LinkRest_LoadSecurityToken;
 	public final String LinkRest_LoadItem;
 	public final String LinkRest_LoadBunchItems;
 	public final String LinkRest_LoadPicture;
 
 	private static int MAX_REQUEST_SIZE = 4000;
+	
 	public Gallery3Imp(String rootLink)
 	{
 		LinkRest_LoadSecurityToken = rootLink+"/index.php/rest";
@@ -128,10 +132,10 @@ public class Gallery3Imp implements WebGallery {
 			throws JSONException, ClientProtocolException, IOException {
 		String type = jsonObject.getJSONObject("entity").getString("type");
 		if(type.equals("album")){
-			return new AlbumEntity(jsonObject, this);
+			return new AlbumEntity(jsonObject, this, mMaxImageDiag);
 		}
 		else {
-			return new PictureEntity(jsonObject, this);
+			return new PictureEntity(jsonObject, this, mMaxImageDiag);
 		}
 		
 	}
@@ -268,5 +272,9 @@ public class Gallery3Imp implements WebGallery {
 
 	public void setSecurityToken(String securityToken) {
 		mSecurityToken = securityToken;
+	}
+
+	public void setPreferedDimensions(int height, int width) {
+		mMaxImageDiag = FloatMath.sqrt(height*height+width*width);
 	}	
 }

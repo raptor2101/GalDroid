@@ -21,13 +21,26 @@ package de.raptor2101.GalDroid.WebGallery.Gallery3;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.util.FloatMath;
+
 public class PictureEntity extends Entity {
 	
 	
-	public PictureEntity(JSONObject jsonObject, Gallery3Imp gallery3)
+	public PictureEntity(JSONObject jsonObject, Gallery3Imp gallery3, float maxImageDiag)
 			throws JSONException {
 		super(jsonObject, gallery3);
-		mLink_Full = String.format(gallery3.LinkRest_LoadPicture, getId(), "full");
+		jsonObject = jsonObject.getJSONObject("entity");
+		int resizeHeight = jsonObject.getInt("resize_height");
+		int resizeWidth = jsonObject.getInt("resize_width");
+		
+		float imageDiag = FloatMath.sqrt(resizeHeight*resizeHeight+resizeWidth*resizeWidth);
+		if(imageDiag > maxImageDiag) {
+			mLink_Full = String.format(gallery3.LinkRest_LoadPicture, getId(), "full");
+		} else {
+			mLink_Full = String.format(gallery3.LinkRest_LoadPicture, getId(), "resize");
+		}
+			
+		
 		mLink_Thumb = String.format(gallery3.LinkRest_LoadPicture, getId(), "thumb");
 	}
 
