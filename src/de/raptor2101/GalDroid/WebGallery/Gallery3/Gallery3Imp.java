@@ -238,11 +238,12 @@ public class Gallery3Imp implements WebGallery {
 	}
 
 	public String getSecurityToken(String user, String password) throws SecurityException {
-		HttpPost httpRequest = new HttpPost(LinkRest_LoadSecurityToken);
-        
-		httpRequest.addHeader("X-Gallery-Request-Method", "post");
-		MultipartEntity mpEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
 		try {
+			HttpPost httpRequest = new HttpPost(LinkRest_LoadSecurityToken);
+	        
+			httpRequest.addHeader("X-Gallery-Request-Method", "post");
+			MultipartEntity mpEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
+		
 			mpEntity.addPart("user", new StringBody(user));
 			mpEntity.addPart("password", new StringBody(password));
 			
@@ -257,10 +258,8 @@ public class Gallery3Imp implements WebGallery {
 				throw new SecurityException("Couldn't verify user-credentials");
 			}
 			
-			return content.trim().replace("\"", "");  
-		} catch (ClientProtocolException e) {
-			throw new SecurityException("Couldn't verify user-credentials", e);
-		} catch (IOException e) {
+			return content.trim().replace("\"", "");
+		} catch (Exception e) {
 			throw new SecurityException("Couldn't verify user-credentials", e);
 		}
 	}
