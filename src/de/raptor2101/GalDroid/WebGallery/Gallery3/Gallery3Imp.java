@@ -24,6 +24,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -38,6 +39,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.os.AsyncTask;
+import android.os.AsyncTask.Status;
 import android.util.FloatMath;
 
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryObject;
@@ -54,6 +57,68 @@ public class Gallery3Imp implements WebGallery {
 	public final String LinkRest_LoadPicture;
 
 	private static int MAX_REQUEST_SIZE = 4000;
+	private class ProgressListener{
+		private final int mMaxCount;
+		private int mObjectCount;
+		private GalleryProgressListener mListener;
+		
+		public ProgressListener(GalleryProgressListener listener, int maxCount){
+			mMaxCount = maxCount;
+			mObjectCount = 0;
+			mListener = listener;			
+		}
+		
+		public void progress(){
+			mObjectCount++;
+			mListener.handleProgress(mObjectCount, mMaxCount);
+		}
+	}
+	private class BackgroundDownloaderTask extends AsyncTask<String, GalleryObject, Void> {
+		private ArrayList<GalleryObject> mDisplayObjects;
+		private int mIndex;
+		private final ProgressListener mProgressListener;
+		
+		public BackgroundDownloaderTask(ArrayList<GalleryObject> displayObjects, int offset, ProgressListener progressListener){
+			mIndex = offset;
+			mDisplayObjects = displayObjects;
+			mProgressListener = progressListener;
+		}
+		@Override
+		protected Void doInBackground(String... params) {
+			InputStream inputStream;
+			try {
+				JSONArray jsonArray;
+				synchronized (mHttpClient) {
+					inputStream = openRestCall(params[0]);
+					jsonArray = parseJSONArray(inputStream);
+				}
+				int length = jsonArray.length();
+				for (int pos = 0; pos < length ; pos++) {
+					JSONObject jsonObject = jsonArray.getJSONObject(pos);
+					GalleryObject galleryObject = loadGalleryEntity(jsonObject);
+					publishProgress(galleryObject);
+				}
+			} catch (ClientProtocolException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			return null;
+		}
+		
+		@Override
+		protected void onProgressUpdate(GalleryObject... values) {
+			mDisplayObjects.set(mIndex++, values[0]);
+			mProgressListener.progress();
+		}
+		
+	}
 	
 	public Gallery3Imp(String rootLink)
 	{
@@ -152,21 +217,27 @@ public class Gallery3Imp implements WebGallery {
 		return getDisplayObjects(String.format(LinkRest_LoadItem, 1), progressListener);
 	}
 
-	public List<GalleryObject> getDisplayObjects(String url,GalleryProgressListener progressListener) {
+	public List<GalleryObject> getDisplayObjects(String url,GalleryProgressListener listener) {
 		ArrayList<GalleryObject> displayObjects;
+		ArrayList<BackgroundDownloaderTask> tasks = new ArrayList<Gallery3Imp.BackgroundDownloaderTask>(5);
 		
 		try {
 			GalleryObject galleryObject = loadGalleryEntity(url);
-			if(galleryObject.hasChildren()){
+			if(galleryObject.hasChildren()) {
 				AlbumEntity album = (AlbumEntity) galleryObject;
 				List<String> members = album.getMembers();
 				int memberSize = members.size();
-				int objectCount = 0;
+				ProgressListener progressListener = new ProgressListener(listener, memberSize);
 				displayObjects = new ArrayList<GalleryObject>(memberSize);
 				
-				for(int i=0; i<memberSize; ){
+				for(int i=0; i<memberSize; i++ ) {
+					displayObjects.add(null);
+				}
+				
+				for(int i=0; i<memberSize; ) {
 					StringBuilder urls = new StringBuilder(MAX_REQUEST_SIZE);
-					
+					BackgroundDownloaderTask task = new BackgroundDownloaderTask(displayObjects, i, progressListener);
+					tasks.add(task);
 					/*
 					 *  If a Album contains a large number of Images
 					 *  load it in a bunch of 10 items.
@@ -174,7 +245,7 @@ public class Gallery3Imp implements WebGallery {
 					 *  Otherwise the max length of a GET-Request might be exceeded
 					 */
 					
-					for( ; i<memberSize; i++){
+					for( ; i<memberSize; i++) {
 						String memberUrl = members.get(i);
 						if(urls.length()+memberUrl.length() > MAX_REQUEST_SIZE)
 						{
@@ -186,16 +257,17 @@ public class Gallery3Imp implements WebGallery {
 					urls.deleteCharAt(urls.length() - 1);
 					url = String.format(LinkRest_LoadBunchItems, urls);
 					
-					InputStream inputStream = openRestCall(url);
-					JSONArray jsonArray = parseJSONArray(inputStream);
-					int length = jsonArray.length();
-					for (int pos = 0; pos < length ; pos++) {
-						JSONObject jsonObject = jsonArray.getJSONObject(pos);
-						galleryObject = loadGalleryEntity(jsonObject);
-						displayObjects.add(galleryObject);
-						if (progressListener != null) {
-							objectCount++; 
-							progressListener.handleProgress(objectCount, memberSize);
+					task.execute(url);
+				}
+				
+				for(BackgroundDownloaderTask task:tasks) {
+					if(task.getStatus() != Status.FINISHED) {
+						try {
+							task.get();
+						} catch (InterruptedException e) {
+							
+						} catch (ExecutionException e) {
+							
 						}
 					}
 				}
