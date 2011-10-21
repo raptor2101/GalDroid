@@ -32,22 +32,23 @@ import android.util.Log;
 import android.view.ViewGroup.LayoutParams;
 import de.raptor2101.GalDroid.WebGallery.GalleryCache;
 import de.raptor2101.GalDroid.WebGallery.GalleryDownloadObject;
-import de.raptor2101.GalDroid.WebGallery.GalleryImage;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.WebGallery;
 
 public class ImageLoaderTask extends AsyncTask<Void, Progress, GalleryDownloadObject> {
-
+	private final static String ClassTag = "ImageLoaderTask";
 	private WebGallery mWebGallery;
 	private GalleryCache mCache;
 	private GalleryDownloadObject mDownloadObject;
 	private WeakReference<ImageLoaderTaskListener> mListener;
 	private LayoutParams mLayoutParams;
+	private boolean mDownloadRunning;
 	
 	public ImageLoaderTask(WebGallery webGallery, GalleryCache cache, GalleryDownloadObject downloadObject){
 		mWebGallery = webGallery;
 		mCache = cache;
 		mDownloadObject = downloadObject;
 		mListener = new WeakReference<ImageLoaderTaskListener>(null); 
+		mDownloadRunning = false;
 	}
 	
 	public void setListener(ImageLoaderTaskListener listener){
@@ -60,6 +61,7 @@ public class ImageLoaderTask extends AsyncTask<Void, Progress, GalleryDownloadOb
 	
 	@Override
 	protected void onPreExecute() {
+		Log.d(ClassTag, String.format("%s - Task started", mDownloadObject));
 		ImageLoaderTaskListener listener = mListener.get();
 		if(listener != null){
 			listener.onLoadingStarted(mDownloadObject.getUniqueId());
@@ -69,41 +71,47 @@ public class ImageLoaderTask extends AsyncTask<Void, Progress, GalleryDownloadOb
 	@Override
 	protected GalleryDownloadObject doInBackground(Void... params) {
 		try {
-			synchronized (mCache) {
-				String uniqueId = mDownloadObject.getUniqueId();
-				InputStream inputStream = mCache.getFileStream(uniqueId);
-				
-				if(inputStream == null) {
-					DownloadImage(uniqueId);
-					ScaleImage(uniqueId);
-					inputStream = mCache.getFileStream(uniqueId);
-				}
-				
-				Options options = new Options();
-				options.inPreferQualityOverSpeed = true;
-				options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-				options.inDither = true;
-				options.inScaled = false;
-				options.inPurgeable = true;
-				options.inInputShareable = true;
-				
-				
-				System.gc();
-				Bitmap bitmap = BitmapFactory.decodeStream(inputStream,null,options );
-				
-				mDownloadObject.setBitmap(bitmap);
+			Log.d(ClassTag, String.format("%s - Task running", mDownloadObject));
+			String uniqueId = mDownloadObject.getUniqueId();
+			InputStream inputStream = mCache.getFileStream(uniqueId);
+			
+			if(inputStream == null) {
+				DownloadImage(uniqueId);
+				ScaleImage(uniqueId);
+				inputStream = mCache.getFileStream(uniqueId);
 			}
+			
+			Options options = new Options();
+			options.inPreferQualityOverSpeed = true;
+			options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+			options.inDither = true;
+			options.inScaled = false;
+			options.inPurgeable = true;
+			options.inInputShareable = true;
+				
+				
+				
+			synchronized (mCache) {
+				Log.d(ClassTag, String.format("%s - Decoding local image", mDownloadObject));
+				System.gc();
+				Bitmap bitmap = BitmapFactory.decodeStream(inputStream, null, options);
+				mDownloadObject.setBitmap(bitmap);
+				Log.d(ClassTag, String.format("%s - Decoding local image - complete", mDownloadObject));
+			}
+				
+			
 			return mDownloadObject;
 		} catch (Exception e) {
-			Log.w("ImageLoaderTask", String.format("Something goes wrong while Downloading %s. ExceptionMessage: %s",mDownloadObject,e.getMessage()));
+			Log.w(ClassTag, String.format("Something goes wrong while Downloading %s. ExceptionMessage: %s",mDownloadObject,e.getMessage()));
 			return mDownloadObject;
 		}
 	}
 
 	private void DownloadImage(String uniqueId) throws IOException {
-		
+		Log.d(ClassTag, String.format("%s - Downloading to local cache file", mDownloadObject));
+		mDownloadRunning = true;
 		InputStream networkStream = mWebGallery.getImageRawData(mDownloadObject.getGalleryObject(),mDownloadObject.getImageSize());
-		OutputStream fileStream = mCache.createFileStream(uniqueId);
+		OutputStream fileStream = mCache.createCacheFile(uniqueId);
 		byte[] writeCache = new byte[1024];
 		int readCounter;
 		while((readCounter = networkStream.read(writeCache)) > 0){
@@ -113,16 +121,19 @@ public class ImageLoaderTask extends AsyncTask<Void, Progress, GalleryDownloadOb
 		networkStream.close();
 		
 		mCache.refreshCacheFile(uniqueId);
+		mDownloadRunning = false;;
+		Log.d(ClassTag, String.format("%s - Downloading to local cache file - complete", mDownloadObject));
 	}
 	
 	private void ScaleImage(String uniqueId) throws IOException {
 		if(mLayoutParams != null) {
-			
+			Log.d(ClassTag, String.format("%s - Decoding Bounds", mDownloadObject));
 			FileInputStream bitmapStream = mCache.getFileStream(uniqueId);
 			Options options = new Options();
 			options.inJustDecodeBounds = true;
 			BitmapFactory.decodeStream( bitmapStream, null, options);
 			bitmapStream.close();
+			Log.d(ClassTag, String.format("%s - Decoding Bounds - done", mDownloadObject));
 			
 			int imgHeight = options.outHeight;
 			int imgWidth = options.outWidth;
@@ -143,29 +154,40 @@ public class ImageLoaderTask extends AsyncTask<Void, Progress, GalleryDownloadOb
 				options.inSampleSize = sampleSize;
 			}
 			bitmapStream = mCache.getFileStream(uniqueId);
-			Bitmap bitmap = BitmapFactory.decodeStream( bitmapStream, null, options);
-			bitmapStream.close();
 			
-			mCache.storeBitmap(uniqueId, bitmap);
-			bitmap.recycle();
-			System.gc();
+			synchronized (mCache) {
+				Log.d(ClassTag, String.format("%s - Resize Image", mDownloadObject));
+				Bitmap bitmap = BitmapFactory.decodeStream(bitmapStream, null, options);
+				bitmapStream.close();
+				mCache.storeBitmap(uniqueId, bitmap);
+				bitmap.recycle();
+				System.gc();
+				Log.d(ClassTag, String.format("%s - Resize Image - done", mDownloadObject));
+			}
+		}
+	}
+	
+	@Override
+	protected void onCancelled() {
+		Log.d(ClassTag, String.format("%s - Task canceled", mDownloadObject));
+		if (mDownloadRunning) {
+			synchronized (mCache) {
+				mCache.removeCacheFile(mDownloadObject.getUniqueId());
+			}
 		}
 	}
 	
 	@Override
 	protected void onPostExecute(GalleryDownloadObject downloadObject) {
+		Log.d(ClassTag, String.format("%s - Task done", mDownloadObject));
+		Bitmap bitmap = null;
 		if(!isCancelled()&&downloadObject.isValid())
 		{
-			Bitmap bitmap = downloadObject.getBitmap();
-				
-			GalleryImage image = downloadObject.getGalleryImage();
-		    if (image!=null) {
-		    	image.setBitmap(bitmap);
-		    }
+			bitmap = downloadObject.getBitmap();
 		}
 		ImageLoaderTaskListener listener = mListener.get();
 		if(listener != null){
-			listener.onLoadingCompleted(mDownloadObject.getUniqueId());
+			listener.onLoadingCompleted(mDownloadObject.getUniqueId(), bitmap);
 		}
 	}
 }

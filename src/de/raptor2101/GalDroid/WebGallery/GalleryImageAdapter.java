@@ -128,6 +128,10 @@ public class GalleryImageAdapter extends BaseAdapter {
 			if(imageView.getGalleryObject().getObjectId() != galleryObject.getObjectId()) {
 				imageView.cleanUp();
 			}
+			else
+			{
+				return cachedView;
+			}
 					
 		}
 		
@@ -137,13 +141,8 @@ public class GalleryImageAdapter extends BaseAdapter {
 		if(imageView == null) {
 			imageView = new GalleryImageView(mContext,this.mLayoutParams,this.mTitleConfig == TitleConfig.ShowTitle);
 			imageView.setLayoutParams(mLayoutParams);
-				
 			imageView.setGalleryObject(galleryObject);
-			
-			
-			LoadGalleryImage(galleryObject, uniqueID, imageView);
-			
-			
+			loadGalleryImage(galleryObject, uniqueID, imageView);
 			
 			mImageViews.set(position, new WeakReference<GalleryImageView>(imageView));
 		}
@@ -152,12 +151,12 @@ public class GalleryImageAdapter extends BaseAdapter {
 		
 	}
 
-	private void LoadGalleryImage(GalleryObject galleryObject, String uniqueID,	GalleryImageView imageView) {
-		GalleryImage galleryImage = new GalleryImage();
+	private void loadGalleryImage(GalleryObject galleryObject, String uniqueId,	GalleryImageView imageView) {
 		
-		Bitmap cachedBitmap = mCache.getBitmap(uniqueID);
+		
+		Bitmap cachedBitmap = mCache.getBitmap(uniqueId);
 		if(cachedBitmap == null){
-			GalleryDownloadObject dowbloadObject = new GalleryDownloadObject(galleryObject, mImageSize, galleryImage);
+			GalleryDownloadObject dowbloadObject = new GalleryDownloadObject(galleryObject, mImageSize);
 			ImageLoaderTask downloadTask = new ImageLoaderTask(mWebGallery, mCache, dowbloadObject);
 			imageView.setImageLoaderTask(downloadTask);
 			downloadTask.setListener(imageView);
@@ -168,10 +167,8 @@ public class GalleryImageAdapter extends BaseAdapter {
 		}
 		else
 		{
-			galleryImage.setBitmap(cachedBitmap);
+			imageView.onLoadingCompleted(uniqueId, cachedBitmap);
 		}
-		
-		imageView.setGalleryImage(galleryImage);
 	}
 
 	public void cleanUp() {
@@ -190,7 +187,7 @@ public class GalleryImageAdapter extends BaseAdapter {
 				GalleryObject galleryObject = imageView.getGalleryObject();
 				String uniqueID = galleryObject.getUniqueId(mImageSize);
 				
-				LoadGalleryImage(galleryObject, uniqueID, imageView);
+				loadGalleryImage(galleryObject, uniqueID, imageView);
 			}
 		}
 	}

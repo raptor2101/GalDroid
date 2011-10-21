@@ -18,23 +18,18 @@
 
 package de.raptor2101.GalDroid.WebGallery;
 
-import java.lang.ref.WeakReference;
-
+import android.graphics.Bitmap;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryObject;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.WebGallery.ImageSize;
-
-import android.graphics.Bitmap;
 
 public class GalleryDownloadObject {
 	private GalleryObject mGalleryObject;
 	private Bitmap mBitmap;
-	private WeakReference<GalleryImage> mGalleryImage;
 	private ImageSize mImageSize;
 	
-	public GalleryDownloadObject(GalleryObject galleryObject, ImageSize imageSize, GalleryImage galleryImage){				
+	public GalleryDownloadObject(GalleryObject galleryObject, ImageSize imageSize){				
 		mGalleryObject = galleryObject;
 		mImageSize = imageSize;
-		mGalleryImage = new WeakReference<GalleryImage>(galleryImage);
 	}
 	
 	public GalleryObject getGalleryObject(){
@@ -48,10 +43,6 @@ public class GalleryDownloadObject {
 	public Bitmap getBitmap(){
 		return mBitmap;
 	}
-
-	public GalleryImage getGalleryImage() {
-		return mGalleryImage.get();
-	}
 	
 	public ImageSize getImageSize(){
 		return mImageSize;
@@ -63,5 +54,10 @@ public class GalleryDownloadObject {
 
 	public boolean isValid() {
 		return mBitmap != null;
+	}
+	
+	@Override
+	public String toString() {
+		return mGalleryObject.getUniqueId(mImageSize);
 	}
 }

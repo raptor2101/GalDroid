@@ -18,7 +18,9 @@
 
 package de.raptor2101.GalDroid.WebGallery.Tasks;
 
+import android.graphics.Bitmap;
+
 public interface ImageLoaderTaskListener {
 	void onLoadingStarted(String uniqueId);
-	void onLoadingCompleted(String uniqueId);
+	void onLoadingCompleted(String uniqueId, Bitmap bitmap);
 }

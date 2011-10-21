@@ -58,15 +58,6 @@ public class GridViewActivity extends GalleryActivity implements OnItemClickList
     }
     
     @Override
-    protected void onResume() {
-    	GalleryImageAdapter adapter = (GalleryImageAdapter) mGridView.getAdapter();
-        if(adapter != null) {
-        	adapter.refreshImages();
-        }
-    	super.onResume();
-    }
-    
-    @Override
     public void onBackPressed() {
     	mAdapter.cleanUp();
     	super.onBackPressed();

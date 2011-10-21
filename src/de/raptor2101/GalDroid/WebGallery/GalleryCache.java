@@ -22,13 +22,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.ref.WeakReference;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Hashtable;
-import java.util.List;
 
 import de.raptor2101.GalDroid.Config.GalDroidPreference;
 
@@ -57,6 +55,22 @@ public class GalleryCache {
 		mDigester = MessageDigest.getInstance("MD5");
 	}
 	
+	public Bitmap getBitmap(String sourceUrl)
+	{
+		String hash = buildHash(sourceUrl);
+		WeakReference<Bitmap> reference = mCachedBitmaps.get(hash);
+		if(reference == null){
+			return null;
+		}
+		Bitmap bitmap = reference.get();
+		if(bitmap == null || bitmap.isRecycled()){
+			mCachedBitmaps.remove(hash);
+			return null;
+		}
+		Log.d("GalleryCache", "Cache Hit Reference " + sourceUrl);
+		return bitmap;
+	}
+
 	public void storeBitmap(String sourceUrl, Bitmap bitmap) {
 		String hash = buildHash(sourceUrl);
 		File cacheFile = new File(mCacheDir, hash);
@@ -101,7 +115,7 @@ public class GalleryCache {
 		return null;
 	}
 	
-	public OutputStream createFileStream(String sourceUrl) {
+	public OutputStream createCacheFile(String sourceUrl) throws IOException{
 		String hash = buildHash(sourceUrl);
 		File cacheFile = new File(mCacheDir, hash);
 		
@@ -113,13 +127,23 @@ public class GalleryCache {
 				
 			} catch (IOException e) {
 				Log.e("GalleryCache", "Error while accessing");
-				return null;				
+				throw e;				
 			}	
 		}
-		Log.d("GalleryCache", "File exist " + sourceUrl);
-		return null;
+		Log.d("GalleryCache", "File already exist " + sourceUrl);
+		throw new IOException("File already exist " + sourceUrl);
 	}
 	
+	public void removeCacheFile(String uniqueId) {
+		String hash = buildHash(uniqueId);
+		File cacheFile = new File(mCacheDir, hash);
+		
+		if (cacheFile.exists()) {
+			cacheFile.delete();
+		}
+		
+	}
+
 	public void refreshCacheFile(String sourceUrl) {
 		String hash = buildHash(sourceUrl);
 		File cacheFile = new File(mCacheDir, hash);
@@ -127,22 +151,6 @@ public class GalleryCache {
 		if (cacheFile.exists()) {
 			GalDroidPreference.AccessCacheObject(hash, cacheFile.length());
 		}
-	}
-	
-	public Bitmap getBitmap(String sourceUrl)
-	{
-		String hash = buildHash(sourceUrl);
-		WeakReference<Bitmap> reference = mCachedBitmaps.get(hash);
-		if(reference == null){
-			return null;
-		}
-		Bitmap bitmap = reference.get();
-		if(bitmap == null || bitmap.isRecycled()){
-			mCachedBitmaps.remove(hash);
-			return null;
-		}
-		Log.d("GalleryCache", "Cache Hit Reference " + sourceUrl);
-		return bitmap;
 	}
 	
 	private String buildHash(String sourceUrl)
@@ -168,15 +176,13 @@ public class GalleryCache {
 		}
 		mCachedBitmaps.clear();
 	}
-
-	public void cleanup(long maxCacheSize) {
-		
-		
-		
-	}
 	
 	public File[] ListCachedFiles(){
-		return mCacheDir.listFiles();
+		if(mCacheDir.exists()){
+			return mCacheDir.listFiles();
+		} else {
+			return new File[0];
+		}
 	}
 
 	public long getMaxCacheSize() {

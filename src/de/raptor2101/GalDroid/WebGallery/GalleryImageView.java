@@ -21,6 +21,7 @@ package de.raptor2101.GalDroid.WebGallery;
 import java.lang.ref.WeakReference;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.graphics.Typeface;
 import android.view.Gravity;
@@ -38,7 +39,6 @@ public class GalleryImageView extends LinearLayout implements ImageLoaderTaskLis
 	private final TextView mTitleTextView;
 	private final boolean mShowTitle;
 	private GalleryObject mGalleryObject;
-	private GalleryImage mGalleryImage;
 	private WeakReference<ImageLoaderTask> mImageLoaderTask;
 	
 	public GalleryImageView(Context context, android.view.ViewGroup.LayoutParams layoutParams, boolean showTitle) {
@@ -82,19 +82,7 @@ public class GalleryImageView extends LinearLayout implements ImageLoaderTaskLis
 	public GalleryObject getGalleryObject(){
 		return mGalleryObject;
 	}
-	public void setGalleryImage(GalleryImage galleryImage){
-		mGalleryImage = galleryImage;
 		
-		if(galleryImage.isLoaded()){
-			mImageView.setVisibility(VISIBLE);
-			mImageView.setImageDrawable(galleryImage);	
-		}
-		else
-		{
-			mImageView.setVisibility(GONE);
-		}
-	}
-	
 	public void setTilte(String title)
 	{
 		if(mTitleTextView != null){
@@ -106,29 +94,21 @@ public class GalleryImageView extends LinearLayout implements ImageLoaderTaskLis
 		ImageView imageView = new ImageView(context);
 		imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
         imageView.setPadding(5, 5, 5, 5);
+        imageView.setDrawingCacheEnabled(false);
         
 		return imageView;
-	}
-	
-	public boolean isLoaded(){
-		return mGalleryImage.isLoaded();
 	}
 
 	public void onLoadingStarted(String uniqueId) {
 		mProgressBar.setVisibility(VISIBLE);
 	}
 
-	public void onLoadingCompleted(String uniqueId) {
+	public void onLoadingCompleted(String uniqueId, Bitmap bitmap) {
 		mProgressBar.setVisibility(GONE);
-		setGalleryImage(mGalleryImage);		
+		mImageView.setImageBitmap(bitmap);		
 	}
 	
 	public void cleanUp(){
-		if(mGalleryImage != null){
-			mGalleryImage.cleanup();
-			mGalleryImage = null;
-			mImageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-		}
 		ImageLoaderTask task = mImageLoaderTask.get();
 		if(task != null){
 			task.cancel(true);
