@@ -20,7 +20,9 @@ package de.raptor2101.GalDroid.WebGallery;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -70,6 +72,8 @@ public class GalleryImageAdapter extends BaseAdapter {
 	
 	private ArrayList<WeakReference<GalleryImageView>> mImageViews;
 	
+	private Queue<WeakReference<ImageLoaderTask>> mActiveDownloadTasks;
+	private int mMaxActiveDownloadTask; 
 	
 	public GalleryImageAdapter(Context context, LayoutParams layoutParams, ScaleMode scaleMode) {
 		super();
@@ -86,6 +90,8 @@ public class GalleryImageAdapter extends BaseAdapter {
 		mImageSize = ImageSize.Thumbnail;
 		mCleanupMode = CleanupMode.None;
 		mScaleMode = scaleMode;
+		mActiveDownloadTasks = new LinkedList<WeakReference<ImageLoaderTask>>(); 
+		mMaxActiveDownloadTask = -1;
 	}
 	
 	public void setGalleryObjects(List<GalleryObject> galleryObjects) {	
@@ -114,6 +120,10 @@ public class GalleryImageAdapter extends BaseAdapter {
 		mCleanupMode = cleanupMode;
 	}
 	
+	public void setMaxActiveDownloads(int maxActiveDownloads) {
+		mMaxActiveDownloadTask = maxActiveDownloads;
+	}
+	
 	public List<GalleryObject> getGalleryObjects()
 	{
 		return mGalleryObjects;
@@ -140,9 +150,10 @@ public class GalleryImageAdapter extends BaseAdapter {
 		GalleryImageView imageView;
 		if(cachedView != null){
 			imageView =(GalleryImageView)cachedView;
-			Log.d(ClassTag, String.format("Cached View %s", imageView.getGalleryObject()));
+			Log.d(ClassTag, String.format("Cached View %s", imageView.getUniqueId()));
 			if(imageView.getGalleryObject().getObjectId() != galleryObject.getObjectId()) {
-				imageView.cancelDownloadTask();
+				Log.d(ClassTag, String.format("Abort downloadTask %s", imageView.getUniqueId()));
+				imageView.cancelImageLoaderTask();
 				if(mCleanupMode == CleanupMode.ForceCleanup) {
 					imageView.recylceBitmap();
 				}
@@ -154,7 +165,7 @@ public class GalleryImageAdapter extends BaseAdapter {
 			Log.d(ClassTag, String.format("Miss ImageView Reference", uniqueID));
 			imageView = new GalleryImageView(mContext,this.mLayoutParams,this.mTitleConfig == TitleConfig.ShowTitle);
 			imageView.setLayoutParams(mLayoutParams);
-			imageView.setGalleryObject(galleryObject);
+			imageView.setGalleryObject(galleryObject, uniqueID);
 			mImageViews.set(position, new WeakReference<GalleryImageView>(imageView));
 		}
 		if(!imageView.isLoaded() && ! imageView.isLoading()){
@@ -167,8 +178,6 @@ public class GalleryImageAdapter extends BaseAdapter {
 	}
 
 	private void loadGalleryImage(GalleryObject galleryObject, String uniqueId,	GalleryImageView imageView) {
-		
-		
 		Bitmap cachedBitmap = mCache.getBitmap(uniqueId);
 		if(cachedBitmap == null){
 			GalleryDownloadObject dowbloadObject = new GalleryDownloadObject(galleryObject, mImageSize);
@@ -178,6 +187,8 @@ public class GalleryImageAdapter extends BaseAdapter {
 			if (mScaleMode == ScaleMode.ScaleSource) {
 				downloadTask.setLayoutParams(mLayoutParams);
 			}
+			mActiveDownloadTasks.offer(new WeakReference<ImageLoaderTask>(downloadTask));
+			checkActiveDownloads();
 			downloadTask.execute();
 		}
 		else
@@ -186,13 +197,26 @@ public class GalleryImageAdapter extends BaseAdapter {
 		}
 	}
 
+	private void checkActiveDownloads() {
+		while(mMaxActiveDownloadTask >-1 && mActiveDownloadTasks.size()>mMaxActiveDownloadTask) {
+			WeakReference<ImageLoaderTask> reference = mActiveDownloadTasks.poll();
+			ImageLoaderTask task = reference.get();
+			
+			if(task != null) {
+				task.cancel(true);
+				reference.clear();
+			}
+		}
+		
+	}
+
 	public void cleanUp() {
 		Log.d(ClassTag, String.format("CleanUp"));
 		for(WeakReference<GalleryImageView> reference:mImageViews) {
 			GalleryImageView imageView = reference.get();
 			if(imageView != null) {
 				Log.d(ClassTag, String.format("CleanUp ", imageView.getGalleryObject().getUniqueId(mImageSize)));
-				imageView.cancelDownloadTask();
+				imageView.cancelImageLoaderTask();
 				imageView.recylceBitmap();
 			}
 		}
