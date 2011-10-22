@@ -37,12 +37,14 @@ import android.graphics.Bitmap;
 import android.util.Log;
 
 public class GalleryCache {
+	private static final String ClassTag = "GalleryCache";
 	private static long mMaxCacheSize = 50 * 1024 *1024; // convert MByte to Byte
 	private File mCacheDir; 
 	private MessageDigest mDigester;
 	private Hashtable<String,WeakReference<Bitmap>> mCachedBitmaps;
 	
 	public GalleryCache(Context context) throws NoSuchAlgorithmException {
+		Log.d(ClassTag, "Recreate cache");
 		if (mCacheDir == null) {
 			mCacheDir = context.getExternalCacheDir();
 			
@@ -60,27 +62,42 @@ public class GalleryCache {
 	public Bitmap getBitmap(String sourceUrl)
 	{
 		String hash = buildHash(sourceUrl);
-		WeakReference<Bitmap> reference = mCachedBitmaps.get(hash);
+		WeakReference<Bitmap> reference;
+		
+		synchronized (mCachedBitmaps) {
+			reference = mCachedBitmaps.get(hash);
+		}
+		
 		if(reference == null){
-			Log.d("GalleryCache", "Cache Miss Reference " + sourceUrl);
+			Log.d(ClassTag, "Cache Miss Hash Reference " + sourceUrl);
 			return null;
 		}
 		Bitmap bitmap = reference.get();
 		if(bitmap == null || bitmap.isRecycled()){
 			if(bitmap != null) {
-				Log.d("GalleryCache", "Bitmap Recycled " + sourceUrl);
+				Log.d(ClassTag, "Bitmap Recycled " + sourceUrl);
+			} else {
+				Log.d(ClassTag, "Cache Miss Object Reference " + sourceUrl);
 			}
-			mCachedBitmaps.remove(hash);
+			
+			synchronized (mCachedBitmaps) {
+				mCachedBitmaps.remove(hash);
+			}
 			return null;
 		}
-		Log.d("GalleryCache", "Cache Hit Reference " + sourceUrl);
+		Log.d(ClassTag, "Cache Hit Reference " + sourceUrl);
 		return bitmap;
 	}
 
 	public void storeBitmap(String sourceUrl, Bitmap bitmap) {
 		String hash = buildHash(sourceUrl);
 		File cacheFile = new File(mCacheDir, hash);
-		mCachedBitmaps.put(hash, new WeakReference<Bitmap>(bitmap));
+		
+		synchronized (mCachedBitmaps) {
+			mCachedBitmaps.put(hash, new WeakReference<Bitmap>(bitmap));
+		}
+		
+		Log.d(ClassTag, "Bitmap referenced " + sourceUrl);
 		
 		if (cacheFile.exists()) {
 			cacheFile.delete();
@@ -91,16 +108,19 @@ public class GalleryCache {
 			FileOutputStream output = new FileOutputStream(cacheFile);
 			bitmap.compress(Bitmap.CompressFormat.JPEG, 100, output);
 			output.close();
-			
+			Log.d(ClassTag, "Bitmap stored local " + sourceUrl);
 			GalDroidPreference.AccessCacheObject(hash, cacheFile.length());
 		} catch (IOException e) {
-			Log.e("GalleryCache", "Error while storing");
+			Log.e(ClassTag, "Error while storing");
 		}	
 	}
 	
 	public void cacheBitmap(String sourceUrl, Bitmap bitmap) {
 		String hash = buildHash(sourceUrl);
-		mCachedBitmaps.put(hash, new WeakReference<Bitmap>(bitmap));
+		synchronized (mCachedBitmaps) {
+			mCachedBitmaps.put(hash, new WeakReference<Bitmap>(bitmap));
+		}
+		Log.d(ClassTag, "Bitmap referenced " + sourceUrl);
 	}
 	
 	public FileInputStream getFileStream(String sourceUrl) {
@@ -108,16 +128,16 @@ public class GalleryCache {
 		File cacheFile = new File(mCacheDir, hash);
 		if (cacheFile.exists()) {
 			try {
-				Log.d("GalleryCache", "Cache Hit " + sourceUrl);
+				Log.d(ClassTag, "Cache Hit " + sourceUrl);
 				GalDroidPreference.AccessCacheObject(hash, cacheFile.length());
 				return new FileInputStream(cacheFile);
 				
 			} catch (IOException e) {
-				Log.e("GalleryCache", "Error while accessing");
+				Log.e(ClassTag, "Error while accessing");
 				return null;				
 			}	
 		}
-		Log.d("GalleryCache", "Cache Mis " + sourceUrl);
+		Log.d(ClassTag, "Cache Mis " + sourceUrl);
 		return null;
 	}
 	
@@ -127,16 +147,16 @@ public class GalleryCache {
 		
 		if (!cacheFile.exists()) {
 			try {
-				Log.d("GalleryCache", "Create CacheFile " + sourceUrl);
+				Log.d(ClassTag, "Create CacheFile " + sourceUrl);
 				cacheFile.createNewFile();
 				return new FileOutputStream(cacheFile);
 				
 			} catch (IOException e) {
-				Log.e("GalleryCache", "Error while accessing");
+				Log.e(ClassTag, "Error while accessing");
 				throw e;				
 			}	
 		}
-		Log.d("GalleryCache", "File already exist " + sourceUrl);
+		Log.d(ClassTag, "File already exist " + sourceUrl);
 		throw new IOException("File already exist " + sourceUrl);
 	}
 	
