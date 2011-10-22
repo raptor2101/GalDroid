@@ -161,5 +161,12 @@ public class GalleryImageView extends LinearLayout implements ImageLoaderTaskLis
 	public String getUniqueId() {
 		return mUniqueId;
 	}
+
+	public void onLoadingCancelled(String uniqueId) {
+		Log.d(CLASS_TAG, String.format("DownloadTask was cancalled %s",mUniqueId));
+		mImageLoaderTask = null;
+		mProgressBar.setVisibility(GONE);
+		mBitmap = null;
+	}
 }
 
