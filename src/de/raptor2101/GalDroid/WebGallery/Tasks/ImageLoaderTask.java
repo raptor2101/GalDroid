@@ -93,7 +93,6 @@ public class ImageLoaderTask extends AsyncTask<Void, Progress, GalleryDownloadOb
 				
 			synchronized (mCache) {
 				Log.d(ClassTag, String.format("%s - Decoding local image", mDownloadObject));
-				System.gc();
 				Bitmap bitmap = BitmapFactory.decodeStream(inputStream, null, options);
 				mDownloadObject.setBitmap(bitmap);
 				Log.d(ClassTag, String.format("%s - Decoding local image - complete", mDownloadObject));
@@ -128,10 +127,15 @@ public class ImageLoaderTask extends AsyncTask<Void, Progress, GalleryDownloadOb
 	private void ScaleImage(String uniqueId) throws IOException {
 		if(mLayoutParams != null) {
 			Log.d(ClassTag, String.format("%s - Decoding Bounds", mDownloadObject));
+			
 			FileInputStream bitmapStream = mCache.getFileStream(uniqueId);
 			Options options = new Options();
 			options.inJustDecodeBounds = true;
-			BitmapFactory.decodeStream( bitmapStream, null, options);
+			
+			synchronized (mCache) {
+				BitmapFactory.decodeStream( bitmapStream, null, options);	
+			}
+			
 			bitmapStream.close();
 			Log.d(ClassTag, String.format("%s - Decoding Bounds - done", mDownloadObject));
 			
@@ -153,15 +157,14 @@ public class ImageLoaderTask extends AsyncTask<Void, Progress, GalleryDownloadOb
 			if(sampleSize > 1) {
 				options.inSampleSize = sampleSize;
 			}
-			bitmapStream = mCache.getFileStream(uniqueId);
 			
 			synchronized (mCache) {
+				bitmapStream = mCache.getFileStream(uniqueId);
 				Log.d(ClassTag, String.format("%s - Resize Image", mDownloadObject));
 				Bitmap bitmap = BitmapFactory.decodeStream(bitmapStream, null, options);
 				bitmapStream.close();
 				mCache.storeBitmap(uniqueId, bitmap);
 				bitmap.recycle();
-				System.gc();
 				Log.d(ClassTag, String.format("%s - Resize Image - done", mDownloadObject));
 			}
 		}

@@ -24,6 +24,7 @@ import java.util.List;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
@@ -35,7 +36,7 @@ import de.raptor2101.GalDroid.WebGallery.Interfaces.WebGallery.ImageSize;
 import de.raptor2101.GalDroid.WebGallery.Tasks.ImageLoaderTask;
 
 public class GalleryImageAdapter extends BaseAdapter {
-	
+	private final static String ClassTag = "GalleryImageAdapter";
 	public enum DisplayTarget{
 		Thumbnails,
 		FullScreen
@@ -51,6 +52,11 @@ public class GalleryImageAdapter extends BaseAdapter {
 		DontScale
 	}
 
+	public enum CleanupMode {
+		ForceCleanup,
+		None
+	}
+	
 	private GalleryCache mCache;
 	private WebGallery mWebGallery;
 	private Context mContext;
@@ -60,7 +66,7 @@ public class GalleryImageAdapter extends BaseAdapter {
 	private LayoutParams mLayoutParams;
 	private ScaleMode mScaleMode;
 	private ImageSize mImageSize;
-	
+	private CleanupMode mCleanupMode;
 	
 	private ArrayList<WeakReference<GalleryImageView>> mImageViews;
 	
@@ -78,10 +84,14 @@ public class GalleryImageAdapter extends BaseAdapter {
 		
 		mTitleConfig = TitleConfig.ShowTitle;
 		mImageSize = ImageSize.Thumbnail;
+		mCleanupMode = CleanupMode.None;
 		mScaleMode = scaleMode;
 	}
 	
-	public void setGalleryObjects(List<GalleryObject> galleryObjects) {
+	public void setGalleryObjects(List<GalleryObject> galleryObjects) {	
+		if(isLoaded()){
+			cleanUp();
+		}
 		this.mGalleryObjects = galleryObjects;
 		this.mImageViews = new ArrayList<WeakReference<GalleryImageView>>(galleryObjects.size());
 		
@@ -98,6 +108,10 @@ public class GalleryImageAdapter extends BaseAdapter {
 	
 	public void setDisplayTarget(DisplayTarget displayTarget) {
 		mImageSize = displayTarget == DisplayTarget.FullScreen ? ImageSize.Full : ImageSize.Thumbnail;
+	}
+	
+	public void setCleanupMode(CleanupMode cleanupMode) {
+		mCleanupMode = cleanupMode;
 	}
 	
 	public List<GalleryObject> getGalleryObjects()
@@ -121,30 +135,31 @@ public class GalleryImageAdapter extends BaseAdapter {
 		
 		GalleryObject galleryObject =  mGalleryObjects.get(position);
 		String uniqueID = galleryObject.getUniqueId(mImageSize);
+		Log.d(ClassTag, String.format("Request View %s", uniqueID));
 		
 		GalleryImageView imageView;
 		if(cachedView != null){
 			imageView =(GalleryImageView)cachedView;
+			Log.d(ClassTag, String.format("Cached View %s", imageView.getGalleryObject()));
 			if(imageView.getGalleryObject().getObjectId() != galleryObject.getObjectId()) {
-				imageView.cleanUp();
-			}
-			else
-			{
-				return cachedView;
-			}
-					
+				imageView.cancelDownloadTask();
+				if(mCleanupMode == CleanupMode.ForceCleanup) {
+					imageView.recylceBitmap();
+				}
+			}					
 		}
-		
-		System.gc();
 		
 		imageView= mImageViews.get(position).get();
 		if(imageView == null) {
+			Log.d(ClassTag, String.format("Miss ImageView Reference", uniqueID));
 			imageView = new GalleryImageView(mContext,this.mLayoutParams,this.mTitleConfig == TitleConfig.ShowTitle);
 			imageView.setLayoutParams(mLayoutParams);
 			imageView.setGalleryObject(galleryObject);
-			loadGalleryImage(galleryObject, uniqueID, imageView);
-			
 			mImageViews.set(position, new WeakReference<GalleryImageView>(imageView));
+		}
+		if(!imageView.isLoaded() && ! imageView.isLoading()){
+			Log.d(ClassTag, String.format("Init Reload", imageView.getGalleryObject()));
+			loadGalleryImage(galleryObject, uniqueID, imageView);
 		}
 		
 		return imageView;
@@ -172,23 +187,32 @@ public class GalleryImageAdapter extends BaseAdapter {
 	}
 
 	public void cleanUp() {
+		Log.d(ClassTag, String.format("CleanUp"));
 		for(WeakReference<GalleryImageView> reference:mImageViews) {
 			GalleryImageView imageView = reference.get();
 			if(imageView != null) {
-				imageView.cleanUp();
+				Log.d(ClassTag, String.format("CleanUp ", imageView.getGalleryObject().getUniqueId(mImageSize)));
+				imageView.cancelDownloadTask();
+				imageView.recylceBitmap();
 			}
 		}
+		System.gc();
 	}
 
 	public void refreshImages() {
 		for(WeakReference<GalleryImageView> reference:mImageViews) {
 			GalleryImageView imageView = reference.get();
-			if(imageView != null) {
+			if(imageView != null && !imageView.isLoaded()) {
+				Log.d(ClassTag, String.format("Relaod ", imageView.getGalleryObject()));
 				GalleryObject galleryObject = imageView.getGalleryObject();
 				String uniqueID = galleryObject.getUniqueId(mImageSize);
 				
 				loadGalleryImage(galleryObject, uniqueID, imageView);
 			}
 		}
+	}
+
+	public boolean isLoaded() {
+		return mGalleryObjects.size() != 0;
 	}
 }

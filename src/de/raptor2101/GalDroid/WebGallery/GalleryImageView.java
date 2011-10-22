@@ -24,6 +24,8 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.graphics.Typeface;
+import android.os.AsyncTask.Status;
+import android.util.Log;
 import android.view.Gravity;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -39,7 +41,9 @@ public class GalleryImageView extends LinearLayout implements ImageLoaderTaskLis
 	private final TextView mTitleTextView;
 	private final boolean mShowTitle;
 	private GalleryObject mGalleryObject;
+	private Bitmap mBitmap;
 	private WeakReference<ImageLoaderTask> mImageLoaderTask;
+	 
 	
 	public GalleryImageView(Context context, android.view.ViewGroup.LayoutParams layoutParams, boolean showTitle) {
 		super(context);
@@ -105,13 +109,24 @@ public class GalleryImageView extends LinearLayout implements ImageLoaderTaskLis
 
 	public void onLoadingCompleted(String uniqueId, Bitmap bitmap) {
 		mProgressBar.setVisibility(GONE);
-		mImageView.setImageBitmap(bitmap);		
+		mImageView.setImageBitmap(bitmap);
+		mBitmap = bitmap;
+		
 	}
 	
-	public void cleanUp(){
+	public void cancelDownloadTask(){
 		ImageLoaderTask task = mImageLoaderTask.get();
 		if(task != null){
 			task.cancel(true);
+		}
+	}
+	
+	public void recylceBitmap(){
+		if (mBitmap != null) {
+			Log.d("GalleryImageView", String.format("Recycle %s",mGalleryObject));
+			mImageView.setImageBitmap(null);
+			mBitmap.recycle();
+			mBitmap = null;
 		}
 	}
 	
@@ -126,6 +141,15 @@ public class GalleryImageView extends LinearLayout implements ImageLoaderTaskLis
 
 	public void setImageLoaderTask(ImageLoaderTask downloadTask) {
 		mImageLoaderTask = new WeakReference<ImageLoaderTask>(downloadTask);		
+	}
+
+	public boolean isLoaded() {
+		return mBitmap != null;
+	}
+
+	public boolean isLoading() {
+		ImageLoaderTask task = mImageLoaderTask.get();
+		return task != null && task.getStatus() != Status.FINISHED;
 	}
 }
 

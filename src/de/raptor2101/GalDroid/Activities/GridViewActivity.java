@@ -62,6 +62,15 @@ public class GridViewActivity extends GalleryActivity implements OnItemClickList
     	mAdapter.cleanUp();
     	super.onBackPressed();
     }
+    
+    @Override
+    protected void onResume() {
+      	GalleryImageAdapter adapter = (GalleryImageAdapter) mGridView.getAdapter();
+        if(adapter != null) {
+        	adapter.refreshImages();
+		}
+        super.onResume();
+    }
 
 	public void onItemClick(AdapterView<?> parent, View view, int pos, long rowId) {
 		GalleryImageView imageView = (GalleryImageView) view;
@@ -78,7 +87,7 @@ public class GridViewActivity extends GalleryActivity implements OnItemClickList
             intent = new Intent(this, GridViewActivity.class);
         	intent.putExtra("Current UniqueId", galleryObject.getObjectId());
         }
-        
+        mAdapter.cleanUp();
         this.startActivity(intent);
 	}
 
