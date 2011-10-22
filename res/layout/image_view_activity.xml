@@ -4,6 +4,7 @@
 	  android:layout_width="fill_parent"
 	  android:layout_height="fill_parent"
 	  android:id="@+id/singleImageGallery"
+	  android:spacing="25dp"
 	  android:layout_weight="1" />
 	<Gallery
 	  android:layout_width="match_parent"
