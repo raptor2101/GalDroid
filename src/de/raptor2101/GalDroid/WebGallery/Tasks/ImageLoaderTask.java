@@ -102,6 +102,10 @@ public class ImageLoaderTask extends AsyncTask<Void, Progress, GalleryDownloadOb
 				
 				
 			synchronized (mCache) {
+				if(isCancelled()) {
+					return null;
+				}
+				
 				Log.d(ClassTag, String.format("%s - Decoding local image", mDownloadObject));
 				Bitmap bitmap = BitmapFactory.decodeStream(inputStream, null, options);
 				mDownloadObject.setBitmap(bitmap);
@@ -138,14 +142,16 @@ public class ImageLoaderTask extends AsyncTask<Void, Progress, GalleryDownloadOb
 		OutputStream fileStream = mCache.createCacheFile(uniqueId);
 		byte[] writeCache = new byte[1024];
 		int readCounter;
-		while((readCounter = networkStream.read(writeCache)) > 0){
+		while((readCounter = networkStream.read(writeCache)) > 0 && !isCancelled()){
 			fileStream.write(writeCache, 0, readCounter);
 		}
 		fileStream.close();
 		networkStream.close();
 		
-		mCache.refreshCacheFile(uniqueId);
-		mDownloadRunning = false;;
+		if(!isCancelled()) {
+			mCache.refreshCacheFile(uniqueId);
+		}
+		mDownloadRunning = false;
 		Log.d(ClassTag, String.format("%s - Downloading to local cache file - complete", mDownloadObject));
 	}
 
@@ -158,6 +164,10 @@ public class ImageLoaderTask extends AsyncTask<Void, Progress, GalleryDownloadOb
 			options.inJustDecodeBounds = true;
 			
 			synchronized (mCache) {
+				if(isCancelled()) {
+					return;
+				}
+				
 				BitmapFactory.decodeStream( bitmapStream, null, options);	
 			}
 			
@@ -184,6 +194,10 @@ public class ImageLoaderTask extends AsyncTask<Void, Progress, GalleryDownloadOb
 			}
 			
 			synchronized (mCache) {
+				if(isCancelled()) {
+					return;
+				}
+				
 				bitmapStream = mCache.getFileStream(uniqueId);
 				Log.d(ClassTag, String.format("%s - Resize Image", mDownloadObject));
 				Bitmap bitmap = BitmapFactory.decodeStream(bitmapStream, null, options);
@@ -193,5 +207,10 @@ public class ImageLoaderTask extends AsyncTask<Void, Progress, GalleryDownloadOb
 				Log.d(ClassTag, String.format("%s - Resize Image - done", mDownloadObject));
 			}
 		}
+	}
+
+	public String getUniqueId() {
+		
+		return mDownloadObject.toString();
 	}
 }
