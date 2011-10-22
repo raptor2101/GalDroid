@@ -124,7 +124,7 @@ public class GalDroidPreference {
 		
 	}
 	
-	public static void AccessCacheObject(String hash, long size){
+	public static void accessCacheObject(String hash, long size){
 		synchronized (mContext) {
 			SQLiteDatabase database = createConnection();
 			String[] selectionArgs = new String[]{hash};
@@ -140,6 +140,20 @@ public class GalDroidPreference {
 			}
 			database.close();
 		}
+	}
+	
+	public static boolean cacheObjectExists(String hash){
+		boolean result;
+		synchronized (mContext) {
+			SQLiteDatabase database = createConnection();
+			String[] selectionArgs = new String[]{hash};
+			
+			Cursor dbCursor = database.query(CACHE_TABLE, new String[]{"hash"}, "hash = @1", selectionArgs, null, null, null);
+			result = dbCursor.getCount() == 1;
+			dbCursor.close();
+			database.close();
+		}
+		return result;
 	}
 	
 	public static long getCacheSpaceNeeded(){

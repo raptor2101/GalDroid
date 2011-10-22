@@ -109,7 +109,7 @@ public class GalleryCache {
 			bitmap.compress(Bitmap.CompressFormat.JPEG, 100, output);
 			output.close();
 			Log.d(ClassTag, "Bitmap stored local " + sourceUrl);
-			GalDroidPreference.AccessCacheObject(hash, cacheFile.length());
+			GalDroidPreference.accessCacheObject(hash, cacheFile.length());
 		} catch (IOException e) {
 			Log.e(ClassTag, "Error while storing");
 		}	
@@ -126,10 +126,10 @@ public class GalleryCache {
 	public FileInputStream getFileStream(String sourceUrl) {
 		String hash = buildHash(sourceUrl);
 		File cacheFile = new File(mCacheDir, hash);
-		if (cacheFile.exists()) {
+		if (GalDroidPreference.cacheObjectExists(hash)&&cacheFile.exists()) {
 			try {
 				Log.d(ClassTag, "Cache Hit " + sourceUrl);
-				GalDroidPreference.AccessCacheObject(hash, cacheFile.length());
+				GalDroidPreference.accessCacheObject(hash, cacheFile.length());
 				return new FileInputStream(cacheFile);
 				
 			} catch (IOException e) {
@@ -175,7 +175,7 @@ public class GalleryCache {
 		File cacheFile = new File(mCacheDir, hash);
 		
 		if (cacheFile.exists()) {
-			GalDroidPreference.AccessCacheObject(hash, cacheFile.length());
+			GalDroidPreference.accessCacheObject(hash, cacheFile.length());
 		}
 	}
 	
