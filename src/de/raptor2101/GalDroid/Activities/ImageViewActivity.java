@@ -83,7 +83,6 @@ public class ImageViewActivity extends GalleryActivity implements OnTouchListene
     	mAdapterThumbnails = new GalleryImageAdapter(this, new Gallery.LayoutParams(100,100), ScaleMode.DontScale);
     	mAdapterThumbnails.setTitleConfig(TitleConfig.HideTitle);
     	mAdapterThumbnails.setDisplayTarget(DisplayTarget.Thumbnails);
-    	mAdapterThumbnails.setCleanupMode(CleanupMode.ForceCleanup);
     	mGalleryThumbnails.setAdapter(mAdapterThumbnails);
     	
     	mGalleryFullscreen.setOnTouchListener(this);
@@ -99,7 +98,6 @@ public class ImageViewActivity extends GalleryActivity implements OnTouchListene
     	GalleryImageAdapter adapter = (GalleryImageAdapter) mGalleryFullscreen.getAdapter();
     	adapter.cleanUp();
     	adapter = (GalleryImageAdapter) mGalleryThumbnails.getAdapter();
-    	adapter.cleanUp();
     	
     	super.onBackPressed();
     }
@@ -194,13 +192,6 @@ public class ImageViewActivity extends GalleryActivity implements OnTouchListene
 
 	public void onNothingSelected(AdapterView<?> arg0) {
 		// Empty Stub, cause nothing to do
-	}
-
-	@Override
-	protected void onDestroy() {
-		mAdapterFullscreen.cleanUp();
-		mAdapterThumbnails.cleanUp();
-		super.onDestroy();
 	}
 	
 	@Override
