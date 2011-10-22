@@ -29,6 +29,7 @@ import de.raptor2101.GalDroid.WebGallery.Tasks.GalleryLoaderTaskListener;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.ViewGroup.LayoutParams;
 
 public abstract class GalleryActivity extends Activity {
@@ -50,6 +51,7 @@ public abstract class GalleryActivity extends Activity {
 			GalDroidApp app = (GalDroidApp)getApplicationContext();
 			app.storeGalleryObjects(getUnqiueId(), galleryObjects);
 			mConfigInstance.mGalleryObjects = galleryObjects;
+			Log.d("GalleryActivity","Call onGalleryObjectsLoaded");
 			onGalleryObjectsLoaded(galleryObjects);		
 		}
 	}
@@ -67,7 +69,7 @@ public abstract class GalleryActivity extends Activity {
 	@Override
     public void onCreate(Bundle savedInstanceState) {
     	super.onCreate(savedInstanceState);
-    	
+    	Log.d("GalleryActivity","New Activity");
     	try {
 			GalDroidApp app = (GalDroidApp)getApplicationContext();
 			app.Initialize(this);
