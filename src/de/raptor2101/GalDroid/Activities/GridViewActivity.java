@@ -43,6 +43,7 @@ public class GridViewActivity extends GalleryActivity implements OnItemClickList
 	
 	@Override
     public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
         setContentView(R.layout.grid_view_activity);
         
         mGridView = (GridView) findViewById(R.id.gridViewWidget);
@@ -55,7 +56,7 @@ public class GridViewActivity extends GalleryActivity implements OnItemClickList
 		
         mGridView.setAdapter(mAdapter);
         
-        super.onCreate(savedInstanceState);
+        
     }
     
     @Override
@@ -81,7 +82,7 @@ public class GridViewActivity extends GalleryActivity implements OnItemClickList
         case (CURRENT_INDEX) : { 
           
           int scrollPos = data.getIntExtra("Current Index",-1);
-          mGridView.smoothScrollToPosition(scrollPos);
+          mGridView.smoothScrollToPositionFromTop(scrollPos, 600);
  
           break; 
         } 

@@ -71,47 +71,54 @@ public abstract class GalleryActivity extends Activity {
     	super.onCreate(savedInstanceState);
     	Log.d("GalleryActivity","New Activity");
     	try {
-    		GalDroidApp app = initialize();
+    		initialize();
 			
-			// Try to get galleryobjects from activity cache
-			mConfigInstance = (GalleryNonConfigurationInstance) getLastNonConfigurationInstance();
-			if(mConfigInstance == null){
-				mConfigInstance = new GalleryNonConfigurationInstance();
-				mConfigInstance.currentIndex = -1;
-			}
 			
-			String uniqueId = getUnqiueId();
-			
-			// Try to get galleryobjects from application cache
-			if(mConfigInstance.mGalleryObjects == null){
-				mConfigInstance.mGalleryObjects = app.loadStoredGalleryObjects(uniqueId);
-			}
-			
-			// Now we have time, load the object from the remote source
-			if(mConfigInstance.mGalleryObjects == null){
-			    mProgressDialog = new ProgressDialog(this);
-			    mProgressDialog.setTitle(R.string.progress_title_load);
-			    mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-			    mProgressDialog.setCancelable(false);
-			    mProgressDialog.dismiss();
-			    
-			    WebGallery gallery = app.getWebGallery();
-			    if(gallery != null) {
-			    	LayoutParams params = this.getWindow().getAttributes();
-					gallery.setPreferedDimensions(params.height, params.width);
-					mListener = new GalleryLoadingListener();
-					GalleryLoaderTask task = new GalleryLoaderTask(gallery, mListener);
-					task.execute(uniqueId);
-			    } else {
-			    	// Without a valid Gallery nothing can be displayed... back to previous activity
-			    	this.finish();
-			    }
-			} else {
-				onGalleryObjectsLoaded(mConfigInstance.mGalleryObjects);
-			}
 		} catch (NoSuchAlgorithmException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+	}
+	
+	@Override
+	protected void onPostCreate(Bundle savedInstanceState) {
+		super.onPostCreate(savedInstanceState);
+		GalDroidApp app = (GalDroidApp)getApplicationContext();
+		// Try to get galleryobjects from activity cache
+		mConfigInstance = (GalleryNonConfigurationInstance) getLastNonConfigurationInstance();
+		if(mConfigInstance == null){
+			mConfigInstance = new GalleryNonConfigurationInstance();
+			mConfigInstance.currentIndex = -1;
+		}
+		
+		String uniqueId = getUnqiueId();
+		
+		// Try to get galleryobjects from application cache
+		if(mConfigInstance.mGalleryObjects == null){
+			mConfigInstance.mGalleryObjects = app.loadStoredGalleryObjects(uniqueId);
+		}
+		
+		// Now we have time, load the object from the remote source
+		if(mConfigInstance.mGalleryObjects == null){
+		    mProgressDialog = new ProgressDialog(this);
+		    mProgressDialog.setTitle(R.string.progress_title_load);
+		    mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+		    mProgressDialog.setCancelable(false);
+		    mProgressDialog.dismiss();
+		    
+		    WebGallery gallery = app.getWebGallery();
+		    if(gallery != null) {
+		    	LayoutParams params = this.getWindow().getAttributes();
+				gallery.setPreferedDimensions(params.height, params.width);
+				mListener = new GalleryLoadingListener();
+				GalleryLoaderTask task = new GalleryLoaderTask(gallery, mListener);
+				task.execute(uniqueId);
+		    } else {
+		    	// Without a valid Gallery nothing can be displayed... back to previous activity
+		    	this.finish();
+		    }
+		} else {
+			onGalleryObjectsLoaded(mConfigInstance.mGalleryObjects);
 		}
 	}
 	
@@ -128,10 +135,9 @@ public abstract class GalleryActivity extends Activity {
     	
 	}
 	
-	private GalDroidApp initialize() throws NoSuchAlgorithmException {
+	private void initialize() throws NoSuchAlgorithmException {
 		GalDroidApp app = (GalDroidApp)getApplicationContext();
 		app.Initialize(this);
-		return app;
 	}
 	
 	@Override

@@ -65,7 +65,7 @@ public class ImageViewActivity extends GalleryActivity implements OnTouchListene
 	@Override
     public void onCreate(Bundle savedInstanceState) {
     	setContentView(R.layout.image_view_activity);
-    	
+    	super.onCreate(savedInstanceState);
     	mGalleryFullscreen = (Gallery) findViewById(R.id.singleImageGallery);
     	mGalleryThumbnails = (Gallery) findViewById(R.id.thumbnailImageGallery);
     	mGalleryThumbnails.setWillNotCacheDrawing(true);
@@ -92,8 +92,6 @@ public class ImageViewActivity extends GalleryActivity implements OnTouchListene
     	mGalleryFullscreen.setOnTouchListener(this);
     	mGalleryFullscreen.setOnItemSelectedListener(this);
     	mGalleryThumbnails.setOnItemSelectedListener(this);
-    	
-        super.onCreate(savedInstanceState);
     }
 
     @Override
