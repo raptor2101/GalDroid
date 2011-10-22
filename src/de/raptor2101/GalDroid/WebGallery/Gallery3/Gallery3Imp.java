@@ -88,10 +88,10 @@ public class Gallery3Imp implements WebGallery {
 			InputStream inputStream;
 			try {
 				JSONArray jsonArray;
-				synchronized (mHttpClient) {
-					inputStream = openRestCall(params[0]);
-					jsonArray = parseJSONArray(inputStream);
-				}
+				
+				inputStream = openRestCall(params[0]);
+				jsonArray = parseJSONArray(inputStream);
+				
 				int length = jsonArray.length();
 				for (int pos = 0; pos < length ; pos++) {
 					JSONObject jsonObject = jsonArray.getJSONObject(pos);
@@ -135,7 +135,6 @@ public class Gallery3Imp implements WebGallery {
 	private JSONObject parseJSON(InputStream inputStream)
 			throws IOException, JSONException {
 		String content = loadContent(inputStream);
-		//System.out.print(content);
 		return new JSONObject(content);
 	}
 
@@ -161,7 +160,6 @@ public class Gallery3Imp implements WebGallery {
 			reader.close();
 			inputStream.close();
 		}
-		System.out.print(stringBuilder.toString());
 		return stringBuilder.toString();
 	}
 	
@@ -285,7 +283,7 @@ public class Gallery3Imp implements WebGallery {
 			displayObjects = new ArrayList<GalleryObject>(0);
 			e.printStackTrace();
 		}
-		System.out.print(displayObjects.size());
+		
 		return displayObjects;
 	}
 
