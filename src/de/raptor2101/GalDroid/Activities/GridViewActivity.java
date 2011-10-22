@@ -37,6 +37,7 @@ import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryObject;
 
 public class GridViewActivity extends GalleryActivity implements OnItemClickListener {
 	
+	private static final int CURRENT_INDEX = 0;
 	private GridView mGridView;
 	private GalleryImageAdapter mAdapter;
 	
@@ -65,13 +66,29 @@ public class GridViewActivity extends GalleryActivity implements OnItemClickList
     
     @Override
     protected void onResume() {
-      	GalleryImageAdapter adapter = (GalleryImageAdapter) mGridView.getAdapter();
+    	super.onResume();
+      	
+    	GalleryImageAdapter adapter = (GalleryImageAdapter) mGridView.getAdapter();
         if(adapter != null) {
         	adapter.refreshImages();
 		}
-        super.onResume();
     }
 
+    @Override 
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {     
+      super.onActivityResult(requestCode, resultCode, data); 
+      switch(requestCode) { 
+        case (CURRENT_INDEX) : { 
+          
+          int scrollPos = data.getIntExtra("Current Index",-1);
+          mGridView.smoothScrollToPosition(scrollPos);
+ 
+          break; 
+        } 
+      } 
+    }
+    
+    
 	public void onItemClick(AdapterView<?> parent, View view, int pos, long rowId) {
 		GalleryImageView imageView = (GalleryImageView) view;
         GalleryObject galleryObject = imageView.getGalleryObject();
@@ -81,13 +98,15 @@ public class GridViewActivity extends GalleryActivity implements OnItemClickList
 			intent = new Intent(this, ImageViewActivity.class);
 			intent.putExtra("Current Index", pos);
 			intent.putExtra("Current UniqueId", getUnqiueId());
+			this.startActivityForResult(intent, CURRENT_INDEX);
         }
         else
         {
             intent = new Intent(this, GridViewActivity.class);
         	intent.putExtra("Current UniqueId", galleryObject.getObjectId());
+        	this.startActivity(intent);
         }
-        this.startActivity(intent);
+        
 	}
 
 	
