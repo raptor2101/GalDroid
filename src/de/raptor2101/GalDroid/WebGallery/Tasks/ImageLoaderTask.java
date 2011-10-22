@@ -69,6 +69,16 @@ public class ImageLoaderTask extends AsyncTask<Void, Progress, GalleryDownloadOb
 	};
 	
 	@Override
+	protected void onCancelled() {
+		Log.d(ClassTag, String.format("%s - Task canceled", mDownloadObject));
+		if (mDownloadRunning) {
+			synchronized (mCache) {
+				mCache.removeCacheFile(mDownloadObject.getUniqueId());
+			}
+		}
+	}
+
+	@Override
 	protected GalleryDownloadObject doInBackground(Void... params) {
 		try {
 			Log.d(ClassTag, String.format("%s - Task running", mDownloadObject));
@@ -95,6 +105,7 @@ public class ImageLoaderTask extends AsyncTask<Void, Progress, GalleryDownloadOb
 				Log.d(ClassTag, String.format("%s - Decoding local image", mDownloadObject));
 				Bitmap bitmap = BitmapFactory.decodeStream(inputStream, null, options);
 				mDownloadObject.setBitmap(bitmap);
+				mCache.cacheBitmap(uniqueId, bitmap);
 				Log.d(ClassTag, String.format("%s - Decoding local image - complete", mDownloadObject));
 			}
 				
@@ -103,6 +114,20 @@ public class ImageLoaderTask extends AsyncTask<Void, Progress, GalleryDownloadOb
 		} catch (Exception e) {
 			Log.w(ClassTag, String.format("Something goes wrong while Downloading %s. ExceptionMessage: %s",mDownloadObject,e.getMessage()));
 			return mDownloadObject;
+		}
+	}
+
+	@Override
+	protected void onPostExecute(GalleryDownloadObject downloadObject) {
+		Log.d(ClassTag, String.format("%s - Task done", mDownloadObject));
+		Bitmap bitmap = null;
+		if(!isCancelled()&&downloadObject.isValid())
+		{
+			bitmap = downloadObject.getBitmap();
+		}
+		ImageLoaderTaskListener listener = mListener.get();
+		if(listener != null){
+			listener.onLoadingCompleted(mDownloadObject.getUniqueId(), bitmap);
 		}
 	}
 
@@ -123,7 +148,7 @@ public class ImageLoaderTask extends AsyncTask<Void, Progress, GalleryDownloadOb
 		mDownloadRunning = false;;
 		Log.d(ClassTag, String.format("%s - Downloading to local cache file - complete", mDownloadObject));
 	}
-	
+
 	private void ScaleImage(String uniqueId) throws IOException {
 		if(mLayoutParams != null) {
 			Log.d(ClassTag, String.format("%s - Decoding Bounds", mDownloadObject));
@@ -167,30 +192,6 @@ public class ImageLoaderTask extends AsyncTask<Void, Progress, GalleryDownloadOb
 				bitmap.recycle();
 				Log.d(ClassTag, String.format("%s - Resize Image - done", mDownloadObject));
 			}
-		}
-	}
-	
-	@Override
-	protected void onCancelled() {
-		Log.d(ClassTag, String.format("%s - Task canceled", mDownloadObject));
-		if (mDownloadRunning) {
-			synchronized (mCache) {
-				mCache.removeCacheFile(mDownloadObject.getUniqueId());
-			}
-		}
-	}
-	
-	@Override
-	protected void onPostExecute(GalleryDownloadObject downloadObject) {
-		Log.d(ClassTag, String.format("%s - Task done", mDownloadObject));
-		Bitmap bitmap = null;
-		if(!isCancelled()&&downloadObject.isValid())
-		{
-			bitmap = downloadObject.getBitmap();
-		}
-		ImageLoaderTaskListener listener = mListener.get();
-		if(listener != null){
-			listener.onLoadingCompleted(mDownloadObject.getUniqueId(), bitmap);
 		}
 	}
 }
