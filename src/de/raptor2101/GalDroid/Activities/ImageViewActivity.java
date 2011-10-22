@@ -20,6 +20,8 @@ package de.raptor2101.GalDroid.Activities;
 
 import java.util.List;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Matrix;
 import android.graphics.PointF;
 import android.os.Bundle;
@@ -78,11 +80,13 @@ public class ImageViewActivity extends GalleryActivity implements OnTouchListene
     	mAdapterFullscreen.setTitleConfig(TitleConfig.HideTitle);
     	mAdapterFullscreen.setDisplayTarget(DisplayTarget.FullScreen);
     	mAdapterFullscreen.setCleanupMode(CleanupMode.ForceCleanup);
+    	mAdapterFullscreen.setMaxActiveDownloads(3);
     	mGalleryFullscreen.setAdapter(mAdapterFullscreen);
     	
     	mAdapterThumbnails = new GalleryImageAdapter(this, new Gallery.LayoutParams(100,100), ScaleMode.DontScale);
     	mAdapterThumbnails.setTitleConfig(TitleConfig.HideTitle);
     	mAdapterThumbnails.setDisplayTarget(DisplayTarget.Thumbnails);
+    	mAdapterThumbnails.setMaxActiveDownloads(20);
     	mGalleryThumbnails.setAdapter(mAdapterThumbnails);
     	
     	mGalleryFullscreen.setOnTouchListener(this);
@@ -98,6 +102,9 @@ public class ImageViewActivity extends GalleryActivity implements OnTouchListene
     	GalleryImageAdapter adapter = (GalleryImageAdapter) mGalleryFullscreen.getAdapter();
     	adapter.cleanUp();
     	adapter = (GalleryImageAdapter) mGalleryThumbnails.getAdapter();
+    	Intent resultIntent = new Intent(this, ImageViewActivity.class);
+    	resultIntent.putExtra("Current Index", getCurrentIndex());
+    	setResult(Activity.RESULT_OK, resultIntent);
     	
     	super.onBackPressed();
     }

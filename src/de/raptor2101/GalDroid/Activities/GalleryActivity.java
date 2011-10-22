@@ -65,16 +65,13 @@ public abstract class GalleryActivity extends Activity {
 	private ProgressDialog mProgressDialog;
 	private GalleryLoaderTaskListener mListener;
 	
-	@SuppressWarnings("unchecked")
+	
 	@Override
     public void onCreate(Bundle savedInstanceState) {
     	super.onCreate(savedInstanceState);
     	Log.d("GalleryActivity","New Activity");
     	try {
-			GalDroidApp app = (GalDroidApp)getApplicationContext();
-			app.Initialize(this);
-			
-			String uniqueId = getUnqiueId();
+    		GalDroidApp app = initialize();
 			
 			// Try to get galleryobjects from activity cache
 			mConfigInstance = (GalleryNonConfigurationInstance) getLastNonConfigurationInstance();
@@ -83,6 +80,7 @@ public abstract class GalleryActivity extends Activity {
 				mConfigInstance.currentIndex = -1;
 			}
 			
+			String uniqueId = getUnqiueId();
 			
 			// Try to get galleryobjects from application cache
 			if(mConfigInstance.mGalleryObjects == null){
@@ -115,6 +113,25 @@ public abstract class GalleryActivity extends Activity {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		Log.d("GalleryActivity","Resume Activity");
+    	try {    		
+			initialize();
+		} catch (NoSuchAlgorithmException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	
+	}
+	
+	private GalDroidApp initialize() throws NoSuchAlgorithmException {
+		GalDroidApp app = (GalDroidApp)getApplicationContext();
+		app.Initialize(this);
+		return app;
 	}
 	
 	@Override
