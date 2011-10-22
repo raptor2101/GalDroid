@@ -71,10 +71,14 @@ public class ImageLoaderTask extends AsyncTask<Void, Progress, GalleryDownloadOb
 	@Override
 	protected void onCancelled() {
 		Log.d(ClassTag, String.format("%s - Task canceled", mDownloadObject));
-		if (mDownloadRunning) {
-			synchronized (mCache) {
-				mCache.removeCacheFile(mDownloadObject.getUniqueId());
-			}
+		
+		synchronized (mCache) {
+			mCache.removeCacheFile(mDownloadObject.getUniqueId());
+		}
+		
+		ImageLoaderTaskListener listener = mListener.get();
+		if(listener != null){
+			listener.onLoadingCancelled(mDownloadObject.getUniqueId());
 		}
 	}
 
