@@ -36,14 +36,15 @@ import de.raptor2101.GalDroid.WebGallery.Tasks.ImageLoaderTask;
 import de.raptor2101.GalDroid.WebGallery.Tasks.ImageLoaderTaskListener;
 
 public class GalleryImageView extends LinearLayout implements ImageLoaderTaskListener{
+	private static final String CLASS_TAG = "GalleryImageView";
 	private final ProgressBar mProgressBar;
 	private final ImageView mImageView;
 	private final TextView mTitleTextView;
 	private final boolean mShowTitle;
 	private GalleryObject mGalleryObject;
 	private Bitmap mBitmap;
-	private WeakReference<ImageLoaderTask> mImageLoaderTask;
-	 
+	private ImageLoaderTask mImageLoaderTask;
+	private String mUniqueId; 
 	
 	public GalleryImageView(Context context, android.view.ViewGroup.LayoutParams layoutParams, boolean showTitle) {
 		super(context);
@@ -74,11 +75,12 @@ public class GalleryImageView extends LinearLayout implements ImageLoaderTaskLis
 			mTitleTextView = null;
 		}
 		
-		mImageLoaderTask = new WeakReference<ImageLoaderTask>(null);
+		mImageLoaderTask = null;
 	}
 	
-	public void setGalleryObject(GalleryObject galleryObject)
+	public void setGalleryObject(GalleryObject galleryObject, String uniqueId)
 	{
+		mUniqueId = uniqueId;
 		mGalleryObject = galleryObject;
 		this.setTilte(galleryObject.getTitle());
 	}
@@ -105,25 +107,20 @@ public class GalleryImageView extends LinearLayout implements ImageLoaderTaskLis
 
 	public void onLoadingStarted(String uniqueId) {
 		mProgressBar.setVisibility(VISIBLE);
+		Log.d(CLASS_TAG, String.format("Loading started %s",mUniqueId));
 	}
 
 	public void onLoadingCompleted(String uniqueId, Bitmap bitmap) {
 		mProgressBar.setVisibility(GONE);
 		mImageView.setImageBitmap(bitmap);
 		mBitmap = bitmap;
-		
-	}
-	
-	public void cancelDownloadTask(){
-		ImageLoaderTask task = mImageLoaderTask.get();
-		if(task != null){
-			task.cancel(true);
-		}
+		mImageLoaderTask = null;
+		Log.d(CLASS_TAG, String.format("Loading done %s",mUniqueId));
 	}
 	
 	public void recylceBitmap(){
 		if (mBitmap != null) {
-			Log.d("GalleryImageView", String.format("Recycle %s",mGalleryObject));
+			Log.d(CLASS_TAG, String.format("Recycle %s",mUniqueId));
 			mImageView.setImageBitmap(null);
 			mBitmap.recycle();
 			mBitmap = null;
@@ -139,8 +136,18 @@ public class GalleryImageView extends LinearLayout implements ImageLoaderTaskLis
 		mImageView.setImageMatrix(matrix);
 	}
 
+	public void cancelImageLoaderTask(){
+		
+		if(mImageLoaderTask != null){
+			Log.d(CLASS_TAG, String.format("Cancel downloadTask %s",mUniqueId));
+			mImageLoaderTask.cancel(true);
+			mImageLoaderTask = null;
+		}
+	}
+
 	public void setImageLoaderTask(ImageLoaderTask downloadTask) {
-		mImageLoaderTask = new WeakReference<ImageLoaderTask>(downloadTask);		
+		Log.d(CLASS_TAG, String.format("Reference downloadTask %s",mUniqueId));
+		mImageLoaderTask = downloadTask;		
 	}
 
 	public boolean isLoaded() {
@@ -148,8 +155,11 @@ public class GalleryImageView extends LinearLayout implements ImageLoaderTaskLis
 	}
 
 	public boolean isLoading() {
-		ImageLoaderTask task = mImageLoaderTask.get();
-		return task != null && task.getStatus() != Status.FINISHED;
+		return mImageLoaderTask != null && mImageLoaderTask.getStatus() != Status.FINISHED;
+	}
+
+	public String getUniqueId() {
+		return mUniqueId;
 	}
 }
 
