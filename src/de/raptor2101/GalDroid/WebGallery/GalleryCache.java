@@ -50,7 +50,9 @@ public class GalleryCache {
 				mCacheDir = context.getCacheDir();
 			}
 		}
-		
+		if(!mCacheDir.exists()){
+			mCacheDir.mkdirs();
+		}
 		mCachedBitmaps = new Hashtable<String,WeakReference<Bitmap>>(50);
 		mDigester = MessageDigest.getInstance("MD5");
 	}
@@ -60,10 +62,14 @@ public class GalleryCache {
 		String hash = buildHash(sourceUrl);
 		WeakReference<Bitmap> reference = mCachedBitmaps.get(hash);
 		if(reference == null){
+			Log.d("GalleryCache", "Cache Miss Reference " + sourceUrl);
 			return null;
 		}
 		Bitmap bitmap = reference.get();
 		if(bitmap == null || bitmap.isRecycled()){
+			if(bitmap != null) {
+				Log.d("GalleryCache", "Bitmap Recycled " + sourceUrl);
+			}
 			mCachedBitmaps.remove(hash);
 			return null;
 		}
@@ -155,16 +161,17 @@ public class GalleryCache {
 	
 	private String buildHash(String sourceUrl)
 	{
-		mDigester.reset();
-		byte[] bytes = sourceUrl.getBytes();
-		mDigester.update(bytes,0,bytes.length);
-		byte[] diggest = mDigester.digest();
-		StringBuffer returnString = new StringBuffer(diggest.length);
-		for (byte b : diggest) {
-			returnString.append(Integer.toHexString(0xFF & b));
+		synchronized (mDigester) {
+			mDigester.reset();
+			byte[] bytes = sourceUrl.getBytes();
+			mDigester.update(bytes, 0, bytes.length);
+			byte[] diggest = mDigester.digest();
+			StringBuffer returnString = new StringBuffer(diggest.length);
+			for (byte b : diggest) {
+				returnString.append(Integer.toHexString(0xFF & b));
+			}
+			return returnString.toString();
 		}
-		
-		return returnString.toString();
 	}
 
 	public void clearCachedBitmaps() {
