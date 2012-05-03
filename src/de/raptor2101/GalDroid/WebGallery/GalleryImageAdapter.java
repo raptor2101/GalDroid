@@ -168,7 +168,7 @@ public class GalleryImageAdapter extends BaseAdapter {
 			imageView.setGalleryObject(galleryObject, uniqueID);
 			mImageViews.set(position, new WeakReference<GalleryImageView>(imageView));
 		}
-		if(!imageView.isLoaded() && ! imageView.isLoading()){
+		if(!imageView.isLoaded() && ! imageView.isLoading() && galleryObject.hasImageAvaible(mImageSize)){
 			Log.d(ClassTag, String.format("Init Reload", imageView.getGalleryObject()));
 			loadGalleryImage(galleryObject, uniqueID, imageView);
 		}

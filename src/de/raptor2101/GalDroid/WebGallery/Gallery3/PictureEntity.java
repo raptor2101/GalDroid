@@ -21,6 +21,8 @@ package de.raptor2101.GalDroid.WebGallery.Gallery3;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import de.raptor2101.GalDroid.WebGallery.Interfaces.WebGallery.ImageSize;
+
 import android.util.FloatMath;
 
 public class PictureEntity extends Entity {
@@ -47,5 +49,9 @@ public class PictureEntity extends Entity {
 	public boolean hasChildren() {
 		// A Image never have childs
 		return false;
+	}
+
+	public boolean hasImageAvaible(ImageSize imageSize) {
+		return true;
 	}
 }

@@ -27,6 +27,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import de.raptor2101.GalDroid.WebGallery.Interfaces.WebGallery.ImageSize;
+
 public class AlbumEntity extends Entity {
 
 	private final List<String> mMembers;
@@ -36,13 +38,18 @@ public class AlbumEntity extends Entity {
 		super(jsonObject, gallery3);
 		JSONArray memberArray = jsonObject.getJSONArray("members");
 		
-		String albumCover_RestLink = jsonObject.getJSONObject("entity").getString("album_cover");
-		albumCover_RestLink = albumCover_RestLink.substring(gallery3.LinkRest_LoadItem.length()-2);
-		
-		int coverId = Integer.parseInt(albumCover_RestLink);
-		
-		mLink_Full = String.format(gallery3.LinkRest_LoadPicture, coverId, "full");
-		mLink_Thumb = String.format(gallery3.LinkRest_LoadPicture, getId(), "thumb");
+		try {
+			String albumCover_RestLink = jsonObject.getJSONObject("entity").getString("album_cover");
+			albumCover_RestLink = albumCover_RestLink.substring(gallery3.LinkRest_LoadItem.length()-2);
+			
+			int coverId = Integer.parseInt(albumCover_RestLink);
+			
+			mLink_Full = String.format(gallery3.LinkRest_LoadPicture, coverId, "full");
+			mLink_Thumb = String.format(gallery3.LinkRest_LoadPicture, getId(), "thumb");
+		} catch (JSONException e) {
+			mLink_Full = "";
+			mLink_Thumb = "";
+		}
 		
 		mMembers = new ArrayList<String>(memberArray.length());
 		
@@ -60,6 +67,16 @@ public class AlbumEntity extends Entity {
 	
 	public boolean hasChildren() {
 		return mMembers.size() > 0;
+	}
+
+
+	public boolean hasImageAvaible(ImageSize imageSize) {
+		if(imageSize == ImageSize.Full) {
+			return !mLink_Full.equals("");
+		} else {
+			return !mLink_Thumb.equals("");
+		}
+			
 	}
 	
 	

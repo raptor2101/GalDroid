@@ -27,6 +27,7 @@ public interface GalleryObject
 	public String getUniqueId(ImageSize imageSize);
 	public boolean hasChildren();	
 	public String getObjectId();
+	public boolean hasImageAvaible(ImageSize imageSize);
 	
 	
 }

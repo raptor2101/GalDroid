@@ -30,6 +30,7 @@ abstract class Entity implements GalleryObject {
 	private final int mId;
 	protected String mLink_Full;
 	protected String mLink_Thumb;
+	protected boolean mHasImage;
 	
 	public Entity(JSONObject jsonObject, Gallery3Imp gallery3) throws JSONException
 	{
@@ -57,5 +58,9 @@ abstract class Entity implements GalleryObject {
 	
 	public String getUniqueId(ImageSize imageSize) {
 		return imageSize == ImageSize.Full? mLink_Full : mLink_Thumb;
+	}
+	
+	public boolean hasImage (){
+		return mHasImage;
 	}
 }
