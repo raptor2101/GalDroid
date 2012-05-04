@@ -32,7 +32,6 @@ import android.util.Log;
 import android.view.ViewGroup.LayoutParams;
 import de.raptor2101.GalDroid.WebGallery.GalleryCache;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryDownloadObject;
-import de.raptor2101.GalDroid.WebGallery.Interfaces.WebGallery;
 
 public class ImageLoaderTask extends AsyncTask<Void, Progress, Bitmap> {
 	private final static String ClassTag = "ImageLoaderTask";

@@ -34,7 +34,6 @@ import android.widget.BaseAdapter;
 import de.raptor2101.GalDroid.Activities.GalDroidApp;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryDownloadObject;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryObject;
-import de.raptor2101.GalDroid.WebGallery.Interfaces.WebGallery;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.WebGallery.ImageSize;
 import de.raptor2101.GalDroid.WebGallery.Tasks.ImageLoaderTask;
 
@@ -61,7 +60,6 @@ public class GalleryImageAdapter extends BaseAdapter {
 	}
 	
 	private GalleryCache mCache;
-	private WebGallery mWebGallery;
 	private Context mContext;
 	
 	private List<GalleryObject> mGalleryObjects;
@@ -81,7 +79,6 @@ public class GalleryImageAdapter extends BaseAdapter {
 		GalDroidApp appContext = (GalDroidApp)context.getApplicationContext();
 		this.mContext = context;
 		this.mCache = appContext.getGalleryCache();
-		this.mWebGallery = appContext.getWebGallery();
 		this.mLayoutParams = layoutParams;
 		
 		mGalleryObjects = new ArrayList<GalleryObject>(0);

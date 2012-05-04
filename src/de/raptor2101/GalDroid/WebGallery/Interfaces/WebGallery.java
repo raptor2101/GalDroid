@@ -18,11 +18,8 @@
 
 package de.raptor2101.GalDroid.WebGallery.Interfaces;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 
 

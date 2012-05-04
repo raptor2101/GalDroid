@@ -21,8 +21,6 @@ package de.raptor2101.GalDroid.WebGallery.Gallery3;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import de.raptor2101.GalDroid.WebGallery.Interfaces.WebGallery.ImageSize;
-
 import android.util.FloatMath;
 
 public class PictureEntity extends Entity {

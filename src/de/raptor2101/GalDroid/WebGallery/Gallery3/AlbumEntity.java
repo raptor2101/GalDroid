@@ -27,8 +27,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import de.raptor2101.GalDroid.WebGallery.Interfaces.WebGallery.ImageSize;
-
 public class AlbumEntity extends Entity {
 
 	private final List<String> mMembers;

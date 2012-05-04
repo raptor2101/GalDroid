@@ -24,8 +24,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryObject;
-import de.raptor2101.GalDroid.WebGallery.Interfaces.WebGallery.ImageSize;
-
 abstract class Entity implements GalleryObject {
 	private final String mTitle;
 	private final String mLink;

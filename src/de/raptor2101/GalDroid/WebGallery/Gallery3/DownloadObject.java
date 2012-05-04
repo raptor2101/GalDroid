@@ -22,9 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
 
-import android.graphics.Bitmap;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryDownloadObject;
-import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryProgressListener;
 
 public class DownloadObject implements GalleryDownloadObject {
 	
