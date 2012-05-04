@@ -30,4 +30,36 @@
 		<nature>com.android.ide.eclipse.adt.AndroidNature</nature>
 		<nature>org.eclipse.jdt.core.javanature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>libs/commons-codec-1.4.jar</name>
+			<type>1</type>
+			<location>/media/Workspace/eclipse_workspace/Libraries/httpcomponents-client-4.1.1/lib/commons-codec-1.4.jar</location>
+		</link>
+		<link>
+			<name>libs/commons-logging-1.1.1.jar</name>
+			<type>1</type>
+			<location>/media/Workspace/eclipse_workspace/Libraries/httpcomponents-client-4.1.1/lib/commons-logging-1.1.1.jar</location>
+		</link>
+		<link>
+			<name>libs/httpclient-4.1.1.jar</name>
+			<type>1</type>
+			<location>/media/Workspace/eclipse_workspace/Libraries/httpcomponents-client-4.1.1/lib/httpclient-4.1.1.jar</location>
+		</link>
+		<link>
+			<name>libs/httpclient-cache-4.1.1.jar</name>
+			<type>1</type>
+			<location>/media/Workspace/eclipse_workspace/Libraries/httpcomponents-client-4.1.1/lib/httpclient-cache-4.1.1.jar</location>
+		</link>
+		<link>
+			<name>libs/httpcore-4.1.jar</name>
+			<type>1</type>
+			<location>/media/Workspace/eclipse_workspace/Libraries/httpcomponents-client-4.1.1/lib/httpcore-4.1.jar</location>
+		</link>
+		<link>
+			<name>libs/httpmime-4.1.1.jar</name>
+			<type>1</type>
+			<location>/media/Workspace/eclipse_workspace/Libraries/httpcomponents-client-4.1.1/lib/httpmime-4.1.1.jar</location>
+		</link>
+	</linkedResources>
 </projectDescription>
