@@ -287,19 +287,9 @@ public class Gallery3Imp implements WebGallery {
 		return displayObjects;
 	}
 
-	public InputStream getImageRawData(GalleryObject galleryObject, ImageSize imageSize) throws ClientProtocolException, IOException{
+	public InputStream getFileStream(String sourceLink) throws ClientProtocolException, IOException{
 		
-		String dataLink;
-		if(galleryObject instanceof AlbumEntity || galleryObject instanceof PictureEntity){
-			Entity galleryEntity = (Entity) galleryObject;
-			dataLink = galleryEntity.getUniqueId(imageSize);
-		}
-		else
-		{
-			throw new ClassCastException("Gallery3 implementation can't handle objects of type "+galleryObject.getClass().getName());
-		}
-		
-		return openRestCall(dataLink);
+		return openRestCall(sourceLink);
 		
 	}
 	

@@ -31,24 +31,20 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.view.ViewGroup.LayoutParams;
 import de.raptor2101.GalDroid.WebGallery.GalleryCache;
-import de.raptor2101.GalDroid.WebGallery.GalleryDownloadObject;
+import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryDownloadObject;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.WebGallery;
 
-public class ImageLoaderTask extends AsyncTask<Void, Progress, GalleryDownloadObject> {
+public class ImageLoaderTask extends AsyncTask<Void, Progress, Bitmap> {
 	private final static String ClassTag = "ImageLoaderTask";
-	private WebGallery mWebGallery;
 	private GalleryCache mCache;
 	private GalleryDownloadObject mDownloadObject;
 	private WeakReference<ImageLoaderTaskListener> mListener;
 	private LayoutParams mLayoutParams;
-	private boolean mDownloadRunning;
 	
-	public ImageLoaderTask(WebGallery webGallery, GalleryCache cache, GalleryDownloadObject downloadObject){
-		mWebGallery = webGallery;
+	public ImageLoaderTask(GalleryCache cache, GalleryDownloadObject downloadObject){
 		mCache = cache;
 		mDownloadObject = downloadObject;
 		mListener = new WeakReference<ImageLoaderTaskListener>(null); 
-		mDownloadRunning = false;
 	}
 	
 	public void setListener(ImageLoaderTaskListener listener){
@@ -83,7 +79,7 @@ public class ImageLoaderTask extends AsyncTask<Void, Progress, GalleryDownloadOb
 	}
 
 	@Override
-	protected GalleryDownloadObject doInBackground(Void... params) {
+	protected Bitmap doInBackground(Void... params) {
 		try {
 			Log.d(ClassTag, String.format("%s - Task running", mDownloadObject));
 			String uniqueId = mDownloadObject.getUniqueId();
@@ -112,37 +108,29 @@ public class ImageLoaderTask extends AsyncTask<Void, Progress, GalleryDownloadOb
 				
 				Log.d(ClassTag, String.format("%s - Decoding local image", mDownloadObject));
 				Bitmap bitmap = BitmapFactory.decodeStream(inputStream, null, options);
-				mDownloadObject.setBitmap(bitmap);
 				mCache.cacheBitmap(uniqueId, bitmap);
 				Log.d(ClassTag, String.format("%s - Decoding local image - complete", mDownloadObject));
+				return bitmap;
 			}
-				
-			
-			return mDownloadObject;
 		} catch (Exception e) {
 			Log.w(ClassTag, String.format("Something goes wrong while Downloading %s. ExceptionMessage: %s",mDownloadObject,e.getMessage()));
-			return mDownloadObject;
+			return null;
 		}
 	}
 
 	@Override
-	protected void onPostExecute(GalleryDownloadObject downloadObject) {
+	protected void onPostExecute(Bitmap bitmap) {
 		Log.d(ClassTag, String.format("%s - Task done", mDownloadObject));
-		Bitmap bitmap = null;
-		if(!isCancelled()&&downloadObject.isValid())
-		{
-			bitmap = downloadObject.getBitmap();
-		}
 		ImageLoaderTaskListener listener = mListener.get();
-		if(listener != null){
+		if(!isCancelled() && listener != null)
+		{
 			listener.onLoadingCompleted(mDownloadObject.getUniqueId(), bitmap);
 		}
 	}
 
 	private void DownloadImage(String uniqueId) throws IOException {
 		Log.d(ClassTag, String.format("%s - Downloading to local cache file", mDownloadObject));
-		mDownloadRunning = true;
-		InputStream networkStream = mWebGallery.getImageRawData(mDownloadObject.getGalleryObject(),mDownloadObject.getImageSize());
+		InputStream networkStream = mDownloadObject.getFileStream();
 		OutputStream fileStream = mCache.createCacheFile(uniqueId);
 		byte[] writeCache = new byte[1024];
 		int readCounter;
@@ -155,7 +143,6 @@ public class ImageLoaderTask extends AsyncTask<Void, Progress, GalleryDownloadOb
 		if(!isCancelled()) {
 			mCache.refreshCacheFile(uniqueId);
 		}
-		mDownloadRunning = false;
 		Log.d(ClassTag, String.format("%s - Downloading to local cache file - complete", mDownloadObject));
 	}
 
@@ -215,6 +202,6 @@ public class ImageLoaderTask extends AsyncTask<Void, Progress, GalleryDownloadOb
 
 	public String getUniqueId() {
 		
-		return mDownloadObject.toString();
+		return mDownloadObject.getUniqueId();
 	}
 }

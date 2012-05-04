@@ -18,16 +18,17 @@
 
 package de.raptor2101.GalDroid.WebGallery.Interfaces;
 
-import de.raptor2101.GalDroid.WebGallery.Interfaces.WebGallery.ImageSize;
+import de.raptor2101.GalDroid.WebGallery.Gallery3.DownloadObject;
 
 
 public interface GalleryObject 
 {
 	public String getTitle();
-	public String getUniqueId(ImageSize imageSize);
+	
 	public boolean hasChildren();	
 	public String getObjectId();
-	public boolean hasImageAvaible(ImageSize imageSize);
+	public DownloadObject getImage();
+	public DownloadObject getThumbnail();
 	
 	
 }

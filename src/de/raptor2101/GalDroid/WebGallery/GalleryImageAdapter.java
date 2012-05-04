@@ -32,6 +32,7 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.BaseAdapter;
 import de.raptor2101.GalDroid.Activities.GalDroidApp;
+import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryDownloadObject;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryObject;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.WebGallery;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.WebGallery.ImageSize;
@@ -141,47 +142,65 @@ public class GalleryImageAdapter extends BaseAdapter {
 		return position;
 	}
 	
-	public View getView(int position, View cachedView, ViewGroup parent) {
-		
+	public View getView(int position, View cachedView, ViewGroup parent) {		
 		GalleryObject galleryObject =  mGalleryObjects.get(position);
-		String uniqueID = galleryObject.getUniqueId(mImageSize);
-		Log.d(ClassTag, String.format("Request View %s", uniqueID));
 		
+		String objectId = galleryObject.getObjectId();
+		Log.d(ClassTag, String.format("Request View %s", objectId));
+		
+		GalleryImageView imageView = getCachedView(cachedView, galleryObject);
+		
+		imageView= mImageViews.get(position).get();
+		if(imageView == null) {
+			Log.d(ClassTag, String.format("Miss ImageView Reference", objectId));
+			imageView = CreateImageView(galleryObject, objectId);
+			mImageViews.set(position, new WeakReference<GalleryImageView>(imageView));
+		}
+		
+		
+		if(!imageView.isLoaded() && ! imageView.isLoading()){
+			Log.d(ClassTag, String.format("Init Reload", galleryObject.getObjectId()));
+			loadGalleryImage(imageView, galleryObject);
+		}
+		
+		return imageView;
+	}
+
+	private GalleryImageView CreateImageView(GalleryObject galleryObject,
+			String objectId) {
 		GalleryImageView imageView;
+		imageView = new GalleryImageView(mContext,this.mLayoutParams,this.mTitleConfig == TitleConfig.ShowTitle);
+		imageView.setLayoutParams(mLayoutParams);
+		imageView.setGalleryObject(galleryObject);
+		return imageView;
+	}
+
+	private GalleryImageView getCachedView(View cachedView, GalleryObject galleryObject) {
+		GalleryImageView imageView = null;
 		if(cachedView != null){
 			imageView =(GalleryImageView)cachedView;
-			Log.d(ClassTag, String.format("Cached View %s", imageView.getUniqueId()));
+			Log.d(ClassTag, String.format("Cached View %s", imageView.getObjectId()));
 			if(imageView.getGalleryObject().getObjectId() != galleryObject.getObjectId()) {
-				Log.d(ClassTag, String.format("Abort downloadTask %s", imageView.getUniqueId()));
+				Log.d(ClassTag, String.format("Abort downloadTask %s", imageView.getObjectId()));
 				imageView.cancelImageLoaderTask();
 				if(mCleanupMode == CleanupMode.ForceCleanup) {
 					imageView.recylceBitmap();
 				}
 			}					
 		}
-		
-		imageView= mImageViews.get(position).get();
-		if(imageView == null) {
-			Log.d(ClassTag, String.format("Miss ImageView Reference", uniqueID));
-			imageView = new GalleryImageView(mContext,this.mLayoutParams,this.mTitleConfig == TitleConfig.ShowTitle);
-			imageView.setLayoutParams(mLayoutParams);
-			imageView.setGalleryObject(galleryObject, uniqueID);
-			mImageViews.set(position, new WeakReference<GalleryImageView>(imageView));
-		}
-		if(!imageView.isLoaded() && ! imageView.isLoading() && galleryObject.hasImageAvaible(mImageSize)){
-			Log.d(ClassTag, String.format("Init Reload", imageView.getGalleryObject()));
-			loadGalleryImage(galleryObject, uniqueID, imageView);
-		}
-		
 		return imageView;
-		
 	}
 
-	private void loadGalleryImage(GalleryObject galleryObject, String uniqueId,	GalleryImageView imageView) {
-		Bitmap cachedBitmap = mCache.getBitmap(uniqueId);
+	private void loadGalleryImage(GalleryImageView imageView, GalleryObject galleryObject) {
+		GalleryDownloadObject downloadObject = mImageSize == ImageSize.Full ? galleryObject.getImage() : galleryObject.getThumbnail();
+		
+		if(downloadObject == null) {
+			return;
+		}
+		
+		Bitmap cachedBitmap = mCache.getBitmap(downloadObject.getUniqueId());
 		if(cachedBitmap == null){
-			GalleryDownloadObject dowbloadObject = new GalleryDownloadObject(galleryObject, mImageSize);
-			ImageLoaderTask downloadTask = new ImageLoaderTask(mWebGallery, mCache, dowbloadObject);
+			ImageLoaderTask downloadTask = new ImageLoaderTask(mCache, downloadObject);
 			imageView.setImageLoaderTask(downloadTask);
 			downloadTask.setListener(imageView);
 			if (mScaleMode == ScaleMode.ScaleSource) {
@@ -193,7 +212,7 @@ public class GalleryImageAdapter extends BaseAdapter {
 		}
 		else
 		{
-			imageView.onLoadingCompleted(uniqueId, cachedBitmap);
+			imageView.onLoadingCompleted(downloadObject.getUniqueId(), cachedBitmap);
 		}
 	}
 
@@ -215,7 +234,7 @@ public class GalleryImageAdapter extends BaseAdapter {
 		for(WeakReference<GalleryImageView> reference:mImageViews) {
 			GalleryImageView imageView = reference.get();
 			if(imageView != null) {
-				Log.d(ClassTag, String.format("CleanUp ", imageView.getGalleryObject().getUniqueId(mImageSize)));
+				Log.d(ClassTag, String.format("CleanUp ", imageView.getObjectId()));
 				imageView.cancelImageLoaderTask();
 				imageView.recylceBitmap();
 			}
@@ -227,11 +246,10 @@ public class GalleryImageAdapter extends BaseAdapter {
 		for(WeakReference<GalleryImageView> reference:mImageViews) {
 			GalleryImageView imageView = reference.get();
 			if(imageView != null && !imageView.isLoaded()) {
-				Log.d(ClassTag, String.format("Relaod ", imageView.getGalleryObject()));
 				GalleryObject galleryObject = imageView.getGalleryObject();
-				String uniqueID = galleryObject.getUniqueId(mImageSize);
-				
-				loadGalleryImage(galleryObject, uniqueID, imageView);
+				Log.d(ClassTag, String.format("Relaod ", imageView.getObjectId()));
+								
+				loadGalleryImage(imageView, galleryObject);
 			}
 		}
 	}

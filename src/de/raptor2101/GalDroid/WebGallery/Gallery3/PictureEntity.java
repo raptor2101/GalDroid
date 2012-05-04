@@ -50,8 +50,4 @@ public class PictureEntity extends Entity {
 		// A Image never have childs
 		return false;
 	}
-
-	public boolean hasImageAvaible(ImageSize imageSize) {
-		return true;
-	}
 }

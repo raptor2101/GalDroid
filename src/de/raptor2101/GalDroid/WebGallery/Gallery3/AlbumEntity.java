@@ -68,16 +68,6 @@ public class AlbumEntity extends Entity {
 	public boolean hasChildren() {
 		return mMembers.size() > 0;
 	}
-
-
-	public boolean hasImageAvaible(ImageSize imageSize) {
-		if(imageSize == ImageSize.Full) {
-			return !mLink_Full.equals("");
-		} else {
-			return !mLink_Thumb.equals("");
-		}
-			
-	}
 	
 	
 }

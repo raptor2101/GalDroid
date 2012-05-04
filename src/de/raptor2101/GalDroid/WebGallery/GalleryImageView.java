@@ -18,8 +18,6 @@
 
 package de.raptor2101.GalDroid.WebGallery;
 
-import java.lang.ref.WeakReference;
-
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
@@ -44,7 +42,6 @@ public class GalleryImageView extends LinearLayout implements ImageLoaderTaskLis
 	private GalleryObject mGalleryObject;
 	private Bitmap mBitmap;
 	private ImageLoaderTask mImageLoaderTask;
-	private String mUniqueId; 
 	
 	public GalleryImageView(Context context, android.view.ViewGroup.LayoutParams layoutParams, boolean showTitle) {
 		super(context);
@@ -78,18 +75,17 @@ public class GalleryImageView extends LinearLayout implements ImageLoaderTaskLis
 		mImageLoaderTask = null;
 	}
 	
-	public void setGalleryObject(GalleryObject galleryObject, String uniqueId)
+	public void setGalleryObject(GalleryObject galleryObject)
 	{
-		mUniqueId = uniqueId;
 		mGalleryObject = galleryObject;
-		this.setTilte(galleryObject.getTitle());
+		this.setTitle(galleryObject.getTitle());
 	}
 	
 	public GalleryObject getGalleryObject(){
 		return mGalleryObject;
 	}
 		
-	public void setTilte(String title)
+	public void setTitle(String title)
 	{
 		if(mTitleTextView != null){
 			mTitleTextView.setText(title);
@@ -105,22 +101,9 @@ public class GalleryImageView extends LinearLayout implements ImageLoaderTaskLis
 		return imageView;
 	}
 
-	public void onLoadingStarted(String uniqueId) {
-		mProgressBar.setVisibility(VISIBLE);
-		Log.d(CLASS_TAG, String.format("Loading started %s",mUniqueId));
-	}
-
-	public void onLoadingCompleted(String uniqueId, Bitmap bitmap) {
-		mProgressBar.setVisibility(GONE);
-		mImageView.setImageBitmap(bitmap);
-		mBitmap = bitmap;
-		mImageLoaderTask = null;
-		Log.d(CLASS_TAG, String.format("Loading done %s",mUniqueId));
-	}
-	
 	public void recylceBitmap(){
 		if (mBitmap != null) {
-			Log.d(CLASS_TAG, String.format("Recycle %s",mUniqueId));
+			Log.d(CLASS_TAG, String.format("Recycle %s",mGalleryObject.getObjectId()));
 			mImageView.setImageBitmap(null);
 			mBitmap.recycle();
 			mBitmap = null;
@@ -139,14 +122,14 @@ public class GalleryImageView extends LinearLayout implements ImageLoaderTaskLis
 	public void cancelImageLoaderTask(){
 		
 		if(mImageLoaderTask != null){
-			Log.d(CLASS_TAG, String.format("Cancel downloadTask %s",mUniqueId));
+			Log.d(CLASS_TAG, String.format("Cancel downloadTask %s",mGalleryObject.getObjectId()));
 			mImageLoaderTask.cancel(true);
 			mImageLoaderTask = null;
 		}
 	}
 
 	public void setImageLoaderTask(ImageLoaderTask downloadTask) {
-		Log.d(CLASS_TAG, String.format("Reference downloadTask %s",mUniqueId));
+		Log.d(CLASS_TAG, String.format("Reference downloadTask %s",mGalleryObject.getObjectId()));
 		mImageLoaderTask = downloadTask;		
 	}
 
@@ -158,12 +141,25 @@ public class GalleryImageView extends LinearLayout implements ImageLoaderTaskLis
 		return mImageLoaderTask != null && mImageLoaderTask.getStatus() != Status.FINISHED;
 	}
 
-	public String getUniqueId() {
-		return mUniqueId;
+	public String getObjectId() {
+		return mGalleryObject.getObjectId();
+	}
+
+	public void onLoadingStarted(String uniqueId) {
+		mProgressBar.setVisibility(VISIBLE);
+		Log.d(CLASS_TAG, String.format("Loading started %s",uniqueId));
+	}
+
+	public void onLoadingCompleted(String uniqueId, Bitmap bitmap) {
+		mProgressBar.setVisibility(GONE);
+		mImageView.setImageBitmap(bitmap);
+		mBitmap = bitmap;
+		mImageLoaderTask = null;
+		Log.d(CLASS_TAG, String.format("Loading done %s",uniqueId));
 	}
 
 	public void onLoadingCancelled(String uniqueId) {
-		Log.d(CLASS_TAG, String.format("DownloadTask was cancalled %s",mUniqueId));
+		Log.d(CLASS_TAG, String.format("DownloadTask was cancalled %s",uniqueId));
 		mImageLoaderTask = null;
 		mProgressBar.setVisibility(GONE);
 		mBitmap = null;

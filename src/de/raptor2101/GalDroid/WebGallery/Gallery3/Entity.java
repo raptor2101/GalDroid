@@ -18,6 +18,8 @@
 
 package de.raptor2101.GalDroid.WebGallery.Gallery3;
 
+import java.lang.ref.WeakReference;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -28,12 +30,13 @@ abstract class Entity implements GalleryObject {
 	private final String mTitle;
 	private final String mLink;
 	private final int mId;
+	private final WeakReference<Gallery3Imp> mWebGallery;
 	protected String mLink_Full;
 	protected String mLink_Thumb;
-	protected boolean mHasImage;
 	
 	public Entity(JSONObject jsonObject, Gallery3Imp gallery3) throws JSONException
 	{
+		mWebGallery = new WeakReference<Gallery3Imp>(gallery3); 
 		jsonObject = jsonObject.getJSONObject("entity");
 		
 		mId = jsonObject.getInt("id");
@@ -43,24 +46,31 @@ abstract class Entity implements GalleryObject {
 	}
 	
 	
-	public String getTitle()
-	{
+	public String getTitle() {
 		return mTitle;
 	}
 	
-	public int getId(){
+	public int getId() {
 		return mId;
 	}
 	
-	public String getObjectId(){
+	public String getObjectId() {
 		return mLink;
 	}
 	
-	public String getUniqueId(ImageSize imageSize) {
-		return imageSize == ImageSize.Full? mLink_Full : mLink_Thumb;
+	public DownloadObject getImage() {
+		return createDownloadObject(mLink_Full);
 	}
 	
-	public boolean hasImage (){
-		return mHasImage;
+	public DownloadObject getThumbnail() {
+		return createDownloadObject(mLink_Thumb);
+	}
+	
+	private DownloadObject createDownloadObject(String link) {
+		Gallery3Imp webGallery = mWebGallery.get();
+		if(webGallery == null) {
+			return null;
+		}
+		return !link.equals("")? new DownloadObject(webGallery, link) : null;
 	}
 }
