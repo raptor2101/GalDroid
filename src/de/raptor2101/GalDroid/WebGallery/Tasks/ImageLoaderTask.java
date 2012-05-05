@@ -42,7 +42,7 @@ public class ImageLoaderTask extends AsyncTask<Void, Progress, Bitmap> {
 	private LayoutParams mLayoutParams;
 	private WebGallery mWebGallery;
 	
-	public ImageLoaderTask(WebGallery webGallery,GalleryCache cache, GalleryDownloadObject downloadObject){
+	public ImageLoaderTask(WebGallery webGallery, GalleryCache cache, GalleryDownloadObject downloadObject){
 		mWebGallery = webGallery;
 		mCache = cache;
 		mDownloadObject = downloadObject;
