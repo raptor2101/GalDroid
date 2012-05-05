@@ -97,14 +97,14 @@ public class GridViewActivity extends GalleryActivity implements OnItemClickList
         Intent intent;
         if (!galleryObject.hasChildren()) {
 			intent = new Intent(this, ImageViewActivity.class);
-			intent.putExtra("Current Index", pos);
-			intent.putExtra("Current UniqueId", getUnqiueId());
+			intent.putExtra(".de.raptor2101.GalDroid.CurrentIndex", pos);
+			intent.putExtra(".de.raptor2101.GalDroid.CurrentUniqueId", getUnqiueId());
 			this.startActivityForResult(intent, CURRENT_INDEX);
         }
         else
         {
             intent = new Intent(this, GridViewActivity.class);
-        	intent.putExtra("Current UniqueId", galleryObject.getObjectId());
+        	intent.putExtra(".de.raptor2101.GalDroid.CurrentUniqueId", galleryObject.getObjectId());
         	this.startActivity(intent);
         }
         

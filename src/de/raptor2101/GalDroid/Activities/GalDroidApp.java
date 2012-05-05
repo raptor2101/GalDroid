@@ -54,7 +54,7 @@ public class GalDroidApp extends Application{
 		
 		if(mWebGallery == null){
 			try {
-				String galleryName = activity.getIntent().getExtras().getString("GalleryName");
+				String galleryName = activity.getIntent().getExtras().getString(".de.raptor2101.GalDroid.GalleryName");
 				if(galleryName != null){
 					GalleryConfig galleryConfig = GalDroidPreference.getSetupByName(galleryName);
 					mWebGallery = GalleryFactory.createFromName(galleryConfig.TypeName, galleryConfig.RootLink, AndroidHttpClient.newInstance("GalDroid"));

@@ -149,7 +149,7 @@ public abstract class GalleryActivity extends Activity {
 	
 	public String getUnqiueId(){
 		try {
-			return getIntent().getExtras().getString("Current UniqueId");
+			return getIntent().getExtras().getString(".de.raptor2101.GalDroid.CurrentUniqueId");
 		} catch (NullPointerException e) {
 			return null;
 		} 

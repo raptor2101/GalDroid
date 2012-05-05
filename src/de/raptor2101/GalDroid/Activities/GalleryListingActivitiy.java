@@ -59,7 +59,7 @@ public class GalleryListingActivitiy extends ListActivity implements CacheTaskLi
 		String galleryName = view.getText().toString();
 		if (item.getItemId() == R.id.item_edit_gallery) {
 			Intent intent = new Intent(this, EditGalleryActivity.class);
-			intent.putExtra("GalleryName", galleryName);
+			intent.putExtra(".de.raptor2101.GalDroid.GalleryName", galleryName);
 			this.startActivity(intent);
 		}
 		else {
@@ -110,7 +110,7 @@ public class GalleryListingActivitiy extends ListActivity implements CacheTaskLi
 		String galleryName = view.getText().toString();
 		
 		Intent intent = new Intent(this, GridViewActivity.class);
-		intent.putExtra("GalleryName", galleryName);
+		intent.putExtra(".de.raptor2101.GalDroid.GalleryName", galleryName);
 		
 		this.startActivity(intent);
 	}
