@@ -18,28 +18,20 @@
 
 package de.raptor2101.GalDroid.WebGallery.Gallery3;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.ref.WeakReference;
-
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryDownloadObject;
 
 public class DownloadObject implements GalleryDownloadObject {
 	
-	private WeakReference<Gallery3Imp> mWebGallery;
-	private String mSourceLink;
+	private final String mSourceLink;
+	private final String mRootLink;
 	
-	public DownloadObject(Gallery3Imp webGallery, String sourceLink){				
+	public DownloadObject(String rootLink, String sourceLink){				
 		mSourceLink = sourceLink;
-		mWebGallery = new WeakReference<Gallery3Imp>(webGallery);
+		mRootLink = rootLink;
 	}
 	
-	public InputStream getFileStream() throws IOException {
-		Gallery3Imp webGallery = mWebGallery.get();
-		if(webGallery == null) {
-			throw new IOException("GalleryContext disposed");
-		}
-		return webGallery.getFileStream(mSourceLink);
+	public String getRootLink() {
+		return mRootLink;
 	}
 	
 	public String getUniqueId() {

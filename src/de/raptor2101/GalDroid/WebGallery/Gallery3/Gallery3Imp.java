@@ -43,6 +43,7 @@ import android.os.AsyncTask;
 import android.os.AsyncTask.Status;
 import android.util.FloatMath;
 
+import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryDownloadObject;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryObject;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryProgressListener;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.WebGallery;
@@ -51,6 +52,7 @@ public class Gallery3Imp implements WebGallery {
 	private HttpClient mHttpClient;
 	private String mSecurityToken;
 	private float mMaxImageDiag;
+	private final String mRootLink;
 	public final String LinkRest_LoadSecurityToken;
 	public final String LinkRest_LoadItem;
 	public final String LinkRest_LoadBunchItems;
@@ -122,6 +124,7 @@ public class Gallery3Imp implements WebGallery {
 	
 	public Gallery3Imp(String rootLink)
 	{
+		mRootLink = rootLink;
 		LinkRest_LoadSecurityToken = rootLink+"/index.php/rest";
 		LinkRest_LoadItem = rootLink+"/index.php/rest/item/%d";
 		LinkRest_LoadBunchItems = rootLink +"/index.php/rest/items?urls=[%s]";
@@ -293,6 +296,17 @@ public class Gallery3Imp implements WebGallery {
 		
 	}
 	
+	public InputStream getFileStream(GalleryDownloadObject galleryDownloadObject) throws ClientProtocolException, IOException {
+		if(!(galleryDownloadObject instanceof DownloadObject)) {
+			throw new IOException("downloadObject don't belong to the Gallery3 Implementation");
+		}
+		DownloadObject downloadObject = (DownloadObject) galleryDownloadObject;
+		if(downloadObject.getRootLink().equals(mRootLink)){
+			throw new IOException("downloadObject don't belong to the this Host");
+		}
+		return getFileStream(downloadObject.getUniqueId());
+	}
+	
 	public void setHttpClient(HttpClient httpClient) {
 		mHttpClient = httpClient;
 	}
@@ -335,5 +349,9 @@ public class Gallery3Imp implements WebGallery {
 
 	public void setPreferedDimensions(int height, int width) {
 		mMaxImageDiag = FloatMath.sqrt(height*height+width*width);
+	}
+
+	public String getRootLink() {
+		return mRootLink;
 	}	
 }

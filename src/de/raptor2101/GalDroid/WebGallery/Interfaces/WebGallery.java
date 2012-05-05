@@ -18,8 +18,11 @@
 
 package de.raptor2101.GalDroid.WebGallery.Interfaces;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 
 
@@ -37,6 +40,8 @@ public interface WebGallery {
 	public void setPreferedDimensions(int height, int width);
 		
 	public String getSecurityToken(String user, String password) throws SecurityException;
+	
+	public InputStream getFileStream(GalleryDownloadObject downloadObject) throws IOException, ClientProtocolException;
 	
 	public void setSecurityToken(String token);
 	public void setHttpClient(HttpClient httpClient);

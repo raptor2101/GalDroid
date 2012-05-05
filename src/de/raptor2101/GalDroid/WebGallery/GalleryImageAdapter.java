@@ -34,6 +34,7 @@ import android.widget.BaseAdapter;
 import de.raptor2101.GalDroid.Activities.GalDroidApp;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryDownloadObject;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryObject;
+import de.raptor2101.GalDroid.WebGallery.Interfaces.WebGallery;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.WebGallery.ImageSize;
 import de.raptor2101.GalDroid.WebGallery.Tasks.ImageLoaderTask;
 
@@ -59,6 +60,7 @@ public class GalleryImageAdapter extends BaseAdapter {
 		None
 	}
 	
+	private WebGallery mWebGallery;
 	private GalleryCache mCache;
 	private Context mContext;
 	
@@ -77,9 +79,10 @@ public class GalleryImageAdapter extends BaseAdapter {
 	public GalleryImageAdapter(Context context, LayoutParams layoutParams, ScaleMode scaleMode) {
 		super();
 		GalDroidApp appContext = (GalDroidApp)context.getApplicationContext();
-		this.mContext = context;
-		this.mCache = appContext.getGalleryCache();
-		this.mLayoutParams = layoutParams;
+		mContext = context;
+		mCache = appContext.getGalleryCache();
+		mWebGallery = appContext.getWebGallery();
+		mLayoutParams = layoutParams;
 		
 		mGalleryObjects = new ArrayList<GalleryObject>(0);
 		mImageViews = new ArrayList<WeakReference<GalleryImageView>>(0);
@@ -197,7 +200,7 @@ public class GalleryImageAdapter extends BaseAdapter {
 		
 		Bitmap cachedBitmap = mCache.getBitmap(downloadObject.getUniqueId());
 		if(cachedBitmap == null){
-			ImageLoaderTask downloadTask = new ImageLoaderTask(mCache, downloadObject);
+			ImageLoaderTask downloadTask = new ImageLoaderTask(mWebGallery, mCache, downloadObject);
 			imageView.setImageLoaderTask(downloadTask);
 			downloadTask.setListener(imageView);
 			if (mScaleMode == ScaleMode.ScaleSource) {

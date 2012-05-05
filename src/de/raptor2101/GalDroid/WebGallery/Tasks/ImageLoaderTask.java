@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.ref.WeakReference;
+import java.security.spec.MGF1ParameterSpec;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -32,6 +33,7 @@ import android.util.Log;
 import android.view.ViewGroup.LayoutParams;
 import de.raptor2101.GalDroid.WebGallery.GalleryCache;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryDownloadObject;
+import de.raptor2101.GalDroid.WebGallery.Interfaces.WebGallery;
 
 public class ImageLoaderTask extends AsyncTask<Void, Progress, Bitmap> {
 	private final static String ClassTag = "ImageLoaderTask";
@@ -39,8 +41,10 @@ public class ImageLoaderTask extends AsyncTask<Void, Progress, Bitmap> {
 	private GalleryDownloadObject mDownloadObject;
 	private WeakReference<ImageLoaderTaskListener> mListener;
 	private LayoutParams mLayoutParams;
+	private WebGallery mWebGallery;
 	
-	public ImageLoaderTask(GalleryCache cache, GalleryDownloadObject downloadObject){
+	public ImageLoaderTask(WebGallery webGallery,GalleryCache cache, GalleryDownloadObject downloadObject){
+		mWebGallery = webGallery;
 		mCache = cache;
 		mDownloadObject = downloadObject;
 		mListener = new WeakReference<ImageLoaderTaskListener>(null); 
@@ -129,7 +133,7 @@ public class ImageLoaderTask extends AsyncTask<Void, Progress, Bitmap> {
 
 	private void DownloadImage(String uniqueId) throws IOException {
 		Log.d(ClassTag, String.format("%s - Downloading to local cache file", mDownloadObject));
-		InputStream networkStream = mDownloadObject.getFileStream();
+		InputStream networkStream = mWebGallery.getFileStream(mDownloadObject);
 		OutputStream fileStream = mCache.createCacheFile(uniqueId);
 		byte[] writeCache = new byte[1024];
 		int readCounter;

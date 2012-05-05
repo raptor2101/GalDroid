@@ -25,22 +25,23 @@ import org.json.JSONObject;
 
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryObject;
 abstract class Entity implements GalleryObject {
+	private final String mRootLink;
 	private final String mTitle;
 	private final String mLink;
 	private final int mId;
-	private final WeakReference<Gallery3Imp> mWebGallery;
+	
 	protected String mLink_Full;
 	protected String mLink_Thumb;
 	
 	public Entity(JSONObject jsonObject, Gallery3Imp gallery3) throws JSONException
 	{
-		mWebGallery = new WeakReference<Gallery3Imp>(gallery3); 
 		jsonObject = jsonObject.getJSONObject("entity");
 		
 		mId = jsonObject.getInt("id");
 		
 		mTitle = jsonObject.getString("title");
 		mLink = gallery3.getItemLink(mId);
+		mRootLink = gallery3.getRootLink();
 	}
 	
 	
@@ -65,10 +66,6 @@ abstract class Entity implements GalleryObject {
 	}
 	
 	private DownloadObject createDownloadObject(String link) {
-		Gallery3Imp webGallery = mWebGallery.get();
-		if(webGallery == null) {
-			return null;
-		}
-		return !link.equals("")? new DownloadObject(webGallery, link) : null;
+		return !link.equals("")? new DownloadObject(mRootLink, link) : null;
 	}
 }
