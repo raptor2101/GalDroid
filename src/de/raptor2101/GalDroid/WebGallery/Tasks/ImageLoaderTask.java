@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.ref.WeakReference;
-import java.security.spec.MGF1ParameterSpec;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
