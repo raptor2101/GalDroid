@@ -93,7 +93,7 @@ public class Gallery3Imp implements WebGallery {
 			try {
 				JSONArray jsonArray;
 				
-				inputStream = openRestCall(params[0]);
+				inputStream = openRestCall(params[0], -1);
 				jsonArray = parseJSONArray(inputStream);
 				
 				int length = jsonArray.length();
@@ -177,7 +177,7 @@ public class Gallery3Imp implements WebGallery {
 		return httpRequest;
 	}
 	
-	private GalleryStream openRestCall(String url) throws IOException, ClientProtocolException {
+	private GalleryStream openRestCall(String url, long suggestedLength) throws IOException, ClientProtocolException {
 		
 		HttpUriRequest httpRequest = buildRequest(url);
         HttpResponse response = mHttpClient.execute(httpRequest);
@@ -186,12 +186,12 @@ public class Gallery3Imp implements WebGallery {
         	long contentLength = Long.parseLong(headers[0].getValue());
         	return new GalleryStream(response.getEntity().getContent(),contentLength);
         } else {
-        	return new GalleryStream(response.getEntity().getContent(), 0);
+        	return new GalleryStream(response.getEntity().getContent(), suggestedLength);
         }
 	}
 	
 	public JSONObject loadJSONObject(String url) throws ClientProtocolException, IOException, JSONException{
-		InputStream inputStream = openRestCall(url);
+		InputStream inputStream = openRestCall(url, -1);
 		return parseJSON(inputStream);
 	}
 	
@@ -297,9 +297,9 @@ public class Gallery3Imp implements WebGallery {
 		return displayObjects;
 	}
 
-	public GalleryStream getFileStream(String sourceLink) throws ClientProtocolException, IOException{
+	private GalleryStream getFileStream(String sourceLink, long suggestedLength) throws ClientProtocolException, IOException{
 		
-		return openRestCall(sourceLink);
+		return openRestCall(sourceLink, suggestedLength);
 		
 	}
 	
@@ -311,7 +311,7 @@ public class Gallery3Imp implements WebGallery {
 		if(!(downloadObject.getRootLink().equals(mRootLink))){
 			throw new IOException("downloadObject don't belong to the this Host");
 		}
-		return getFileStream(downloadObject.getUniqueId());
+		return getFileStream(downloadObject.getUniqueId(), downloadObject.getFileSize());
 	}
 	
 	public void setHttpClient(HttpClient httpClient) {
