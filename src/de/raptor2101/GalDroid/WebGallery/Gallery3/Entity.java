@@ -19,6 +19,7 @@
 package de.raptor2101.GalDroid.WebGallery.Gallery3;
 
 import java.lang.ref.WeakReference;
+import java.util.Date;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -30,8 +31,13 @@ abstract class Entity implements GalleryObject {
 	private final String mLink;
 	private final int mId;
 	
+	private final Date mUploadDate;
+	
 	protected String mLink_Full;
 	protected String mLink_Thumb;
+	
+	protected int mFileSize_Full;
+	protected int mFileSize_Thumb;
 	
 	public Entity(JSONObject jsonObject, Gallery3Imp gallery3) throws JSONException
 	{
@@ -39,11 +45,13 @@ abstract class Entity implements GalleryObject {
 		
 		mId = jsonObject.getInt("id");
 		
+		long msElapsed = jsonObject.getLong("created")*1000;
+		mUploadDate = new Date(msElapsed);
+		
 		mTitle = jsonObject.getString("title");
 		mLink = gallery3.getItemLink(mId);
 		mRootLink = gallery3.getRootLink();
 	}
-	
 	
 	public String getTitle() {
 		return mTitle;
@@ -57,15 +65,19 @@ abstract class Entity implements GalleryObject {
 		return mLink;
 	}
 	
+	public Date getUpadloadDate() {
+		return mUploadDate;
+	}
+	
 	public DownloadObject getImage() {
-		return createDownloadObject(mLink_Full);
+		return createDownloadObject(mLink_Full, mFileSize_Full);
 	}
 	
 	public DownloadObject getThumbnail() {
-		return createDownloadObject(mLink_Thumb);
+		return createDownloadObject(mLink_Thumb, mFileSize_Thumb);
 	}
 	
-	private DownloadObject createDownloadObject(String link) {
-		return !link.equals("")? new DownloadObject(mRootLink, link) : null;
+	private DownloadObject createDownloadObject(String link, int fileSize) {
+		return !link.equals("")? new DownloadObject(mRootLink, link, fileSize) : null;
 	}
 }

@@ -24,10 +24,12 @@ public class DownloadObject implements GalleryDownloadObject {
 	
 	private final String mSourceLink;
 	private final String mRootLink;
+	private final int mFileSize;
 	
-	public DownloadObject(String rootLink, String sourceLink){				
+	public DownloadObject(String rootLink, String sourceLink, int fileSize){				
 		mSourceLink = sourceLink;
 		mRootLink = rootLink;
+		mFileSize = fileSize;
 	}
 	
 	public String getRootLink() {
@@ -36,6 +38,10 @@ public class DownloadObject implements GalleryDownloadObject {
 	
 	public String getUniqueId() {
 		return mSourceLink;
+	}
+	
+	public int getFileSize() {
+		return mFileSize;
 	}
 	
 	@Override

@@ -185,9 +185,9 @@ public class Gallery3Imp implements WebGallery {
         if(headers.length > 0) {
         	long contentLength = Long.parseLong(headers[0].getValue());
         	return new GalleryStream(response.getEntity().getContent(),contentLength);
+        } else {
+        	return new GalleryStream(response.getEntity().getContent(), 0);
         }
-        
-        return new GalleryStream(response.getEntity().getContent(), -1);
 	}
 	
 	public JSONObject loadJSONObject(String url) throws ClientProtocolException, IOException, JSONException{

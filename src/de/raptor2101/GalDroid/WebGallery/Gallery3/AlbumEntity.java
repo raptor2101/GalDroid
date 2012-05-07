@@ -37,16 +37,21 @@ public class AlbumEntity extends Entity {
 		JSONArray memberArray = jsonObject.getJSONArray("members");
 		
 		try {
-			String albumCover_RestLink = jsonObject.getJSONObject("entity").getString("album_cover");
+			jsonObject = jsonObject.getJSONObject("entity");
+			String albumCover_RestLink = jsonObject.getString("album_cover");
 			albumCover_RestLink = albumCover_RestLink.substring(gallery3.LinkRest_LoadItem.length()-2);
 			
 			int coverId = Integer.parseInt(albumCover_RestLink);
 			
 			mLink_Full = String.format(gallery3.LinkRest_LoadPicture, coverId, "full");
 			mLink_Thumb = String.format(gallery3.LinkRest_LoadPicture, getId(), "thumb");
+			mFileSize_Full = 100000; //For some wired reason no FileSize is reported by Gallery3 and a second request cost to much io...
+			mFileSize_Thumb = jsonObject.getInt("thumb_size");
 		} catch (JSONException e) {
 			mLink_Full = "";
 			mLink_Thumb = "";
+			mFileSize_Full = 0;
+			mFileSize_Thumb = 0;
 		}
 		
 		mMembers = new ArrayList<String>(memberArray.length());
