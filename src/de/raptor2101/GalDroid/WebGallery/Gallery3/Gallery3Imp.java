@@ -301,7 +301,7 @@ public class Gallery3Imp implements WebGallery {
 			throw new IOException("downloadObject don't belong to the Gallery3 Implementation");
 		}
 		DownloadObject downloadObject = (DownloadObject) galleryDownloadObject;
-		if(downloadObject.getRootLink().equals(mRootLink)){
+		if(!(downloadObject.getRootLink().equals(mRootLink))){
 			throw new IOException("downloadObject don't belong to the this Host");
 		}
 		return getFileStream(downloadObject.getUniqueId());
