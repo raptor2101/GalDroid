@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
@@ -43,6 +44,7 @@ import android.os.AsyncTask;
 import android.os.AsyncTask.Status;
 import android.util.FloatMath;
 
+import de.raptor2101.GalDroid.WebGallery.GalleryStream;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryDownloadObject;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryObject;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryProgressListener;
@@ -175,12 +177,17 @@ public class Gallery3Imp implements WebGallery {
 		return httpRequest;
 	}
 	
-	private InputStream openRestCall(String url) throws IOException, ClientProtocolException {
+	private GalleryStream openRestCall(String url) throws IOException, ClientProtocolException {
 		
 		HttpUriRequest httpRequest = buildRequest(url);
         HttpResponse response = mHttpClient.execute(httpRequest);
+        Header[] headers = response.getHeaders("Content-Length");
+        if(headers.length > 0) {
+        	long contentLength = Long.parseLong(headers[0].getValue());
+        	return new GalleryStream(response.getEntity().getContent(),contentLength);
+        }
         
-        return response.getEntity().getContent();
+        return new GalleryStream(response.getEntity().getContent(), -1);
 	}
 	
 	public JSONObject loadJSONObject(String url) throws ClientProtocolException, IOException, JSONException{
@@ -290,13 +297,13 @@ public class Gallery3Imp implements WebGallery {
 		return displayObjects;
 	}
 
-	public InputStream getFileStream(String sourceLink) throws ClientProtocolException, IOException{
+	public GalleryStream getFileStream(String sourceLink) throws ClientProtocolException, IOException{
 		
 		return openRestCall(sourceLink);
 		
 	}
 	
-	public InputStream getFileStream(GalleryDownloadObject galleryDownloadObject) throws ClientProtocolException, IOException {
+	public GalleryStream getFileStream(GalleryDownloadObject galleryDownloadObject) throws ClientProtocolException, IOException {
 		if(!(galleryDownloadObject instanceof DownloadObject)) {
 			throw new IOException("downloadObject don't belong to the Gallery3 Implementation");
 		}
