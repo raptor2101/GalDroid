@@ -65,7 +65,7 @@ abstract class Entity implements GalleryObject {
 		return mLink;
 	}
 	
-	public Date getUpadloadDate() {
+	public Date getDateUploaded() {
 		return mUploadDate;
 	}
 	
