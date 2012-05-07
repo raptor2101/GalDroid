@@ -31,6 +31,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.view.ViewGroup.LayoutParams;
 import de.raptor2101.GalDroid.WebGallery.GalleryCache;
+import de.raptor2101.GalDroid.WebGallery.GalleryStream;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryDownloadObject;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.WebGallery;
 
@@ -131,21 +132,30 @@ public class ImageLoaderTask extends AsyncTask<Void, Progress, Bitmap> {
 	}
 
 	private void DownloadImage(String uniqueId) throws IOException {
-		Log.d(ClassTag, String.format("%s - Downloading to local cache file", mDownloadObject));
-		InputStream networkStream = mWebGallery.getFileStream(mDownloadObject);
-		OutputStream fileStream = mCache.createCacheFile(uniqueId);
-		byte[] writeCache = new byte[1024];
-		int readCounter;
-		while((readCounter = networkStream.read(writeCache)) > 0 && !isCancelled()){
-			fileStream.write(writeCache, 0, readCounter);
+		ImageLoaderTaskListener listener = mListener.get();		
+		if(listener != null) {
+			Log.d(ClassTag, String.format("%s - Downloading to local cache file", mDownloadObject));
+			
+			GalleryStream networkStream = mWebGallery.getFileStream(mDownloadObject);
+			OutputStream fileStream = mCache.createCacheFile(uniqueId);
+			
+			byte[] writeCache = new byte[10*1024];
+			int readCounter;
+			int currentPos = 0;
+			int length= (int) networkStream.getContentLength();
+			while((readCounter = networkStream.read(writeCache)) > 0 && !isCancelled()){
+				fileStream.write(writeCache, 0, readCounter);
+				currentPos += readCounter;
+				listener.onLoadingProgress(uniqueId, currentPos, length);
+			}
+			fileStream.close();
+			networkStream.close();
+			
+			if(!isCancelled()) {
+				mCache.refreshCacheFile(uniqueId);
+			}
+			Log.d(ClassTag, String.format("%s - Downloading to local cache file - complete", mDownloadObject));
 		}
-		fileStream.close();
-		networkStream.close();
-		
-		if(!isCancelled()) {
-			mCache.refreshCacheFile(uniqueId);
-		}
-		Log.d(ClassTag, String.format("%s - Downloading to local cache file - complete", mDownloadObject));
 	}
 
 	private void ScaleImage(String uniqueId) throws IOException {
