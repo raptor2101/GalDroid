@@ -18,10 +18,12 @@
 
 package de.raptor2101.GalDroid.WebGallery.Interfaces;
 
+import java.io.Serializable;
+
 import de.raptor2101.GalDroid.WebGallery.Gallery3.DownloadObject;
 
 
-public interface GalleryObject 
+public interface GalleryObject extends Serializable
 {
 	public String getTitle();
 	
@@ -29,6 +31,4 @@ public interface GalleryObject
 	public String getObjectId();
 	public DownloadObject getImage();
 	public DownloadObject getThumbnail();
-	
-	
 }
