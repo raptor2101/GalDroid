@@ -49,7 +49,7 @@ public class GalleryImageView extends LinearLayout implements ImageLoaderTaskLis
 		
 		mImageView = CreateImageView(context);
 		
-		mProgressBar = new ProgressBar(context,null,android.R.attr.progressBarStyle);
+		mProgressBar = new ProgressBar(context,null,android.R.attr.progressBarStyleLarge);
 		mProgressBar.setVisibility(GONE);
 		this.addView(mProgressBar);
 		
@@ -149,6 +149,11 @@ public class GalleryImageView extends LinearLayout implements ImageLoaderTaskLis
 		mProgressBar.setVisibility(VISIBLE);
 		Log.d(CLASS_TAG, String.format("Loading started %s",uniqueId));
 	}
+	
+	public void onLoadingProgress(String uniqueId, int currentValue, int maxValue) {
+		mProgressBar.setMax(maxValue);
+		mProgressBar.setProgress(currentValue);
+	}
 
 	public void onLoadingCompleted(String uniqueId, Bitmap bitmap) {
 		mProgressBar.setVisibility(GONE);
@@ -164,5 +169,7 @@ public class GalleryImageView extends LinearLayout implements ImageLoaderTaskLis
 		mProgressBar.setVisibility(GONE);
 		mBitmap = null;
 	}
+
+	
 }
 
