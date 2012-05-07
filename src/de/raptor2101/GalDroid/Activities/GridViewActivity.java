@@ -23,11 +23,18 @@ import java.util.List;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.ContextMenu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.AdapterView;
+import android.widget.TextView;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.GridView;
 import de.raptor2101.GalDroid.R;
+import de.raptor2101.GalDroid.Config.GalDroidPreference;
 import de.raptor2101.GalDroid.WebGallery.GalleryImageAdapter;
 import de.raptor2101.GalDroid.WebGallery.GalleryImageAdapter.ScaleMode;
 import de.raptor2101.GalDroid.WebGallery.GalleryImageView;
@@ -56,7 +63,7 @@ public class GridViewActivity extends GalleryActivity implements OnItemClickList
 		
         mGridView.setAdapter(mAdapter);
         
-        
+        registerForContextMenu(mGridView);
     }
     
     @Override
@@ -114,6 +121,27 @@ public class GridViewActivity extends GalleryActivity implements OnItemClickList
 	
 	public void onGalleryObjectsLoaded(List<GalleryObject> galleryObjects){
 		mAdapter.setGalleryObjects(galleryObjects);
+	}
+	
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.object_context_menu, menu);
+	}
+	
+	@Override
+	public boolean onContextItemSelected(MenuItem item) {
+		
+		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+		GalleryImageView imageView = (GalleryImageView) info.targetView;
+		
+		if (item.getItemId() == R.id.item_additional_info_object) {
+			
+			Intent intent = new Intent(this, ObjectDetailsActivity.class);
+			intent.putExtra(".de.raptor2101.GalDroid.GalleryObject", imageView.getGalleryObject());
+			this.startActivity(intent);
+		}
+		return true;
 	}
 
 }
