@@ -141,6 +141,11 @@ public class GalleryCache {
 		return null;
 	}
 	
+	public File getFile(String sourceUrl) {
+		String hash = buildHash(sourceUrl);
+		return new File(mCacheDir, hash);
+	}
+	
 	public OutputStream createCacheFile(String sourceUrl) throws IOException{
 		String hash = buildHash(sourceUrl);
 		File cacheFile = new File(mCacheDir, hash);
