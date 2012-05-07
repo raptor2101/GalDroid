@@ -36,10 +36,10 @@ public class PictureEntity extends Entity {
 		float imageDiag = FloatMath.sqrt(resizeHeight*resizeHeight+resizeWidth*resizeWidth);
 		if(imageDiag > maxImageDiag) {
 			mLink_Full = String.format(gallery3.LinkRest_LoadPicture, getId(), "full");
-			mFileSize_Thumb = jsonObject.getInt("file_size");
+			mFileSize_Full = jsonObject.getInt("file_size");
 		} else {
 			mLink_Full = String.format(gallery3.LinkRest_LoadPicture, getId(), "resize");
-			mFileSize_Thumb = jsonObject.getInt("resize_size");
+			mFileSize_Full = jsonObject.getInt("resize_size");
 		}
 			
 		
