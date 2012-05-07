@@ -101,7 +101,7 @@ public abstract class GalleryActivity extends Activity {
 		// Now we have time, load the object from the remote source
 		if(mConfigInstance.mGalleryObjects == null){
 		    mProgressDialog = new ProgressDialog(this);
-		    mProgressDialog.setTitle(R.string.progress_title_load);
+		    mProgressDialog.setTitle(R.string.progress_title_load_gallery);
 		    mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
 		    mProgressDialog.setCancelable(false);
 		    mProgressDialog.dismiss();

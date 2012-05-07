@@ -9,7 +9,8 @@
     <string name="button_create">hinzufügen</string>
     <string name="button_edit">bearbeiten</string>
     <string name="progress_title_verify">Überprüfe Sicherheitsangaben</string>
-    <string name="progress_title_load">Lade Galerie ...</string>
+    <string name="progress_title_load_gallery">Lade Galerie</string>
+    <string name="progress_title_load_image">Lade Bild</string>
     <string name="gallery_type">Galerie Typ</string>
     <string name="gallery_host">Server</string>
     <string name="gallery_username">Benutzer</string>
@@ -19,4 +20,10 @@
     </string-array>
     <string name="gallery_types_prompt">Wähle einen Galerie Typen</string>
     <string name="gallery_name">Galerie - Name</string>
+    <string name="object_title">Titel</string>
+    <string name="object_tags">Schlagwörter</string>
+    <string name="object_createdate">Aufnahmezeit</string>
+    <string name="object_uploaddate">Veröffentlicht</string>
+    <string name="object_comments">Kommentare</string>
+    <string name="menu_additional_info_object">Bildinformationen</string>
 </resources>

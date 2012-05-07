@@ -9,7 +9,8 @@
     <string name="button_create">Create</string>
     <string name="button_edit">Edit</string>
     <string name="progress_title_verify">Verify Usercredentials</string>
-    <string name="progress_title_load">Load Gallery</string>
+    <string name="progress_title_load_gallery">Load Gallery</string>
+    <string name="progress_title_load_image">Load Image</string>
     <string name="gallery_type">Gallery Type</string>
     <string name="gallery_host">Server</string>
     <string name="gallery_username">User</string>
@@ -18,5 +19,6 @@
         <item>Gallery 3</item>
     </string-array>
     <string name="gallery_types_prompt">Choose a gallery type</string>
-    <string name="gallery_name">Gallery name</string>
+    <string name="gallery_name">Gallery name</string><string name="object_title">Title</string><string name="object_tags">Tags</string><string name="object_createdate">Created</string><string name="object_uploaddate">Released</string><string name="object_comments">Comments</string>
+    <string name="menu_additional_info_object">Additional Info</string>
 </resources>
