@@ -22,8 +22,20 @@
     <string name="gallery_name">Galerie - Name</string>
     <string name="object_title">Titel</string>
     <string name="object_tags">Schlagwörter</string>
-    <string name="object_createdate">Aufnahmezeit</string>
     <string name="object_uploaddate">Veröffentlicht</string>
     <string name="object_comments">Kommentare</string>
     <string name="menu_additional_info_object">Bildinformationen</string>
+    <string name="object_informations">Gallery Informationen</string>
+    <string name="object_exif_informations">EXIF Informationen</string>
+    <string name="object_exif_createdate">Aufnahmezeit</string>
+    <string name="object_exif_aperture">Blende</string>
+    <string name="object_exif_exposure">Belichtung</string>
+    <string name="object_exif_flash">Blitz</string>
+    <string name="object_exif_focallength">Brennweite</string>
+    <string name="object_exif_iso">ISO</string>
+    <string name="object_exif_make">Make</string>
+    <string name="object_exif_model">Model</string>
+    <string name="object_exif_whitebalance">Weißabgleich</string>
+    <string name="object_exif_whitebalance_auto">Automatisch</string>
+    <string name="object_exif_whitebalance_manual">Manuell</string>
 </resources>

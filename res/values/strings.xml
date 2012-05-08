@@ -21,4 +21,17 @@
     <string name="gallery_types_prompt">Choose a gallery type</string>
     <string name="gallery_name">Gallery name</string><string name="object_title">Title</string><string name="object_tags">Tags</string><string name="object_createdate">Created</string><string name="object_uploaddate">Released</string><string name="object_comments">Comments</string>
     <string name="menu_additional_info_object">Additional Info</string>
+    <string name="object_informations">Gallery Informations</string>
+    <string name="object_exif_informations">EXIF Informationen</string>
+    <string name="object_exif_createdate">Createdate</string>
+    <string name="object_exif_aperture">Aperture</string>
+    <string name="object_exif_exposure">Exposure</string>
+    <string name="object_exif_flash">Flash</string>
+    <string name="object_exif_focallength">Focallength</string>
+    <string name="object_exif_iso">ISO</string>
+    <string name="object_exif_make">Make</string>
+    <string name="object_exif_model">Model</string>
+    <string name="object_exif_whitebalance">Whitebalance</string>
+    <string name="object_exif_whitebalance_auto">automatic</string>
+    <string name="object_exif_whitebalance_manual">manual</string>
 </resources>
