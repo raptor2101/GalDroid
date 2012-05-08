@@ -2,7 +2,6 @@ package de.raptor2101.GalDroid.Activities;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Date;
 
 import de.raptor2101.GalDroid.R;
 import de.raptor2101.GalDroid.WebGallery.GalleryCache;
@@ -93,8 +92,44 @@ public class ObjectDetailsActivity extends Activity implements ImageLoaderTaskLi
 			ExifInterface exif = new ExifInterface(cachedFile.getAbsolutePath());
 			
 			
-			TextView textField = (TextView) findViewById(R.id.textCreateDate);
+			TextView textField = (TextView) findViewById(R.id.textExifCreateDate);
 			textField.setText(exif.getAttribute(ExifInterface.TAG_DATETIME));
+			
+			textField = (TextView) findViewById(R.id.textExifAperture);
+			textField.setText(exif.getAttribute(ExifInterface.TAG_APERTURE));
+			
+			textField = (TextView) findViewById(R.id.textExifExposure);
+			float exposureTime = 1.0f / Float.parseFloat(exif.getAttribute(ExifInterface.TAG_EXPOSURE_TIME));
+			textField.setText(String.format("1/%.0fs", exposureTime));
+			
+			textField = (TextView) findViewById(R.id.textExifFlash);
+			int flash = exif.getAttributeInt(ExifInterface.TAG_FLASH, 0);
+			textField.setText(String.format("%d", flash));
+			
+			textField = (TextView) findViewById(R.id.textExifISO);
+			textField.setText(exif.getAttribute(ExifInterface.TAG_ISO));
+			
+			textField = (TextView) findViewById(R.id.textExifModel);
+			textField.setText(exif.getAttribute(ExifInterface.TAG_MODEL));
+			
+			textField = (TextView) findViewById(R.id.textExifModel);
+			textField.setText(exif.getAttribute(ExifInterface.TAG_MODEL));
+			
+			textField = (TextView) findViewById(R.id.textExifMake);
+			textField.setText(exif.getAttribute(ExifInterface.TAG_MAKE));
+			
+			double focalLength = exif.getAttributeDouble(ExifInterface.TAG_FOCAL_LENGTH, 0);
+			textField = (TextView) findViewById(R.id.textExifFocalLength);
+			textField.setText(String.format("%.0fmm", focalLength));
+			
+			textField = (TextView) findViewById(R.id.textExifWhiteBalance);
+			int whiteBalance = exif.getAttributeInt(ExifInterface.TAG_FLASH, 0);
+			if(whiteBalance == ExifInterface.WHITEBALANCE_AUTO) {
+				textField.setText(R.string.object_exif_whitebalance_auto);
+			}
+			else {
+				textField.setText(R.string.object_exif_whitebalance_manual);
+			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
