@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.  
  */
 
-package de.raptor2101.GalDroid.WebGallery.Gallery3;
+package de.raptor2101.GalDroid.WebGallery.Gallery3.JSON;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,12 +27,14 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import de.raptor2101.GalDroid.WebGallery.Gallery3.Gallery3Imp;
+
 public class AlbumEntity extends Entity {
 
 	private final List<String> mMembers;
 	
-	public AlbumEntity(JSONObject jsonObject, Gallery3Imp gallery3, float maxImageDiag)
-			throws JSONException, ClientProtocolException, IOException {
+	public AlbumEntity(JSONObject jsonObject, Gallery3Imp gallery3)
+			throws JSONException{
 		super(jsonObject, gallery3);
 		JSONArray memberArray = jsonObject.getJSONArray("members");
 		

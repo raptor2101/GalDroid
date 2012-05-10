@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
+import org.json.JSONException;
 
 import de.raptor2101.GalDroid.WebGallery.GalleryStream;
 
@@ -33,16 +34,24 @@ public interface WebGallery {
 		Full
 	}
 	
+	public GalleryObject getDisplayObject(String path) throws ClientProtocolException, IOException, JSONException;
+	
 	public List<GalleryObject> getDisplayObjects();
 	public List<GalleryObject> getDisplayObjects(String path);
 	public List<GalleryObject> getDisplayObjects(GalleryProgressListener progressListener);
 	public List<GalleryObject> getDisplayObjects(String path, GalleryProgressListener progressListener);
+	
+	public List<String> getDisplayObjectTags(GalleryObject galleryObject, GalleryProgressListener progressListener) throws IOException;
+	
 	
 	public void setPreferedDimensions(int height, int width);
 		
 	public String getSecurityToken(String user, String password) throws SecurityException;
 	
 	public GalleryStream getFileStream(GalleryDownloadObject downloadObject) throws IOException, ClientProtocolException;
+	
+	public void loadObjectComments(GalleryObject galleryObject) throws IOException, ClientProtocolException;
+	
 	
 	public void setSecurityToken(String token);
 	public void setHttpClient(HttpClient httpClient);

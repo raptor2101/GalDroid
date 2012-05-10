@@ -16,17 +16,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.  
  */
 
-package de.raptor2101.GalDroid.WebGallery.Gallery3;
+package de.raptor2101.GalDroid.WebGallery.Gallery3.JSON;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import de.raptor2101.GalDroid.WebGallery.Gallery3.Gallery3Imp;
 
 import android.util.FloatMath;
 
 public class PictureEntity extends Entity {
 	
 	
-	public PictureEntity(JSONObject jsonObject, Gallery3Imp gallery3, float maxImageDiag)
+	public PictureEntity(JSONObject jsonObject, Gallery3Imp gallery3)
 			throws JSONException {
 		super(jsonObject, gallery3);
 		jsonObject = jsonObject.getJSONObject("entity");
@@ -34,7 +36,7 @@ public class PictureEntity extends Entity {
 		int resizeWidth = jsonObject.getInt("resize_width");
 		
 		float imageDiag = FloatMath.sqrt(resizeHeight*resizeHeight+resizeWidth*resizeWidth);
-		if(imageDiag > maxImageDiag) {
+		if(imageDiag > gallery3.getMaxImageDiag()) {
 			mLink_Full = String.format(gallery3.LinkRest_LoadPicture, getId(), "full");
 			mFileSize_Full = jsonObject.getInt("file_size");
 		} else {

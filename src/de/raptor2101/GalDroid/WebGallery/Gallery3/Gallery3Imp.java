@@ -26,25 +26,26 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.StringBody;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.os.AsyncTask;
 import android.os.AsyncTask.Status;
 import android.util.FloatMath;
 
 import de.raptor2101.GalDroid.WebGallery.GalleryStream;
+import de.raptor2101.GalDroid.WebGallery.Gallery3.JSON.AlbumEntity;
+import de.raptor2101.GalDroid.WebGallery.Gallery3.JSON.Entity;
+import de.raptor2101.GalDroid.WebGallery.Gallery3.JSON.EntityFactory;
+import de.raptor2101.GalDroid.WebGallery.Gallery3.Tasks.JSONArrayLoaderTask;
+import de.raptor2101.GalDroid.WebGallery.Gallery3.Tasks.JSONObjectLoaderTask;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryDownloadObject;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryObject;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryProgressListener;
@@ -57,79 +58,21 @@ public class Gallery3Imp implements WebGallery {
 	private final String mRootLink;
 	public final String LinkRest_LoadSecurityToken;
 	public final String LinkRest_LoadItem;
+	public final String LinkRest_LoadTag;
 	public final String LinkRest_LoadBunchItems;
+	public final String LinkRest_LoadBunchTags;
 	public final String LinkRest_LoadPicture;
 
 	private static int MAX_REQUEST_SIZE = 4000;
-	private class ProgressListener{
-		private final int mMaxCount;
-		private int mObjectCount;
-		private GalleryProgressListener mListener;
-		
-		public ProgressListener(GalleryProgressListener listener, int maxCount){
-			mMaxCount = maxCount;
-			mObjectCount = 0;
-			mListener = listener;			
-		}
-		
-		public void progress(){
-			mObjectCount++;
-			mListener.handleProgress(mObjectCount, mMaxCount);
-		}
-	}
-	private class BackgroundDownloaderTask extends AsyncTask<String, GalleryObject, Void> {
-		private ArrayList<GalleryObject> mDisplayObjects;
-		private int mIndex;
-		private final ProgressListener mProgressListener;
-		
-		public BackgroundDownloaderTask(ArrayList<GalleryObject> displayObjects, int offset, ProgressListener progressListener){
-			mIndex = offset;
-			mDisplayObjects = displayObjects;
-			mProgressListener = progressListener;
-		}
-		@Override
-		protected Void doInBackground(String... params) {
-			InputStream inputStream;
-			try {
-				JSONArray jsonArray;
-				
-				inputStream = openRestCall(params[0], -1);
-				jsonArray = parseJSONArray(inputStream);
-				
-				int length = jsonArray.length();
-				for (int pos = 0; pos < length ; pos++) {
-					JSONObject jsonObject = jsonArray.getJSONObject(pos);
-					GalleryObject galleryObject = loadGalleryEntity(jsonObject);
-					publishProgress(galleryObject);
-				}
-			} catch (ClientProtocolException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-			return null;
-		}
-		
-		@Override
-		protected void onProgressUpdate(GalleryObject... values) {
-			mDisplayObjects.set(mIndex++, values[0]);
-			mProgressListener.progress();
-		}
-		
-	}
 	
 	public Gallery3Imp(String rootLink)
 	{
 		mRootLink = rootLink;
 		LinkRest_LoadSecurityToken = rootLink+"/index.php/rest";
 		LinkRest_LoadItem = rootLink+"/index.php/rest/item/%d";
+		LinkRest_LoadTag = rootLink+"/index.php/rest/tag/%s";
 		LinkRest_LoadBunchItems = rootLink +"/index.php/rest/items?urls=[%s]";
+		LinkRest_LoadBunchTags = rootLink +"/index.php/rest/tags?urls=[%s]";
 		LinkRest_LoadPicture = rootLink +"/index.php/rest/data/%s?size=%s";
 	}
 	
@@ -137,80 +80,24 @@ public class Gallery3Imp implements WebGallery {
 		return String.format(LinkRest_LoadItem, id);
 	}
 	
-	private JSONObject parseJSON(InputStream inputStream)
-			throws IOException, JSONException {
-		String content = loadContent(inputStream);
-		return new JSONObject(content);
-	}
-
-	private JSONArray parseJSONArray(InputStream inputStream)
-			throws IOException, JSONException {
-		String content = loadContent(inputStream);
-		return new JSONArray(content);
-	}
-	private String loadContent(InputStream inputStream)
-			throws IOException {
-		InputStreamReader streamReader = new InputStreamReader(inputStream);
-		BufferedReader reader = new BufferedReader(streamReader);
-		StringBuilder stringBuilder = new StringBuilder();
-		try {
-			String line = null;
-
-			while ((line = reader.readLine()) != null) {
-				stringBuilder.append(line + '\n');
-			}
-		} 
-		finally
-		{
-			reader.close();
-			inputStream.close();
-		}
-		return stringBuilder.toString();
-	}
-	
-	private HttpUriRequest buildRequest(String url){
+	private RestCall buildRestCall(String url, long suggestedLength){
 		HttpGet httpRequest = new HttpGet(url);
         
 		httpRequest.addHeader("X-Gallery-Request-Method", "get");
 		httpRequest.addHeader("X-Gallery-Request-Key", mSecurityToken);
 		
-		return httpRequest;
+		return new RestCall(this, httpRequest, suggestedLength);
 	}
 	
-	private GalleryStream openRestCall(String url, long suggestedLength) throws IOException, ClientProtocolException {
-		
-		HttpUriRequest httpRequest = buildRequest(url);
-        HttpResponse response = mHttpClient.execute(httpRequest);
-        Header[] headers = response.getHeaders("Content-Length");
-        if(headers.length > 0) {
-        	long contentLength = Long.parseLong(headers[0].getValue());
-        	return new GalleryStream(response.getEntity().getContent(),contentLength);
-        } else {
-        	return new GalleryStream(response.getEntity().getContent(), suggestedLength);
-        }
-	}
-	
-	public JSONObject loadJSONObject(String url) throws ClientProtocolException, IOException, JSONException{
-		InputStream inputStream = openRestCall(url, -1);
-		return parseJSON(inputStream);
-	}
-	
-	public Entity loadGalleryEntity(String url) throws ClientProtocolException, IOException, JSONException
+	private Entity loadGalleryEntity(String url) throws ClientProtocolException, IOException, JSONException
 	{
-		JSONObject jsonObject = loadJSONObject(url);
-		return loadGalleryEntity(jsonObject);
-	}
-
-	private Entity loadGalleryEntity(JSONObject jsonObject)
-			throws JSONException, ClientProtocolException, IOException {
-		String type = jsonObject.getJSONObject("entity").getString("type");
-		if(type.equals("album")){
-			return new AlbumEntity(jsonObject, this, mMaxImageDiag);
-		}
-		else {
-			return new PictureEntity(jsonObject, this, mMaxImageDiag);
-		}
 		
+		RestCall restCall = buildRestCall(url, -1);
+		return EntityFactory.parseJSON(restCall.loadJSONObject(), this);
+	}	
+	
+	public GalleryObject getDisplayObject(String url) throws ClientProtocolException, IOException, JSONException {
+		return loadGalleryEntity(url);
 	}
 	
 	public List<GalleryObject> getDisplayObjects() {
@@ -224,60 +111,70 @@ public class Gallery3Imp implements WebGallery {
 	public List<GalleryObject> getDisplayObjects(GalleryProgressListener progressListener) {
 		return getDisplayObjects(String.format(LinkRest_LoadItem, 1), progressListener);
 	}
-
-	public List<GalleryObject> getDisplayObjects(String url,GalleryProgressListener listener) {
-		ArrayList<GalleryObject> displayObjects;
-		ArrayList<BackgroundDownloaderTask> tasks = new ArrayList<Gallery3Imp.BackgroundDownloaderTask>(5);
+	
+	private List<JSONObject> loadJSONObjectsParallel(String bunchUrl,List<String> urls, int taskCount, GalleryProgressListener listener) {
+		int objectSize = urls.size();
+		ArrayList<JSONArrayLoaderTask> tasks = new ArrayList<JSONArrayLoaderTask>(taskCount);
 		
+		ProgressListener progressListener = new ProgressListener(listener, objectSize);
+		
+		ArrayList<JSONObject> jsonObjects = new ArrayList<JSONObject>(objectSize);
+		for(int i=0; i<objectSize; i++ ) {
+			jsonObjects.add(null);
+		}
+		
+		for(int i=0; i<objectSize; ) {
+			StringBuilder requstUrl = new StringBuilder(MAX_REQUEST_SIZE);
+			JSONArrayLoaderTask task = new JSONArrayLoaderTask(jsonObjects, i, progressListener);
+			tasks.add(task);
+			/*
+			 *  TODO Kommentar anpassen  
+			 *  Otherwise the max length of a GET-Request might be exceeded
+			 */
+			
+			for( ; i<objectSize; i++) {
+				String url = urls.get(i);
+				if(url.length()+requstUrl.length() > MAX_REQUEST_SIZE)
+				{
+					break;
+				}
+				requstUrl.append("%22" + url + "%22,");
+			}
+			
+			requstUrl.deleteCharAt(requstUrl.length() - 1);
+			String realUrl = String.format(bunchUrl, requstUrl);
+			
+			task.execute(buildRestCall(realUrl, -1));
+		}
+		
+		for(JSONArrayLoaderTask task:tasks) {
+			if(task.getStatus() != Status.FINISHED) {
+				try {
+					task.get();
+				} catch (InterruptedException e) {
+					
+				} catch (ExecutionException e) {
+					
+				}
+			}
+		}
+		
+		return jsonObjects;
+	}
+	public List<GalleryObject> getDisplayObjects(String url, GalleryProgressListener listener) {
+		ArrayList<GalleryObject> displayObjects;
 		try {
 			GalleryObject galleryObject = loadGalleryEntity(url);
 			if(galleryObject.hasChildren()) {
 				AlbumEntity album = (AlbumEntity) galleryObject;
 				List<String> members = album.getMembers();
-				int memberSize = members.size();
-				ProgressListener progressListener = new ProgressListener(listener, memberSize);
-				displayObjects = new ArrayList<GalleryObject>(memberSize);
 				
-				for(int i=0; i<memberSize; i++ ) {
-					displayObjects.add(null);
-				}
+				displayObjects = new ArrayList<GalleryObject>(members.size());
 				
-				for(int i=0; i<memberSize; ) {
-					StringBuilder urls = new StringBuilder(MAX_REQUEST_SIZE);
-					BackgroundDownloaderTask task = new BackgroundDownloaderTask(displayObjects, i, progressListener);
-					tasks.add(task);
-					/*
-					 *  If a Album contains a large number of Images
-					 *  load it in a bunch of 10 items.
-					 *  
-					 *  Otherwise the max length of a GET-Request might be exceeded
-					 */
-					
-					for( ; i<memberSize; i++) {
-						String memberUrl = members.get(i);
-						if(urls.length()+memberUrl.length() > MAX_REQUEST_SIZE)
-						{
-							break;
-						}
-						urls.append("%22" + memberUrl + "%22,");
-					}
-					
-					urls.deleteCharAt(urls.length() - 1);
-					url = String.format(LinkRest_LoadBunchItems, urls);
-					
-					task.execute(url);
-				}
+				List<JSONObject> jsonObjects = loadJSONObjectsParallel(LinkRest_LoadBunchItems,members,5,listener);
 				
-				for(BackgroundDownloaderTask task:tasks) {
-					if(task.getStatus() != Status.FINISHED) {
-						try {
-							task.get();
-						} catch (InterruptedException e) {
-							
-						} catch (ExecutionException e) {
-							
-						}
-					}
+				for(JSONObject jsonObject:jsonObjects) {
+					displayObjects.add(EntityFactory.parseJSON(jsonObject, this));
 				}
 			}
 			else displayObjects = new ArrayList<GalleryObject>(0);
@@ -296,10 +193,58 @@ public class Gallery3Imp implements WebGallery {
 		
 		return displayObjects;
 	}
+	
+	public List<String> getDisplayObjectTags(GalleryObject galleryObject, GalleryProgressListener listener) throws IOException {
+		try {
+			Entity entity = (Entity) galleryObject;
+			List<String> tagLinks = entity.getTagLinks();
+			int linkCount = tagLinks.size();
+			ArrayList<String> tags = new ArrayList<String>(linkCount);
+			ArrayList<JSONObject> jsonObjects = new ArrayList<JSONObject>(linkCount);
+			if (linkCount>0) {
+				
+				
+				
+				ProgressListener progressListener = new ProgressListener(listener, linkCount);
+				JSONObjectLoaderTask task = new JSONObjectLoaderTask(jsonObjects, 0, progressListener);
+				
+				for(int i=0; i<linkCount; i++ ) {
+					jsonObjects.add(null);
+				}
+				RestCall[] restCalls = new RestCall[linkCount];
+				for(int i=0; i<linkCount; i++ ) {
+					restCalls[i] = buildRestCall(tagLinks.get(i),-1);
+				}
+				task.execute(restCalls);
+				if(task.getStatus() != Status.FINISHED) {
+					try {
+						task.get();
+					} catch (InterruptedException e) {
+						
+					} catch (ExecutionException e) {
+						
+					}
+				}
+				for (JSONObject jsonObject : jsonObjects) {
+					if(jsonObject != null) {
+						try {
+							tags.add(EntityFactory.parseTag(jsonObject));
+						} catch (JSONException e) {
+							// Nothing to do here
+						}
+					}
+				}
+			}
+			return tags;
+		} catch (ClassCastException e) {
+			throw new IOException("GalleryObject doesn't contain to Gallery3Implementation", e);
+		}
+		
+	}
 
 	private GalleryStream getFileStream(String sourceLink, long suggestedLength) throws ClientProtocolException, IOException{
-		
-		return openRestCall(sourceLink, suggestedLength);
+		RestCall restCall = buildRestCall(sourceLink, suggestedLength);
+		return restCall.open();
 		
 	}
 	
@@ -333,7 +278,10 @@ public class Gallery3Imp implements WebGallery {
 		
 			response = mHttpClient.execute(httpRequest);
 			InputStream  inputStream = response.getEntity().getContent();
-			String content = loadContent(inputStream);
+			InputStreamReader streamReader = new InputStreamReader(inputStream);
+			BufferedReader reader = new BufferedReader(streamReader);
+			String content = reader.readLine();
+			inputStream.close();
 			if(content.length()==0 || content.startsWith("[]"))
 			{
 				throw new SecurityException("Couldn't verify user-credentials");
@@ -345,7 +293,6 @@ public class Gallery3Imp implements WebGallery {
 		}
 	}
 
-	// TODO Remove
 	public HttpClient getHttpClient() {
 		return mHttpClient;
 	}
@@ -360,5 +307,14 @@ public class Gallery3Imp implements WebGallery {
 
 	public String getRootLink() {
 		return mRootLink;
-	}	
+	}
+
+	public void loadObjectComments(GalleryObject galleryObject) throws IOException, ClientProtocolException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public float getMaxImageDiag() {
+		return mMaxImageDiag;
+	}
 }

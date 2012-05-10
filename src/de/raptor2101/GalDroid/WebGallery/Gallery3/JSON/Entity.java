@@ -16,23 +16,32 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.  
  */
 
-package de.raptor2101.GalDroid.WebGallery.Gallery3;
+package de.raptor2101.GalDroid.WebGallery.Gallery3.JSON;
 
-import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+
+import de.raptor2101.GalDroid.WebGallery.Gallery3.DownloadObject;
+import de.raptor2101.GalDroid.WebGallery.Gallery3.Gallery3Imp;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryObject;
-abstract class Entity implements GalleryObject {
+
+public abstract class Entity implements GalleryObject {
+	private final Pattern mPatternExtractTagId = Pattern.compile("tag_item/(\\d+),\\d+");
 	private final String mRootLink;
 	private final String mTitle;
 	private final String mLink;
 	private final int mId;
 	
 	private final Date mUploadDate;
-	
+	private final ArrayList<String> mTags;
 	protected String mLink_Full;
 	protected String mLink_Thumb;
 	
@@ -41,16 +50,30 @@ abstract class Entity implements GalleryObject {
 	
 	public Entity(JSONObject jsonObject, Gallery3Imp gallery3) throws JSONException
 	{
-		jsonObject = jsonObject.getJSONObject("entity");
+		JSONObject entity = jsonObject.getJSONObject("entity");
 		
-		mId = jsonObject.getInt("id");
+		mId = entity.getInt("id");
 		
-		long msElapsed = jsonObject.getLong("created")*1000;
+		long msElapsed = entity.getLong("created")*1000;
 		mUploadDate = new Date(msElapsed);
 		
-		mTitle = jsonObject.getString("title");
+		mTitle = entity.getString("title");
 		mLink = gallery3.getItemLink(mId);
 		mRootLink = gallery3.getRootLink();
+		
+		
+		JSONObject relationShips  = jsonObject.getJSONObject("relationships");
+		JSONObject tagsSection = relationShips.getJSONObject("tags");
+		JSONArray tags = tagsSection.getJSONArray("members");
+		
+		mTags = new ArrayList<String>(tags.length());
+		for(int i=0;i<tags.length();i++) {
+			Matcher matcher = mPatternExtractTagId.matcher(tags.getString(i));
+			while(matcher.find()) {
+				String tagId = matcher.group(1);
+				mTags.add(String.format(gallery3.LinkRest_LoadTag, tagId));
+			}
+		}
 	}
 	
 	public String getTitle() {
@@ -79,5 +102,9 @@ abstract class Entity implements GalleryObject {
 	
 	private DownloadObject createDownloadObject(String link, int fileSize) {
 		return !link.equals("")? new DownloadObject(mRootLink, link, fileSize) : null;
+	}
+	
+	public List<String> getTagLinks() {
+		return mTags;
 	}
 }
