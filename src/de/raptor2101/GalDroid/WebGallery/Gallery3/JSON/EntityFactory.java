@@ -19,4 +19,8 @@ public class EntityFactory {
 	public static String parseTag(JSONObject jsonObject) throws JSONException {
 		return jsonObject.getJSONObject("entity").getString("name");
 	}
+	
+	public static CommentEntity parseComment(JSONObject jsonObject) throws JSONException {
+		return new CommentEntity(jsonObject);
+	}
 }

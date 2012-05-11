@@ -42,7 +42,7 @@ public interface WebGallery {
 	public List<GalleryObject> getDisplayObjects(String path, GalleryProgressListener progressListener);
 	
 	public List<String> getDisplayObjectTags(GalleryObject galleryObject, GalleryProgressListener progressListener) throws IOException;
-	
+	public List<GalleryObjectComment> getDisplayObjectComments(GalleryObject galleryObject, GalleryProgressListener progressListener) throws IOException, ClientProtocolException, JSONException;
 	
 	public void setPreferedDimensions(int height, int width);
 		
@@ -50,7 +50,7 @@ public interface WebGallery {
 	
 	public GalleryStream getFileStream(GalleryDownloadObject downloadObject) throws IOException, ClientProtocolException;
 	
-	public void loadObjectComments(GalleryObject galleryObject) throws IOException, ClientProtocolException;
+	
 	
 	
 	public void setSecurityToken(String token);

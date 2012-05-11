@@ -34,6 +34,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.StringBody;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -42,12 +43,15 @@ import android.util.FloatMath;
 
 import de.raptor2101.GalDroid.WebGallery.GalleryStream;
 import de.raptor2101.GalDroid.WebGallery.Gallery3.JSON.AlbumEntity;
+import de.raptor2101.GalDroid.WebGallery.Gallery3.JSON.CommentEntity;
+import de.raptor2101.GalDroid.WebGallery.Gallery3.JSON.CommentEntity.CommentState;
 import de.raptor2101.GalDroid.WebGallery.Gallery3.JSON.Entity;
 import de.raptor2101.GalDroid.WebGallery.Gallery3.JSON.EntityFactory;
 import de.raptor2101.GalDroid.WebGallery.Gallery3.Tasks.JSONArrayLoaderTask;
 import de.raptor2101.GalDroid.WebGallery.Gallery3.Tasks.JSONObjectLoaderTask;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryDownloadObject;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryObject;
+import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryObjectComment;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryProgressListener;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.WebGallery;
 
@@ -62,6 +66,7 @@ public class Gallery3Imp implements WebGallery {
 	public final String LinkRest_LoadBunchItems;
 	public final String LinkRest_LoadBunchTags;
 	public final String LinkRest_LoadPicture;
+	public final String LinkRest_LoadComments;
 
 	private static int MAX_REQUEST_SIZE = 4000;
 	
@@ -74,6 +79,7 @@ public class Gallery3Imp implements WebGallery {
 		LinkRest_LoadBunchItems = rootLink +"/index.php/rest/items?urls=[%s]";
 		LinkRest_LoadBunchTags = rootLink +"/index.php/rest/tags?urls=[%s]";
 		LinkRest_LoadPicture = rootLink +"/index.php/rest/data/%s?size=%s";
+		LinkRest_LoadComments = rootLink + "/index.php/rest/item_comments/%d";
 	}
 	
 	public String getItemLink(int id){
@@ -242,6 +248,65 @@ public class Gallery3Imp implements WebGallery {
 		
 	}
 
+	public List<GalleryObjectComment> getDisplayObjectComments(GalleryObject galleryObject, GalleryProgressListener listener) throws IOException, ClientProtocolException, JSONException {
+		try {
+			Entity entity = (Entity) galleryObject;
+			String commentSource = String.format(LinkRest_LoadComments, entity.getId());
+			RestCall restCall = buildRestCall(commentSource, -1);
+			JSONObject jsonObject = restCall.loadJSONObject();
+			JSONArray jsonItemComments = jsonObject.getJSONArray("members");
+			int commentCount = jsonItemComments.length();
+			ArrayList<JSONObject> jsonObjects = new ArrayList<JSONObject>(commentCount);
+			ProgressListener progressListener = new ProgressListener(listener, commentCount);
+			JSONObjectLoaderTask task = new JSONObjectLoaderTask(jsonObjects, 0, progressListener);
+			
+			for(int i=0; i<commentCount; i++ ) {
+				jsonObjects.add(null);
+			}
+			
+			RestCall[] restCalls = new RestCall[commentCount];
+			for(int i=0; i<commentCount; i++ ) {
+				restCalls[i] = buildRestCall(jsonItemComments.getString(i),-1);
+			}
+			task.execute(restCalls);
+			
+			if(task.getStatus() != Status.FINISHED) {
+				try {
+					task.get();
+				} catch (InterruptedException e) {
+					
+				} catch (ExecutionException e) {
+					
+				}
+			}
+			ArrayList<CommentEntity> comments = new ArrayList<CommentEntity>(commentCount);
+			ArrayList<String> authors = new ArrayList<String>(commentCount);
+			
+			// Convert jsonObject to CommentEntity
+			for(JSONObject commentObject:jsonObjects) {
+				CommentEntity comment = EntityFactory.parseComment(commentObject);
+				if(comment.getState() == CommentState.Published) {
+					comments.add(comment);
+					
+					if(!comment.isAuthorInformationLoaded()) {
+						authors.add(comment.getAuthorId());
+					}
+				}
+			}
+			
+			// Load all authors - Doesn't provided by gallery3
+			
+			// Typsafe cast...
+			ArrayList<GalleryObjectComment> gocs = new ArrayList<GalleryObjectComment>(comments.size());
+			for(CommentEntity comment:comments) {
+				gocs.add(comment);
+			}
+			return gocs;
+		} catch (ClassCastException e) {
+			throw new IOException("GalleryObject doesn't contain to Gallery3Implementation", e);
+		}
+	}
+
 	private GalleryStream getFileStream(String sourceLink, long suggestedLength) throws ClientProtocolException, IOException{
 		RestCall restCall = buildRestCall(sourceLink, suggestedLength);
 		return restCall.open();
@@ -307,11 +372,6 @@ public class Gallery3Imp implements WebGallery {
 
 	public String getRootLink() {
 		return mRootLink;
-	}
-
-	public void loadObjectComments(GalleryObject galleryObject) throws IOException, ClientProtocolException {
-		// TODO Auto-generated method stub
-		
 	}
 
 	public float getMaxImageDiag() {
