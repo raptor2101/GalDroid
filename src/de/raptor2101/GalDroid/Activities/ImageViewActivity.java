@@ -101,7 +101,7 @@ public class ImageViewActivity extends GalleryActivity implements OnTouchListene
     	adapter.cleanUp();
     	adapter = (GalleryImageAdapter) mGalleryThumbnails.getAdapter();
     	Intent resultIntent = new Intent(this, ImageViewActivity.class);
-    	resultIntent.putExtra(".de.raptor2101.GalDroid.CurrentIndex", getCurrentIndex());
+    	resultIntent.putExtra(GalDroidApp.INTENT_EXTRA_DISPLAY_INDEX, getCurrentIndex());
     	setResult(Activity.RESULT_OK, resultIntent);
     	
     	super.onBackPressed();

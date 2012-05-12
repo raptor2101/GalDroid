@@ -102,22 +102,6 @@ public class Gallery3Imp implements WebGallery {
 		return EntityFactory.parseJSON(restCall.loadJSONObject(), this);
 	}	
 	
-	public GalleryObject getDisplayObject(String url) throws ClientProtocolException, IOException, JSONException {
-		return loadGalleryEntity(url);
-	}
-	
-	public List<GalleryObject> getDisplayObjects() {
-		return getDisplayObjects(String.format(LinkRest_LoadItem, 1), null);
-	}
-	
-	public List<GalleryObject> getDisplayObjects(String url) {
-		return getDisplayObjects(url, null);
-	}
-	
-	public List<GalleryObject> getDisplayObjects(GalleryProgressListener progressListener) {
-		return getDisplayObjects(String.format(LinkRest_LoadItem, 1), progressListener);
-	}
-	
 	private List<JSONObject> loadJSONObjectsParallel(String bunchUrl,List<String> urls, int taskCount, GalleryProgressListener listener) {
 		int objectSize = urls.size();
 		ArrayList<JSONArrayLoaderTask> tasks = new ArrayList<JSONArrayLoaderTask>(taskCount);
@@ -167,6 +151,23 @@ public class Gallery3Imp implements WebGallery {
 		
 		return jsonObjects;
 	}
+
+	public GalleryObject getDisplayObject(String url) throws ClientProtocolException, IOException, JSONException {
+		return loadGalleryEntity(url);
+	}
+	
+	public List<GalleryObject> getDisplayObjects() {
+		return getDisplayObjects(String.format(LinkRest_LoadItem, 1), null);
+	}
+	
+	public List<GalleryObject> getDisplayObjects(String url) {
+		return getDisplayObjects(url, null);
+	}
+	
+	public List<GalleryObject> getDisplayObjects(GalleryProgressListener progressListener) {
+		return getDisplayObjects(String.format(LinkRest_LoadItem, 1), progressListener);
+	}
+	
 	public List<GalleryObject> getDisplayObjects(String url, GalleryProgressListener listener) {
 		ArrayList<GalleryObject> displayObjects;
 		try {
@@ -198,6 +199,22 @@ public class Gallery3Imp implements WebGallery {
 		}
 		
 		return displayObjects;
+	}
+	
+	public List<GalleryObject> getDisplayObjects(GalleryObject galleryObject) {
+		return getDisplayObjects(galleryObject, null);
+	}
+
+	public List<GalleryObject> getDisplayObjects(GalleryObject galleryObject, GalleryProgressListener progressListener) {
+		try {
+			Entity entity = (Entity) galleryObject;
+			if(!entity.hasChildren()) {
+				return null;
+			}
+			return getDisplayObjects(entity.getObjectLink(), progressListener);
+		} catch (ClassCastException e) {
+			return null;
+		}
 	}
 	
 	public List<String> getDisplayObjectTags(GalleryObject galleryObject, GalleryProgressListener listener) throws IOException {

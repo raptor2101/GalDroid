@@ -49,7 +49,7 @@ public abstract class GalleryActivity extends Activity {
 		public void onDownloadCompleted(List<GalleryObject> galleryObjects) {
 			mProgressDialog.dismiss();
 			GalDroidApp app = (GalDroidApp)getApplicationContext();
-			app.storeGalleryObjects(getUnqiueId(), galleryObjects);
+			app.storeGalleryObjects(getDisplayedGallery(), galleryObjects);
 			mConfigInstance.mGalleryObjects = galleryObjects;
 			Log.d("GalleryActivity","Call onGalleryObjectsLoaded");
 			onGalleryObjectsLoaded(galleryObjects);		
@@ -91,11 +91,11 @@ public abstract class GalleryActivity extends Activity {
 			mConfigInstance.currentIndex = -1;
 		}
 		
-		String uniqueId = getUnqiueId();
+		GalleryObject diplayedGallery = getDisplayedGallery();
 		
 		// Try to get galleryobjects from application cache
 		if(mConfigInstance.mGalleryObjects == null){
-			mConfigInstance.mGalleryObjects = app.loadStoredGalleryObjects(uniqueId);
+			mConfigInstance.mGalleryObjects = app.loadStoredGalleryObjects(diplayedGallery);
 		}
 		
 		// Now we have time, load the object from the remote source
@@ -112,7 +112,7 @@ public abstract class GalleryActivity extends Activity {
 				gallery.setPreferedDimensions(params.height, params.width);
 				mListener = new GalleryLoadingListener();
 				GalleryLoaderTask task = new GalleryLoaderTask(gallery, mListener);
-				task.execute(uniqueId);
+				task.execute(diplayedGallery);
 		    } else {
 		    	// Without a valid Gallery nothing can be displayed... back to previous activity
 		    	this.finish();
@@ -147,10 +147,10 @@ public abstract class GalleryActivity extends Activity {
 	
 	public abstract void onGalleryObjectsLoaded(List<GalleryObject> galleryObjects);
 	
-	public String getUnqiueId(){
+	public GalleryObject getDisplayedGallery(){
 		try {
-			return getIntent().getExtras().getString(".de.raptor2101.GalDroid.CurrentUniqueId");
-		} catch (NullPointerException e) {
+			return (GalleryObject)getIntent().getExtras().get(GalDroidApp.INTENT_EXTRA_DISPLAY_GALLERY);
+		} catch (Exception e) {
 			return null;
 		} 
 		

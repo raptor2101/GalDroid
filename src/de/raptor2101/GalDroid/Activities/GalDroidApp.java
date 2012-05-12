@@ -32,11 +32,14 @@ import android.app.Application;
 import android.net.http.AndroidHttpClient;
 
 public class GalDroidApp extends Application{
-
+	public static final String INTENT_EXTRA_DISPLAY_GALLERY = ".de.raptor2101.GalDroid.GalleryObject";
+	public static final String INTENT_EXTRA_DISPLAY_INDEX = ".de.raptor2101.GalDroid.DisplayIndex";
+	public static final String INTENT_EXTRA_GALLERY_PROVIDER = ".de.raptor2101.GalDroid.GalleryProvider";
 	private WebGallery mWebGallery = null;
 	private GalleryCache mGalleryCache = null;
-	private List<GalleryObject> mGalleryObjects = null;
-	private String mStoredUniqueId = null;
+	private List<GalleryObject> mGalleryChildObjects = null;
+	private GalleryObject mStoredGalleryObject = null;
+	
 	public WebGallery getWebGallery() {
 		return mWebGallery;
 	}
@@ -54,7 +57,7 @@ public class GalDroidApp extends Application{
 		
 		if(mWebGallery == null){
 			try {
-				String galleryName = activity.getIntent().getExtras().getString(".de.raptor2101.GalDroid.GalleryName");
+				String galleryName = activity.getIntent().getExtras().getString(INTENT_EXTRA_GALLERY_PROVIDER);
 				if(galleryName != null){
 					GalleryConfig galleryConfig = GalDroidPreference.getSetupByName(galleryName);
 					mWebGallery = GalleryFactory.createFromName(galleryConfig.TypeName, galleryConfig.RootLink, AndroidHttpClient.newInstance("GalDroid"));
@@ -66,20 +69,25 @@ public class GalDroidApp extends Application{
 		}
 	}
 
-	public void storeGalleryObjects(String uniqueId, List<GalleryObject> galleryObjects) {
-		mStoredUniqueId = uniqueId;
-		mGalleryObjects = galleryObjects;
+	public void storeGalleryObjects(GalleryObject parent, List<GalleryObject> childObjects) {
+		if(parent != null) {
+			mStoredGalleryObject = parent;
+			mGalleryChildObjects = childObjects;
+		} else {
+			parent = null;
+			childObjects = null;
+		}
 	}
 	
-	public List<GalleryObject> loadStoredGalleryObjects(String uniqueId) {
-		if(uniqueId == null) {
+	public List<GalleryObject> loadStoredGalleryObjects(GalleryObject parent) {
+		if(parent == null) {
 			return null;
 		}
 		
-		if(!uniqueId.equals(mStoredUniqueId)) {
+		if(!parent.equals(mStoredGalleryObject)) {
 			return null;
 		}
 		
-		return mGalleryObjects;
+		return mGalleryChildObjects;
 	}
 }

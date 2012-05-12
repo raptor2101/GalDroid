@@ -53,7 +53,7 @@ public class EditGalleryActivity extends Activity implements OnClickListener {
 	    Bundle extras = getIntent().getExtras();
 	    if(extras != null)
 	    {
-		    String configName = extras.getString(".de.raptor2101.GalDroid.GalleryName");
+		    String configName = extras.getString(GalDroidApp.INTENT_EXTRA_GALLERY_PROVIDER);
 		    if(configName != null) {
 		    	mConfig =  GalDroidPreference.getSetupByName(configName);
 		    	button.setText("Edit");

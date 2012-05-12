@@ -85,6 +85,10 @@ public abstract class Entity implements GalleryObject {
 	}
 	
 	public String getObjectId() {
+		return String.format("%d", mId);
+	}
+	
+	public String getObjectLink() {
 		return mLink;
 	}
 	
@@ -107,6 +111,12 @@ public abstract class Entity implements GalleryObject {
 	public List<String> getTagLinks() {
 		return mTags;
 	}
+	
+	@Override
+	public String toString() {
+		return mLink;
+	}
+	
 	@Override
 	public boolean equals(Object o) {
 		if(o instanceof Entity) {

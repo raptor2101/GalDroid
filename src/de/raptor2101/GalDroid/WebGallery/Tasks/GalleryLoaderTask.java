@@ -28,7 +28,7 @@ import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryObject;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryProgressListener;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.WebGallery;
 
-public class GalleryLoaderTask extends AsyncTask<String, Progress, List<GalleryObject>> implements GalleryProgressListener {
+public class GalleryLoaderTask extends AsyncTask<GalleryObject, Progress, List<GalleryObject>> implements GalleryProgressListener {
 
 	private WeakReference<GalleryLoaderTaskListener> mListener;
 	private WebGallery mWebGallery;
@@ -40,7 +40,7 @@ public class GalleryLoaderTask extends AsyncTask<String, Progress, List<GalleryO
 	}
 	
 	@Override
-	protected List<GalleryObject> doInBackground(String... params) {
+	protected List<GalleryObject> doInBackground(GalleryObject... params) {
 		List<GalleryObject> objects;
 		
 		if (mWebGallery != null) {

@@ -104,14 +104,17 @@ public class GridViewActivity extends GalleryActivity implements OnItemClickList
         Intent intent;
         if (!galleryObject.hasChildren()) {
 			intent = new Intent(this, ImageViewActivity.class);
-			intent.putExtra(".de.raptor2101.GalDroid.CurrentIndex", pos);
-			intent.putExtra(".de.raptor2101.GalDroid.CurrentUniqueId", getUnqiueId());
+			intent.putExtra(GalDroidApp.INTENT_EXTRA_DISPLAY_INDEX, pos);
+			intent.putExtra(GalDroidApp.INTENT_EXTRA_DISPLAY_GALLERY, getDisplayedGallery());
+			
+			// The startActivityForResult is needed to scroll to the last disyplayed imaged from the ImageView
+			// The Result is handled by onActivityResult
 			this.startActivityForResult(intent, CURRENT_INDEX);
         }
         else
         {
             intent = new Intent(this, GridViewActivity.class);
-        	intent.putExtra(".de.raptor2101.GalDroid.CurrentUniqueId", galleryObject.getObjectId());
+        	intent.putExtra(GalDroidApp.INTENT_EXTRA_DISPLAY_GALLERY, galleryObject);
         	this.startActivity(intent);
         }
         
