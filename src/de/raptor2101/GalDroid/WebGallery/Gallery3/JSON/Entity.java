@@ -107,4 +107,14 @@ public abstract class Entity implements GalleryObject {
 	public List<String> getTagLinks() {
 		return mTags;
 	}
+	@Override
+	public boolean equals(Object o) {
+		if(o instanceof Entity) {
+			Entity entity = (Entity) o;
+			return entity.mId == mId;
+		}
+		else {
+			return false;
+		}
+	}
 }
