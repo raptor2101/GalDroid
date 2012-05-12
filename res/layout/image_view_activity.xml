@@ -1,16 +1,282 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="fill_parent" android:layout_height="fill_parent" android:orientation="vertical">
-	<Gallery
-	  android:layout_width="fill_parent"
-	  android:layout_height="fill_parent"
-	  android:id="@+id/singleImageGallery"
-	  android:spacing="25dp"
-	  android:layout_weight="1" />
-	<Gallery
-	  android:layout_width="match_parent"
-	  android:layout_height="200dp"
-	  android:id="@+id/thumbnailImageGallery"
-	  android:layout_weight="1" 
-	  android:spacing="25dp"
-	  android:visibility="gone" />
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:orientation="horizontal" >
+
+        <TableLayout
+            android:id="@+id/viewImageInformations"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:layout_marginRight="10dp" 
+            android:visibility="visible">
+
+            <TableRow>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_span="2"
+                    android:gravity="bottom"
+                    android:height="50dp"
+                    android:text="@string/object_informations"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:textStyle="bold" />
+            </TableRow>
+
+            <TableRow>
+
+                <View
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dp"
+                    android:layout_span="2"
+                    android:background="#FFFFFF" />
+            </TableRow>
+
+            <TableRow>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="left"
+                    android:text="@string/object_title"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/textTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="left"
+                    android:minWidth="100dp" />
+            </TableRow>
+
+            <TableRow>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="left"
+                    android:text="@string/object_uploaddate"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/textUploadDate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="left" />
+            </TableRow>
+
+            <TableRow>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="left"
+                    android:text="@string/object_tags"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/textTags"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="left" />
+            </TableRow>
+
+            <TableRow>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="left"
+                    android:text="@string/object_comments"
+                    android:textStyle="bold" />
+            </TableRow>
+
+            <TableRow>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="50dp"
+                    android:layout_span="2"
+                    android:gravity="bottom"
+                    android:text="@string/object_exif_informations"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:textStyle="bold" />
+            </TableRow>
+
+            <TableRow>
+
+                <View
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dp"
+                    android:layout_span="2"
+                    android:background="#FFFFFF" />
+            </TableRow>
+
+            <TableRow>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="left"
+                    android:text="@string/object_exif_createdate"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/textExifCreateDate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="left" />
+            </TableRow>
+
+            <TableRow>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="left"
+                    android:text="@string/object_exif_aperture"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/textExifAperture"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="left" />
+            </TableRow>
+
+            <TableRow>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="left"
+                    android:text="@string/object_exif_exposure"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/textExifExposure"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="left" />
+            </TableRow>
+
+            <TableRow>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="left"
+                    android:text="@string/object_exif_flash"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/textExifFlash"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="left" />
+            </TableRow>
+
+            <TableRow>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="left"
+                    android:text="@string/object_exif_focallength"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/textExifFocalLength"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="left" />
+            </TableRow>
+
+            <TableRow>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="left"
+                    android:text="@string/object_exif_iso"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/textExifISO"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="left" />
+            </TableRow>
+
+            <TableRow>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="left"
+                    android:text="@string/object_exif_make"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/textExifMake"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="left" />
+            </TableRow>
+
+            <TableRow>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="left"
+                    android:text="@string/object_exif_model"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/textExifModel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="left" />
+            </TableRow>
+
+            <TableRow>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="5dp"
+                    android:gravity="left"
+                    android:text="@string/object_exif_whitebalance"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/textExifWhiteBalance"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="left" />
+            </TableRow>
+        </TableLayout>
+
+        <Gallery
+            android:id="@+id/singleImageGallery"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:spacing="25dp" />
+    </LinearLayout>
+
+    <Gallery
+        android:id="@+id/thumbnailImageGallery"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_weight="1"
+        android:spacing="25dp"
+        android:visibility="gone" />
+
 </LinearLayout>

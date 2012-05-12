@@ -126,7 +126,7 @@ public class GridViewActivity extends GalleryActivity implements OnItemClickList
 		mAdapter.setGalleryObjects(galleryObjects);
 	}
 	
-	@Override
+	/*@Override
 	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.object_context_menu, menu);
@@ -145,6 +145,6 @@ public class GridViewActivity extends GalleryActivity implements OnItemClickList
 			this.startActivity(intent);
 		}
 		return true;
-	}
+	}*/
 
 }

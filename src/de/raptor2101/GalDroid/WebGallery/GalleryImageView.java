@@ -18,6 +18,8 @@
 
 package de.raptor2101.GalDroid.WebGallery;
 
+import java.lang.ref.WeakReference;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
@@ -42,6 +44,7 @@ public class GalleryImageView extends LinearLayout implements ImageLoaderTaskLis
 	private GalleryObject mGalleryObject;
 	private Bitmap mBitmap;
 	private ImageLoaderTask mImageLoaderTask;
+	private WeakReference<ImageLoaderTaskListener> mListener;
 	
 	public GalleryImageView(Context context, android.view.ViewGroup.LayoutParams layoutParams, boolean showTitle) {
 		super(context);
@@ -148,11 +151,21 @@ public class GalleryImageView extends LinearLayout implements ImageLoaderTaskLis
 	public void onLoadingStarted(String uniqueId) {
 		mProgressBar.setVisibility(VISIBLE);
 		Log.d(CLASS_TAG, String.format("Loading started %s",uniqueId));
+		
+		ImageLoaderTaskListener listener = mListener.get();
+		if(listener != null) {
+			listener.onLoadingStarted(uniqueId);
+		}
 	}
 	
 	public void onLoadingProgress(String uniqueId, int currentValue, int maxValue) {
 		mProgressBar.setMax(maxValue);
 		mProgressBar.setProgress(currentValue);
+		
+		ImageLoaderTaskListener listener = mListener.get();
+		if(listener != null) {
+			listener.onLoadingProgress(uniqueId, currentValue, maxValue);
+		}
 	}
 
 	public void onLoadingCompleted(String uniqueId, Bitmap bitmap) {
@@ -161,6 +174,11 @@ public class GalleryImageView extends LinearLayout implements ImageLoaderTaskLis
 		mBitmap = bitmap;
 		mImageLoaderTask = null;
 		Log.d(CLASS_TAG, String.format("Loading done %s",uniqueId));
+		
+		ImageLoaderTaskListener listener = mListener.get();
+		if(listener != null) {
+			listener.onLoadingCompleted(uniqueId, bitmap);
+		}
 	}
 
 	public void onLoadingCancelled(String uniqueId) {
@@ -168,6 +186,15 @@ public class GalleryImageView extends LinearLayout implements ImageLoaderTaskLis
 		mImageLoaderTask = null;
 		mProgressBar.setVisibility(GONE);
 		mBitmap = null;
+		
+		ImageLoaderTaskListener listener = mListener.get();
+		if(listener != null) {
+			listener.onLoadingCancelled(uniqueId);
+		}
+	}
+
+	public void setListener(ImageLoaderTaskListener listener) {
+		mListener = new WeakReference<ImageLoaderTaskListener>(listener);
 	}
 
 	

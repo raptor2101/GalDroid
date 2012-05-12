@@ -18,12 +18,16 @@
  
 package de.raptor2101.GalDroid.Activities;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.graphics.PointF;
+import android.media.ExifInterface;
 import android.os.Bundle;
 import android.util.FloatMath;
 import android.util.Log;
@@ -32,9 +36,11 @@ import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.AdapterView;
+import android.widget.TextView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.Gallery;
 import de.raptor2101.GalDroid.R;
+import de.raptor2101.GalDroid.WebGallery.GalleryCache;
 import de.raptor2101.GalDroid.WebGallery.GalleryImageAdapter;
 import de.raptor2101.GalDroid.WebGallery.GalleryImageAdapter.CleanupMode;
 import de.raptor2101.GalDroid.WebGallery.GalleryImageAdapter.DisplayTarget;
@@ -42,10 +48,11 @@ import de.raptor2101.GalDroid.WebGallery.GalleryImageAdapter.ScaleMode;
 import de.raptor2101.GalDroid.WebGallery.GalleryImageAdapter.TitleConfig;
 import de.raptor2101.GalDroid.WebGallery.GalleryImageView;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryObject;
+import de.raptor2101.GalDroid.WebGallery.Tasks.ImageLoaderTaskListener;
 
 
 
-public class ImageViewActivity extends GalleryActivity implements OnTouchListener, OnItemSelectedListener {
+public class ImageViewActivity extends GalleryActivity implements OnTouchListener, OnItemSelectedListener, ImageLoaderTaskListener {
 	private enum TouchMode {
 		None,
 		Drag,
@@ -81,6 +88,7 @@ public class ImageViewActivity extends GalleryActivity implements OnTouchListene
     	mAdapterFullscreen.setDisplayTarget(DisplayTarget.FullScreen);
     	mAdapterFullscreen.setCleanupMode(CleanupMode.ForceCleanup);
     	mAdapterFullscreen.setMaxActiveDownloads(3);
+    	mAdapterFullscreen.setListener(this);
     	mGalleryFullscreen.setAdapter(mAdapterFullscreen);
     	
     	mAdapterThumbnails = new GalleryImageAdapter(this, new Gallery.LayoutParams(100,100), ScaleMode.DontScale);
@@ -188,6 +196,8 @@ public class ImageViewActivity extends GalleryActivity implements OnTouchListene
 		setCurrentIndex(position);
 		if(gallery == mGalleryFullscreen){
 			mGalleryThumbnails.setSelection(position);
+			
+			extractImageInformations();
 		}
 		else {
 			mGalleryFullscreen.setSelection(position);
@@ -211,6 +221,153 @@ public class ImageViewActivity extends GalleryActivity implements OnTouchListene
         
         mGalleryFullscreen.setSelection(currentIndex);
         mGalleryThumbnails.setSelection(currentIndex);
+	}
+
+	public void onLoadingStarted(String uniqueId) {
+		// Nothing todo		
+	}
+
+	public void onLoadingProgress(String uniqueId, int currentValue,
+			int maxValue) {
+		// Nothing todo
+		
+	}
+
+	public void onLoadingCompleted(String uniqueId, Bitmap bitmap) {
+		// if a Download is completed it could be the current diplayed image.
+		// so start decoding of its embeded informations
+		extractImageInformations();
+	}
+
+	private void extractImageInformations() {
+		GalleryImageView imageView = (GalleryImageView) mGalleryFullscreen.getSelectedView();
+		if(imageView != null && imageView.isLoaded()) {
+			GalleryObject galleryObject = imageView.getGalleryObject();
+			extractObjectInformation(galleryObject);
+			extractExifInformation(galleryObject);
+		} else {
+			clearImageInformations();
+		}
+		
+	}
+	
+	private void clearImageInformations() {
+		TextView textView = (TextView) findViewById(R.id.textTitle);
+		textView.setText("");
+		textView = (TextView) findViewById(R.id.textUploadDate);
+		textView.setText("");
+		
+		textView = (TextView) findViewById(R.id.textExifCreateDate);
+		textView.setText("");
+		
+		textView = (TextView) findViewById(R.id.textExifAperture);
+		textView.setText("");
+		
+		textView = (TextView) findViewById(R.id.textExifExposure);
+		textView.setText("");
+		
+		textView = (TextView) findViewById(R.id.textExifFlash);
+		textView.setText("");
+		
+		textView = (TextView) findViewById(R.id.textExifISO);
+		textView.setText("");
+		
+		textView = (TextView) findViewById(R.id.textExifModel);
+		textView.setText("");
+		
+		textView = (TextView) findViewById(R.id.textExifModel);
+		textView.setText("");
+		
+		textView = (TextView) findViewById(R.id.textExifMake);
+		textView.setText("");
+		
+		textView = (TextView) findViewById(R.id.textExifFocalLength);
+		textView.setText("");
+		
+		textView = (TextView) findViewById(R.id.textExifWhiteBalance);
+		textView.setText("");
+	}
+
+	private void extractObjectInformation(GalleryObject galleryObject) {
+
+		TextView textTitle = (TextView) findViewById(R.id.textTitle);
+		TextView textUploadDate = (TextView) findViewById(R.id.textUploadDate);
+		
+		
+		textTitle.setText(galleryObject.getTitle());
+		textUploadDate.setText(galleryObject.getDateUploaded().toLocaleString());
+	}
+	
+	private void extractExifInformation(GalleryObject galleryObject) {
+		GalDroidApp appContext = (GalDroidApp) this.getApplicationContext();
+		GalleryCache cache = appContext.getGalleryCache();
+		File cachedFile = cache.getFile(galleryObject.getImage().getUniqueId());
+		try {
+			ExifInterface exif = new ExifInterface(cachedFile.getAbsolutePath());
+			
+			
+			TextView textField = (TextView) findViewById(R.id.textExifCreateDate);
+			textField.setText(exif.getAttribute(ExifInterface.TAG_DATETIME));
+			
+			textField = (TextView) findViewById(R.id.textExifAperture);
+			textField.setText(exif.getAttribute(ExifInterface.TAG_APERTURE));
+			
+			try {
+				textField = (TextView) findViewById(R.id.textExifExposure);
+				float exposureTime = 1.0f / Float.parseFloat(exif.getAttribute(ExifInterface.TAG_EXPOSURE_TIME));
+				textField.setText(String.format("1/%.0fs", exposureTime));
+			} catch (Exception e) {
+				
+			}
+			
+			try {
+				textField = (TextView) findViewById(R.id.textExifFlash);
+				int flash = exif.getAttributeInt(ExifInterface.TAG_FLASH, 0);
+				textField.setText(String.format("%d", flash));
+			} catch (Exception e) {
+				
+			}
+			
+			textField = (TextView) findViewById(R.id.textExifISO);
+			textField.setText(exif.getAttribute(ExifInterface.TAG_ISO));
+			
+			textField = (TextView) findViewById(R.id.textExifModel);
+			textField.setText(exif.getAttribute(ExifInterface.TAG_MODEL));
+			
+			textField = (TextView) findViewById(R.id.textExifModel);
+			textField.setText(exif.getAttribute(ExifInterface.TAG_MODEL));
+			
+			textField = (TextView) findViewById(R.id.textExifMake);
+			textField.setText(exif.getAttribute(ExifInterface.TAG_MAKE));
+			
+			try {
+				double focalLength = exif.getAttributeDouble(ExifInterface.TAG_FOCAL_LENGTH, 0);
+				textField = (TextView) findViewById(R.id.textExifFocalLength);
+				textField.setText(String.format("%.0fmm", focalLength));
+			} catch (Exception e) {
+
+			}
+			
+			try {
+				textField = (TextView) findViewById(R.id.textExifWhiteBalance);
+				int whiteBalance = exif.getAttributeInt(ExifInterface.TAG_FLASH, 0);
+				if(whiteBalance == ExifInterface.WHITEBALANCE_AUTO) {
+					textField.setText(R.string.object_exif_whitebalance_auto);
+				}
+				else {
+					textField.setText(R.string.object_exif_whitebalance_manual);
+				}
+			} catch (Exception e) {
+				
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	public void onLoadingCancelled(String uniqueId) {
+		// Nothing todo
+		
 	}
 }
 

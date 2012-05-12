@@ -37,6 +37,7 @@ import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryObject;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.WebGallery;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.WebGallery.ImageSize;
 import de.raptor2101.GalDroid.WebGallery.Tasks.ImageLoaderTask;
+import de.raptor2101.GalDroid.WebGallery.Tasks.ImageLoaderTaskListener;
 
 public class GalleryImageAdapter extends BaseAdapter {
 	private final static String ClassTag = "GalleryImageAdapter";
@@ -71,6 +72,7 @@ public class GalleryImageAdapter extends BaseAdapter {
 	private ImageSize mImageSize;
 	private CleanupMode mCleanupMode;
 	
+	private WeakReference<ImageLoaderTaskListener> mListener;
 	private ArrayList<WeakReference<GalleryImageView>> mImageViews;
 	
 	private Queue<WeakReference<ImageLoaderTask>> mActiveDownloadTasks;
@@ -93,6 +95,11 @@ public class GalleryImageAdapter extends BaseAdapter {
 		mScaleMode = scaleMode;
 		mActiveDownloadTasks = new LinkedList<WeakReference<ImageLoaderTask>>(); 
 		mMaxActiveDownloadTask = -1;
+		mListener = new WeakReference<ImageLoaderTaskListener>(null);
+	}
+	
+	public void setListener(ImageLoaderTaskListener listener) {
+		mListener = new WeakReference<ImageLoaderTaskListener>(listener);
 	}
 	
 	public void setGalleryObjects(List<GalleryObject> galleryObjects) {	
@@ -153,7 +160,7 @@ public class GalleryImageAdapter extends BaseAdapter {
 		imageView= mImageViews.get(position).get();
 		if(imageView == null) {
 			Log.d(ClassTag, String.format("Miss ImageView Reference", objectId));
-			imageView = CreateImageView(galleryObject, objectId);
+			imageView = CreateImageView(galleryObject);
 			mImageViews.set(position, new WeakReference<GalleryImageView>(imageView));
 		}
 		
@@ -166,12 +173,12 @@ public class GalleryImageAdapter extends BaseAdapter {
 		return imageView;
 	}
 
-	private GalleryImageView CreateImageView(GalleryObject galleryObject,
-			String objectId) {
+	private GalleryImageView CreateImageView(GalleryObject galleryObject) {
 		GalleryImageView imageView;
 		imageView = new GalleryImageView(mContext,this.mLayoutParams,this.mTitleConfig == TitleConfig.ShowTitle);
 		imageView.setLayoutParams(mLayoutParams);
 		imageView.setGalleryObject(galleryObject);
+		imageView.setListener(mListener.get());
 		return imageView;
 	}
 
