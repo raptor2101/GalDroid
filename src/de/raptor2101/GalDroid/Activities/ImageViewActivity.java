@@ -206,7 +206,7 @@ public class ImageViewActivity extends GalleryActivity implements OnTouchListene
 		
 		int currentIndex = getCurrentIndex();
         if(currentIndex == -1){
-        	currentIndex = getIntent().getExtras().getInt(".de.raptor2101.GalDroid.CurrentIndex");
+        	currentIndex = getIntent().getExtras().getInt(GalDroidApp.INTENT_EXTRA_DISPLAY_INDEX);
         }
         
         mGalleryFullscreen.setSelection(currentIndex);
