@@ -28,6 +28,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.sax.RootElement;
+
 
 import de.raptor2101.GalDroid.WebGallery.Gallery3.DownloadObject;
 import de.raptor2101.GalDroid.WebGallery.Gallery3.Gallery3Imp;
@@ -85,7 +87,7 @@ public abstract class Entity implements GalleryObject {
 	}
 	
 	public String getObjectId() {
-		return String.format("%d", mId);
+		return String.format("%s/%d", mRootLink, mId);
 	}
 	
 	public String getObjectLink() {
