@@ -150,19 +150,19 @@ public class GalleryCache {
 		String hash = buildHash(sourceUrl);
 		File cacheFile = new File(mCacheDir, hash);
 		
-		if (!cacheFile.exists()) {
-			try {
-				Log.d(ClassTag, "Create CacheFile " + sourceUrl);
-				cacheFile.createNewFile();
-				return new FileOutputStream(cacheFile);
-				
-			} catch (IOException e) {
-				Log.e(ClassTag, "Error while accessing");
-				throw e;				
-			}	
+		if (cacheFile.exists()) {
+			cacheFile.delete();
 		}
-		Log.d(ClassTag, "File already exist " + sourceUrl);
-		throw new IOException("File already exist " + sourceUrl);
+		
+		try {
+			Log.d(ClassTag, "Create CacheFile " + sourceUrl);
+			cacheFile.createNewFile();
+			return new FileOutputStream(cacheFile);
+			
+		} catch (IOException e) {
+			Log.e(ClassTag, "Error while accessing");
+			throw e;				
+		}	
 	}
 	
 	public void removeCacheFile(String uniqueId) {
