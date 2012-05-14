@@ -181,7 +181,9 @@ public class Gallery3Imp implements WebGallery {
 				List<JSONObject> jsonObjects = loadJSONObjectsParallel(LinkRest_LoadBunchItems,members,5,listener);
 				
 				for(JSONObject jsonObject:jsonObjects) {
-					displayObjects.add(EntityFactory.parseJSON(jsonObject, this));
+					if(jsonObject != null) {
+						displayObjects.add(EntityFactory.parseJSON(jsonObject, this));
+					}
 				}
 			}
 			else displayObjects = new ArrayList<GalleryObject>(0);
