@@ -76,6 +76,7 @@ public class GalleryImageView extends LinearLayout implements ImageLoaderTaskLis
 		}
 		
 		mImageLoaderTask = null;
+		mListener = new WeakReference<ImageLoaderTaskListener>(null);
 	}
 	
 	public void setGalleryObject(GalleryObject galleryObject)
