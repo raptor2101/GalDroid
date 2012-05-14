@@ -48,7 +48,6 @@ import de.raptor2101.GalDroid.WebGallery.Gallery3.JSON.CommentEntity.CommentStat
 import de.raptor2101.GalDroid.WebGallery.Gallery3.JSON.Entity;
 import de.raptor2101.GalDroid.WebGallery.Gallery3.JSON.EntityFactory;
 import de.raptor2101.GalDroid.WebGallery.Gallery3.Tasks.JSONArrayLoaderTask;
-import de.raptor2101.GalDroid.WebGallery.Gallery3.Tasks.JSONObjectLoaderTask;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryDownloadObject;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryObject;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryObjectComment;
@@ -106,16 +105,11 @@ public class Gallery3Imp implements WebGallery {
 		int objectSize = urls.size();
 		ArrayList<JSONArrayLoaderTask> tasks = new ArrayList<JSONArrayLoaderTask>(taskCount);
 		
-		ProgressListener progressListener = new ProgressListener(listener, objectSize);
-		
 		ArrayList<JSONObject> jsonObjects = new ArrayList<JSONObject>(objectSize);
-		for(int i=0; i<objectSize; i++ ) {
-			jsonObjects.add(null);
-		}
 		
 		for(int i=0; i<objectSize; ) {
 			StringBuilder requstUrl = new StringBuilder(MAX_REQUEST_SIZE);
-			JSONArrayLoaderTask task = new JSONArrayLoaderTask(jsonObjects, i, progressListener);
+			JSONArrayLoaderTask task = new JSONArrayLoaderTask();
 			tasks.add(task);
 			/*
 			 *  TODO Kommentar anpassen  
@@ -140,7 +134,15 @@ public class Gallery3Imp implements WebGallery {
 		for(JSONArrayLoaderTask task:tasks) {
 			if(task.getStatus() != Status.FINISHED) {
 				try {
-					task.get();
+					JSONArray jsonArray = task.get();
+					for(int i=0; i<jsonArray.length(); i++) {
+						try {
+							jsonObjects.add(jsonArray.getJSONObject(i));
+							listener.handleProgress(jsonObjects.size(), objectSize);
+						} catch (JSONException e) {
+							e.printStackTrace();
+						}
+					}
 				} catch (InterruptedException e) {
 					
 				} catch (ExecutionException e) {
@@ -227,36 +229,13 @@ public class Gallery3Imp implements WebGallery {
 			ArrayList<String> tags = new ArrayList<String>(linkCount);
 			ArrayList<JSONObject> jsonObjects = new ArrayList<JSONObject>(linkCount);
 			if (linkCount>0) {
-				
-				
-				
-				ProgressListener progressListener = new ProgressListener(listener, linkCount);
-				JSONObjectLoaderTask task = new JSONObjectLoaderTask(jsonObjects, 0, progressListener);
-				
 				for(int i=0; i<linkCount; i++ ) {
-					jsonObjects.add(null);
-				}
-				RestCall[] restCalls = new RestCall[linkCount];
-				for(int i=0; i<linkCount; i++ ) {
-					restCalls[i] = buildRestCall(tagLinks.get(i),-1);
-				}
-				task.execute(restCalls);
-				if(task.getStatus() != Status.FINISHED) {
 					try {
-						task.get();
-					} catch (InterruptedException e) {
-						
-					} catch (ExecutionException e) {
-						
-					}
-				}
-				for (JSONObject jsonObject : jsonObjects) {
-					if(jsonObject != null) {
-						try {
-							tags.add(EntityFactory.parseTag(jsonObject));
-						} catch (JSONException e) {
-							// Nothing to do here
-						}
+						RestCall restCall = buildRestCall(tagLinks.get(i),-1);
+						JSONObject jsonObject = restCall.loadJSONObject();
+						tags.add(EntityFactory.parseTag(jsonObject));
+					} catch (JSONException e) {
+						// Nothing to do here
 					}
 				}
 			}
@@ -276,34 +255,14 @@ public class Gallery3Imp implements WebGallery {
 			JSONArray jsonItemComments = jsonObject.getJSONArray("members");
 			int commentCount = jsonItemComments.length();
 			ArrayList<JSONObject> jsonObjects = new ArrayList<JSONObject>(commentCount);
-			ProgressListener progressListener = new ProgressListener(listener, commentCount);
-			JSONObjectLoaderTask task = new JSONObjectLoaderTask(jsonObjects, 0, progressListener);
+			ArrayList<GalleryObjectComment> comments = new ArrayList<GalleryObjectComment>(commentCount);
+			ArrayList<String> authors = new ArrayList<String>(commentCount);			
 			
 			for(int i=0; i<commentCount; i++ ) {
-				jsonObjects.add(null);
-			}
-			
-			RestCall[] restCalls = new RestCall[commentCount];
-			for(int i=0; i<commentCount; i++ ) {
-				restCalls[i] = buildRestCall(jsonItemComments.getString(i),-1);
-			}
-			task.execute(restCalls);
-			
-			if(task.getStatus() != Status.FINISHED) {
-				try {
-					task.get();
-				} catch (InterruptedException e) {
-					
-				} catch (ExecutionException e) {
-					
-				}
-			}
-			ArrayList<CommentEntity> comments = new ArrayList<CommentEntity>(commentCount);
-			ArrayList<String> authors = new ArrayList<String>(commentCount);
-			
-			// Convert jsonObject to CommentEntity
-			for(JSONObject commentObject:jsonObjects) {
-				CommentEntity comment = EntityFactory.parseComment(commentObject);
+				restCall = buildRestCall(jsonItemComments.getString(i),-1);
+				jsonObject = restCall.loadJSONObject();
+				
+				CommentEntity comment = EntityFactory.parseComment(jsonObject);
 				if(comment.getState() == CommentState.Published) {
 					comments.add(comment);
 					
@@ -313,14 +272,7 @@ public class Gallery3Imp implements WebGallery {
 				}
 			}
 			
-			// Load all authors - Doesn't provided by gallery3
-			
-			// Typsafe cast...
-			ArrayList<GalleryObjectComment> gocs = new ArrayList<GalleryObjectComment>(comments.size());
-			for(CommentEntity comment:comments) {
-				gocs.add(comment);
-			}
-			return gocs;
+			return comments;
 		} catch (ClassCastException e) {
 			throw new IOException("GalleryObject doesn't contain to Gallery3Implementation", e);
 		}
