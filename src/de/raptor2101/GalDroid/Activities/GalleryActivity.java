@@ -26,10 +26,12 @@ import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryObject;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.WebGallery;
 import de.raptor2101.GalDroid.WebGallery.Tasks.GalleryLoaderTask;
 import de.raptor2101.GalDroid.WebGallery.Tasks.GalleryLoaderTaskListener;
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Window;
 import android.view.ViewGroup.LayoutParams;
 
 public abstract class GalleryActivity extends Activity {
@@ -64,12 +66,18 @@ public abstract class GalleryActivity extends Activity {
 	
 	private ProgressDialog mProgressDialog;
 	private GalleryLoaderTaskListener mListener;
-	
+	protected ActionBar mActionBar;
 	
 	@Override
     public void onCreate(Bundle savedInstanceState) {
     	super.onCreate(savedInstanceState);
-    	Log.d("GalleryActivity","New Activity");
+    	
+    	requestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
+		mActionBar = getActionBar();
+    	mActionBar.setDisplayShowHomeEnabled(false);
+    	mActionBar.setDisplayShowTitleEnabled(false);
+    	mActionBar.hide();
+    	
     	try {
     		initialize();
 			

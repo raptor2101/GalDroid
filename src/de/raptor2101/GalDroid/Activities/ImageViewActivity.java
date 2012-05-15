@@ -80,24 +80,14 @@ public class ImageViewActivity extends GalleryActivity implements OnTouchListene
 	
 	
 	private TouchMode mTouchMode;
-	
-	private ActionBar mActionBar;
 	private Handler mHideActionBarHandler;
 	private TableLayout mInformationView;
 	@Override
     public void onCreate(Bundle savedInstanceState) {
-		requestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
+		super.onCreate(savedInstanceState);
 		
 		setContentView(R.layout.image_view_activity);
-    	super.onCreate(savedInstanceState);
-    	
-    	mActionBar = getActionBar();
-    	
-    	mActionBar.setDisplayShowHomeEnabled(false);
-    	mActionBar.setDisplayShowTitleEnabled(false);
-    	mActionBar.hide();
-    	
-    	mHideActionBarHandler = new Handler();
+		mHideActionBarHandler = new Handler();
     	
     	mInformationView = (TableLayout) findViewById(R.id.viewImageInformations);
     	mInformationView.setVisibility(View.GONE);
