@@ -24,7 +24,7 @@
     <string name="object_tags">Schlagwörter</string>
     <string name="object_uploaddate">Veröffentlicht</string>
     <string name="object_comments">Kommentare</string>
-    <string name="menu_additional_info_object">Bildinformationen</string>
+    <string name="menu_image_info">Bildinformationen</string>
     <string name="object_informations">Gallery Informationen</string>
     <string name="object_exif_informations">EXIF Informationen</string>
     <string name="object_exif_createdate">Aufnahmezeit</string>

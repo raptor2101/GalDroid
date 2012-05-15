@@ -22,20 +22,32 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.PointF;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.media.ExifInterface;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.FloatMath;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup.LayoutParams;
+import android.view.Window;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.Gallery;
@@ -52,7 +64,7 @@ import de.raptor2101.GalDroid.WebGallery.Tasks.ImageLoaderTaskListener;
 
 
 
-public class ImageViewActivity extends GalleryActivity implements OnTouchListener, OnItemSelectedListener, ImageLoaderTaskListener {
+public class ImageViewActivity extends GalleryActivity implements OnTouchListener, OnItemSelectedListener, ImageLoaderTaskListener, OnItemClickListener, Runnable {
 	private enum TouchMode {
 		None,
 		Drag,
@@ -69,16 +81,33 @@ public class ImageViewActivity extends GalleryActivity implements OnTouchListene
 	
 	private TouchMode mTouchMode;
 	
+	private ActionBar mActionBar;
+	private Handler mHideActionBarHandler;
+	private TableLayout mInformationView;
 	@Override
     public void onCreate(Bundle savedInstanceState) {
-    	setContentView(R.layout.image_view_activity);
+		requestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
+		
+		setContentView(R.layout.image_view_activity);
     	super.onCreate(savedInstanceState);
+    	
+    	mActionBar = getActionBar();
+    	
+    	mActionBar.setDisplayShowHomeEnabled(false);
+    	mActionBar.setDisplayShowTitleEnabled(false);
+    	mActionBar.hide();
+    	
+    	mHideActionBarHandler = new Handler();
+    	
+    	mInformationView = (TableLayout) findViewById(R.id.viewImageInformations);
+    	mInformationView.setVisibility(View.GONE);
+    	
     	mGalleryFullscreen = (Gallery) findViewById(R.id.singleImageGallery);
     	mGalleryThumbnails = (Gallery) findViewById(R.id.thumbnailImageGallery);
     	mGalleryThumbnails.setWillNotCacheDrawing(true);
     	
-    	mGalleryFullscreen.setSystemUiVisibility(View.STATUS_BAR_HIDDEN);
-    	mGalleryFullscreen.setWillNotCacheDrawing(true);
+    	//mGalleryFullscreen.setSystemUiVisibility(View.STATUS_BAR_HIDDEN);
+    	//mGalleryFullscreen.setWillNotCacheDrawing(true);
     	
     	LayoutParams params = this.getWindow().getAttributes();
     	minDragHeight = params.height/5f;
@@ -97,6 +126,7 @@ public class ImageViewActivity extends GalleryActivity implements OnTouchListene
     	mAdapterThumbnails.setMaxActiveDownloads(20);
     	mGalleryThumbnails.setAdapter(mAdapterThumbnails);
     	
+    	mGalleryFullscreen.setOnItemClickListener(this);
     	mGalleryFullscreen.setOnTouchListener(this);
     	mGalleryFullscreen.setOnItemSelectedListener(this);
     	mGalleryThumbnails.setOnItemSelectedListener(this);
@@ -115,7 +145,25 @@ public class ImageViewActivity extends GalleryActivity implements OnTouchListene
     	super.onBackPressed();
     }
     
-
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.image_view_options_menu, menu);
+        return true;
+    }
+    
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+    	if(item.getItemId() == R.id.item_additional_info_object) {
+    		if(mInformationView.getVisibility() == View.GONE){
+    			mInformationView.setVisibility(View.VISIBLE);
+    		} else {
+    			mInformationView.setVisibility(View.GONE);
+    		}
+    	}
+    	return true;
+    }
+    
 	public boolean onTouch(View v, MotionEvent event) {
 		Log.d("ImageViewActivity", "EventAction: " + event.getAction());
 		switch(event.getAction()) {
@@ -123,6 +171,7 @@ public class ImageViewActivity extends GalleryActivity implements OnTouchListene
 				mTouchStartY = event.getY();
 				mTouchStartX = event.getX();
 				mTouchMode = TouchMode.Drag;
+				Log.d("ImageViewActivity","Start Drag");
 				break;
 			case MotionEvent.ACTION_POINTER_3_DOWN:
 			case MotionEvent.ACTION_POINTER_2_DOWN:
@@ -142,6 +191,7 @@ public class ImageViewActivity extends GalleryActivity implements OnTouchListene
 				if(mTouchMode == TouchMode.Drag) {
 					if(Math.abs(event.getX()-mTouchStartX) < 50) {
 						float diffY = event.getY()-mTouchStartY;
+						Log.d("ImageViewActivity",String.format("DragLength %.2f MinLength %.2f", Math.abs(diffY), minDragHeight));
 						if(Math.abs(diffY)>minDragHeight) {
 							if(diffY > 0 && mGalleryThumbnails.getVisibility() == View.VISIBLE) {
 								mGalleryThumbnails.setVisibility(View.GONE);
@@ -368,6 +418,21 @@ public class ImageViewActivity extends GalleryActivity implements OnTouchListene
 	public void onLoadingCancelled(String uniqueId) {
 		// Nothing todo
 		
+	}
+	
+	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+		if(mActionBar.isShowing()) {
+			mActionBar.hide();
+			mHideActionBarHandler.removeCallbacks(this);
+		} else {
+			mActionBar.show();
+			mHideActionBarHandler.postDelayed(this, 10000);
+		}
+		
+	}
+
+	public void run() {
+		mActionBar.hide();
 	}
 }
 
