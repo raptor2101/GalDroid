@@ -136,13 +136,6 @@ public class ImageViewActivity extends GalleryActivity implements OnTouchListene
     }
     
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.image_view_options_menu, menu);
-        return true;
-    }
-    
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
     	if(item.getItemId() == R.id.item_additional_info_object) {
     		if(mInformationView.getVisibility() == View.GONE){

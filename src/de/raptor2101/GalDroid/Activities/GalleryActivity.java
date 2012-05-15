@@ -31,6 +31,8 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.Window;
 import android.view.ViewGroup.LayoutParams;
 
@@ -152,6 +154,13 @@ public abstract class GalleryActivity extends Activity {
 	public final Object onRetainNonConfigurationInstance() {
 		return mConfigInstance;
 	}
+	
+	@Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.image_view_options_menu, menu);
+        return true;
+    }
 	
 	public abstract void onGalleryObjectsLoaded(List<GalleryObject> galleryObjects);
 	
