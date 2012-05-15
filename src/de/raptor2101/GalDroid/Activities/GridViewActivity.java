@@ -88,7 +88,7 @@ public class GridViewActivity extends GalleryActivity implements OnItemClickList
       switch(requestCode) { 
         case (CURRENT_INDEX) : { 
           
-          int scrollPos = data.getIntExtra("Current Index",-1);
+          int scrollPos = data.getIntExtra(GalDroidApp.INTENT_EXTRA_DISPLAY_INDEX,-1);
           mGridView.smoothScrollToPositionFromTop(scrollPos, 600);
  
           break; 
