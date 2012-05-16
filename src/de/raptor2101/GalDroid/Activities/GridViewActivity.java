@@ -104,9 +104,8 @@ public class GridViewActivity extends GalleryActivity implements OnItemClickList
         Intent intent;
         if (!galleryObject.hasChildren()) {
 			intent = new Intent(this, ImageViewActivity.class);
-			intent.putExtra(GalDroidApp.INTENT_EXTRA_DISPLAY_INDEX, pos);
 			intent.putExtra(GalDroidApp.INTENT_EXTRA_DISPLAY_GALLERY, getDisplayedGallery());
-			
+			intent.putExtra(GalDroidApp.INTENT_EXTRA_DISPLAY_OBJECT, galleryObject);
 			// The startActivityForResult is needed to scroll to the last disyplayed imaged from the ImageView
 			// The Result is handled by onActivityResult
 			this.startActivityForResult(intent, CURRENT_INDEX);
@@ -126,10 +125,10 @@ public class GridViewActivity extends GalleryActivity implements OnItemClickList
 		mAdapter.setGalleryObjects(galleryObjects);
 	}
 	
-	/*@Override
+	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
 		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.object_context_menu, menu);
+		inflater.inflate(R.menu.grid_view_context_menu, menu);		
 	}
 	
 	@Override
@@ -140,11 +139,13 @@ public class GridViewActivity extends GalleryActivity implements OnItemClickList
 		
 		if (item.getItemId() == R.id.item_additional_info_object) {
 			
-			Intent intent = new Intent(this, ObjectDetailsActivity.class);
-			intent.putExtra(".de.raptor2101.GalDroid.GalleryObject", imageView.getGalleryObject());
+			Intent intent = new Intent(this, ImageViewActivity.class);
+			intent.putExtra(GalDroidApp.INTENT_EXTRA_DISPLAY_GALLERY, getDisplayedGallery());
+			intent.putExtra(GalDroidApp.INTENT_EXTRA_DISPLAY_OBJECT, imageView.getGalleryObject());
+			intent.putExtra(GalDroidApp.INTENT_EXTRA_SHOW_IMAGE_INFO, true);
 			this.startActivity(intent);
 		}
 		return true;
-	}*/
+	}
 
 }

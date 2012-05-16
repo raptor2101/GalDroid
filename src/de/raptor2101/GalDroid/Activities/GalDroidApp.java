@@ -34,7 +34,10 @@ import android.net.http.AndroidHttpClient;
 public class GalDroidApp extends Application{
 	public static final String INTENT_EXTRA_DISPLAY_GALLERY = ".de.raptor2101.GalDroid.GalleryObject";
 	public static final String INTENT_EXTRA_DISPLAY_INDEX = ".de.raptor2101.GalDroid.DisplayIndex";
+	public static final String INTENT_EXTRA_DISPLAY_OBJECT = ".de.raptor2101.GalDroid.DisplayObject";
 	public static final String INTENT_EXTRA_GALLERY_PROVIDER = ".de.raptor2101.GalDroid.GalleryProvider";
+	public static final String INTENT_EXTRA_SHOW_IMAGE_INFO = ".de.raptor2101.GalDroid.ShowImageInfo";
+	
 	private WebGallery mWebGallery = null;
 	private GalleryCache mGalleryCache = null;
 	private List<GalleryObject> mGalleryChildObjects = null;

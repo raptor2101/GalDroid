@@ -100,7 +100,12 @@ public class ImageViewActivity extends GalleryActivity implements OnTouchListene
     	mHideActionBarHandler = new Handler();
     	
     	mInformationView = (TableLayout) findViewById(R.id.viewImageInformations);
-    	mInformationView.setVisibility(View.GONE);
+    	boolean showInfo =  getIntent().getExtras().getBoolean(GalDroidApp.INTENT_EXTRA_SHOW_IMAGE_INFO);
+    	if(showInfo) {
+    		mInformationView.setVisibility(View.VISIBLE);
+    	} else {
+    		mInformationView.setVisibility(View.GONE);
+    	}
     	
     	mGalleryFullscreen = (Gallery) findViewById(R.id.singleImageGallery);
     	mGalleryThumbnails = (Gallery) findViewById(R.id.thumbnailImageGallery);
@@ -266,7 +271,8 @@ public class ImageViewActivity extends GalleryActivity implements OnTouchListene
 		
 		int currentIndex = getCurrentIndex();
         if(currentIndex == -1){
-        	currentIndex = getIntent().getExtras().getInt(GalDroidApp.INTENT_EXTRA_DISPLAY_INDEX);
+        	GalleryObject currentObject = (GalleryObject) getIntent().getExtras().getSerializable(GalDroidApp.INTENT_EXTRA_DISPLAY_OBJECT);
+        	currentIndex = galleryObjects.indexOf(currentObject);
         }
         
         mGalleryFullscreen.setSelection(currentIndex);

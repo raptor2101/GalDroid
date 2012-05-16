@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+    <item android:id="@+id/item_additional_info_object" 
+        android:checked="false" 
+        android:visible="true" 
+        android:enabled="true" 
+        android:title="@string/menu_image_info"
+        android:icon="@drawable/ic_options_menu_info"
+        android:showAsAction="always"
+        android:checkable="false"></item>
+
+</menu>
