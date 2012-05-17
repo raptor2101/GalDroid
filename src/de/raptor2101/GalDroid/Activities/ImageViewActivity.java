@@ -47,11 +47,13 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ProgressBar;
 import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.Gallery;
 import de.raptor2101.GalDroid.R;
+import de.raptor2101.GalDroid.Activities.Listeners.TagLoaderListener;
 import de.raptor2101.GalDroid.WebGallery.GalleryCache;
 import de.raptor2101.GalDroid.WebGallery.GalleryImageAdapter;
 import de.raptor2101.GalDroid.WebGallery.GalleryImageAdapter.CleanupMode;
@@ -60,17 +62,26 @@ import de.raptor2101.GalDroid.WebGallery.GalleryImageAdapter.ScaleMode;
 import de.raptor2101.GalDroid.WebGallery.GalleryImageAdapter.TitleConfig;
 import de.raptor2101.GalDroid.WebGallery.GalleryImageView;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryObject;
+import de.raptor2101.GalDroid.WebGallery.Interfaces.WebGallery;
 import de.raptor2101.GalDroid.WebGallery.Tasks.ImageLoaderTaskListener;
+import de.raptor2101.GalDroid.WebGallery.Tasks.TagLoaderTask;
+import de.raptor2101.GalDroid.WebGallery.Tasks.TagLoaderTaskListener;
 
 
 
-public class ImageViewActivity extends GalleryActivity implements OnTouchListener, OnItemSelectedListener, ImageLoaderTaskListener, OnItemClickListener, Runnable {
+public class ImageViewActivity extends GalleryActivity 
+	implements OnTouchListener, OnItemSelectedListener, 
+				ImageLoaderTaskListener, OnItemClickListener, Runnable {
+	
 	private enum TouchMode {
 		None,
 		Drag,
 		Zoom,
 	}
 	
+	
+	
+	private WebGallery mWebGallery;
 	private Gallery mGalleryFullscreen;
 	private Gallery mGalleryThumbnails;
 	private PointF mScalePoint = new PointF();
@@ -84,6 +95,9 @@ public class ImageViewActivity extends GalleryActivity implements OnTouchListene
 	private ActionBar mActionBar;
 	private Handler mHideActionBarHandler;
 	private TableLayout mInformationView;
+	private TagLoaderTask mTagLoaderTask;
+	private TagLoaderListener mTagLoaderListener;
+	
 	@Override
     public void onCreate(Bundle savedInstanceState) {
 		requestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
@@ -116,6 +130,8 @@ public class ImageViewActivity extends GalleryActivity implements OnTouchListene
     	
     	LayoutParams params = this.getWindow().getAttributes();
     	minDragHeight = params.height/5f;
+    	GalDroidApp app = (GalDroidApp) getApplication();
+    	mWebGallery = app.getWebGallery();
     	
     	mAdapterFullscreen = new GalleryImageAdapter(this, new Gallery.LayoutParams(params.width,params.height), ScaleMode.ScaleSource);
     	mAdapterFullscreen.setTitleConfig(TitleConfig.HideTitle);
@@ -135,6 +151,8 @@ public class ImageViewActivity extends GalleryActivity implements OnTouchListene
     	mGalleryFullscreen.setOnTouchListener(this);
     	mGalleryFullscreen.setOnItemSelectedListener(this);
     	mGalleryThumbnails.setOnItemSelectedListener(this);
+    	
+    	mTagLoaderListener = new TagLoaderListener((TextView)findViewById(R.id.textTags), (ProgressBar)findViewById(R.id.progressBarTags));
     }
 
     @Override
@@ -310,6 +328,10 @@ public class ImageViewActivity extends GalleryActivity implements OnTouchListene
 	private void clearImageInformations() {
 		TextView textView = (TextView) findViewById(R.id.textTitle);
 		textView.setText("");
+		
+		textView = (TextView) findViewById(R.id.textTags);
+		textView.setText("");
+		
 		textView = (TextView) findViewById(R.id.textUploadDate);
 		textView.setText("");
 		
@@ -352,6 +374,9 @@ public class ImageViewActivity extends GalleryActivity implements OnTouchListene
 		
 		textTitle.setText(galleryObject.getTitle());
 		textUploadDate.setText(galleryObject.getDateUploaded().toLocaleString());
+		
+		mTagLoaderTask = new TagLoaderTask(mWebGallery, mTagLoaderListener);
+		mTagLoaderTask.execute(galleryObject);
 	}
 	
 	private void extractExifInformation(GalleryObject galleryObject) {
