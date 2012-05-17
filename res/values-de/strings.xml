@@ -38,4 +38,8 @@
     <string name="object_exif_whitebalance">Weißabgleich</string>
     <string name="object_exif_whitebalance_auto">Automatisch</string>
     <string name="object_exif_whitebalance_manual">Manuell</string>
+    <string name="object_geo_informations">Geo Informationen</string>
+    <string name="object_geo_lat">Breitengrad</string>
+    <string name="object_geo_long">Längengrad</string>
+    <string name="object_geo_height">Höhe</string>
 </resources>

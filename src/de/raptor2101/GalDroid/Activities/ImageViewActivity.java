@@ -364,6 +364,15 @@ public class ImageViewActivity extends GalleryActivity
 		
 		textView = (TextView) findViewById(R.id.textExifWhiteBalance);
 		textView.setText("");
+		
+		textView = (TextView) findViewById(R.id.textGeoLat);
+		textView.setText("");
+		
+		textView = (TextView) findViewById(R.id.textGeoLong);
+		textView.setText("");
+		
+		textView = (TextView) findViewById(R.id.textGeoHeight);
+		textView.setText("");
 	}
 
 	private void extractObjectInformation(GalleryObject galleryObject) {
@@ -441,11 +450,44 @@ public class ImageViewActivity extends GalleryActivity
 			} catch (Exception e) {
 				
 			}
+			
+			textField = (TextView) findViewById(R.id.textGeoLat);
+			String latitude = parseDegMinSec(exif.getAttribute(ExifInterface.TAG_GPS_LATITUDE));
+			textField.setText(latitude);
+			
+			textField = (TextView) findViewById(R.id.textGeoLong);
+			String longitude = parseDegMinSec(exif.getAttribute(ExifInterface.TAG_GPS_LONGITUDE));
+			textField.setText(longitude);
+			
+			textField = (TextView) findViewById(R.id.textGeoHeight);
+			String height = exif.getAttribute(ExifInterface.TAG_GPS_ALTITUDE);
+			textField.setText(parseHeight(height));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
+	private String parseDegMinSec(String tagGpsValue) {
+		try {
+			String[] values = tagGpsValue.split("[,/]");
+			float deg = Float.parseFloat(values[0])/Float.parseFloat(values[1]);
+			float min = Float.parseFloat(values[2])/Float.parseFloat(values[3]);
+			float sec = Float.parseFloat(values[4])/Float.parseFloat(values[5]);
+			return String.format("%.0f° %.0f' %.2f\"", deg,min,sec);
+		} catch (Exception e) {
+			return "";
+		}
+	}
+	private String parseHeight(String tagGpsValue) {
+		try {
+			String[] values = tagGpsValue.split("/");
+			float height = Float.parseFloat(values[0])/Float.parseFloat(values[1]);
+			return String.format("%.2fm", height);
+		} catch (Exception e) {
+			return "";
+		}
+	}
+
 	public void onLoadingCancelled(String uniqueId) {
 		// Nothing todo
 		

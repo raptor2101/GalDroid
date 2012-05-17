@@ -34,4 +34,8 @@
     <string name="object_exif_whitebalance">Whitebalance</string>
     <string name="object_exif_whitebalance_auto">automatic</string>
     <string name="object_exif_whitebalance_manual">manual</string>
+    <string name="object_geo_informations">Geo Informations</string>
+    <string name="object_geo_lat">Latitude</string>
+    <string name="object_geo_long">Longitude</string>
+    <string name="object_geo_height">Height</string>
 </resources>
