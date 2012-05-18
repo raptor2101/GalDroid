@@ -5,6 +5,8 @@ import java.io.IOException;
 
 import android.app.Activity;
 import android.media.ExifInterface;
+import android.os.AsyncTask;
+import android.os.AsyncTask.Status;
 import android.widget.TextView;
 import de.raptor2101.GalDroid.R;
 import de.raptor2101.GalDroid.Activities.Listeners.CommentLoaderListener;
@@ -104,6 +106,20 @@ public class ImageInformationExtractor {
 		
 		textTitle.setText(galleryObject.getTitle());
 		textUploadDate.setText(galleryObject.getDateUploaded().toLocaleString());
+		
+		if(mTagLoaderTask != null && (mTagLoaderTask.getStatus() == Status.RUNNING || mTagLoaderTask.getStatus() == Status.PENDING)) {
+			mTagLoaderTask.cancel(true);
+			while(mTagLoaderTask.getStatus() != Status.FINISHED) {
+				Thread.yield();
+			}
+		}
+		
+		if(mCommentLoaderTask != null && (mCommentLoaderTask.getStatus() == Status.RUNNING || mCommentLoaderTask.getStatus() == Status.PENDING)) {
+			mCommentLoaderTask.cancel(true);
+			while(mCommentLoaderTask.getStatus() != Status.FINISHED) {
+				Thread.yield();
+			}
+		}
 		
 		mTagLoaderTask = new TagLoaderTask(mWebGallery, mTagLoaderListener);
 		mTagLoaderTask.execute(galleryObject);
