@@ -112,19 +112,11 @@ public class ImageInformationExtractor {
 		if(mTagLoaderTask != null && (mTagLoaderTask.getStatus() == Status.RUNNING || mTagLoaderTask.getStatus() == Status.PENDING)) {
 			Log.d(ClassTag, "Aborting TagLoaderTask");
 			mTagLoaderTask.cancel(true);
-			while(mTagLoaderTask.getStatus() == Status.RUNNING) {
-				Thread.yield();
-			}
-			Log.d(ClassTag, "TagLoaderTask aborted");
 		}
 		
 		if(mCommentLoaderTask != null && (mCommentLoaderTask.getStatus() == Status.RUNNING || mCommentLoaderTask.getStatus() == Status.PENDING)) {
 			Log.d(ClassTag, "Aborting CommentLoaderTask");
 			mCommentLoaderTask.cancel(true);
-			while(mCommentLoaderTask.getStatus() == Status.RUNNING) {
-				Thread.yield();
-			}
-			Log.d(ClassTag, "CommentLoaderTask aborted");
 		}
 		
 		mTagLoaderTask = new TagLoaderTask(mWebGallery, mTagLoaderListener);
