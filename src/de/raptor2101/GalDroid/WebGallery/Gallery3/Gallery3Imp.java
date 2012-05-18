@@ -236,7 +236,10 @@ public class Gallery3Imp implements WebGallery {
 						tags.add(EntityFactory.parseTag(jsonObject));
 					} catch (JSONException e) {
 						// Nothing to do here
+					} catch (IOException e) {
+						// Nothing to do here
 					}
+					
 				}
 			}
 			return tags;
