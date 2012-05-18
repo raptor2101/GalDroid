@@ -43,6 +43,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
+import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.widget.AdapterView;
@@ -53,6 +54,7 @@ import android.widget.TextView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.Gallery;
 import de.raptor2101.GalDroid.R;
+import de.raptor2101.GalDroid.Activities.Listeners.CommentLoaderListener;
 import de.raptor2101.GalDroid.Activities.Listeners.TagLoaderListener;
 import de.raptor2101.GalDroid.WebGallery.GalleryCache;
 import de.raptor2101.GalDroid.WebGallery.GalleryImageAdapter;
@@ -63,6 +65,7 @@ import de.raptor2101.GalDroid.WebGallery.GalleryImageAdapter.TitleConfig;
 import de.raptor2101.GalDroid.WebGallery.GalleryImageView;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryObject;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.WebGallery;
+import de.raptor2101.GalDroid.WebGallery.Tasks.CommentLoaderTask;
 import de.raptor2101.GalDroid.WebGallery.Tasks.ImageLoaderTaskListener;
 import de.raptor2101.GalDroid.WebGallery.Tasks.TagLoaderTask;
 import de.raptor2101.GalDroid.WebGallery.Tasks.TagLoaderTaskListener;
@@ -98,6 +101,8 @@ public class ImageViewActivity extends GalleryActivity
 	private TagLoaderTask mTagLoaderTask;
 	private TagLoaderListener mTagLoaderListener;
 	
+	private CommentLoaderTask mCommentLoaderTask;
+	private CommentLoaderListener mCommentLoaderListener;
 	@Override
     public void onCreate(Bundle savedInstanceState) {
 		requestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
@@ -153,6 +158,7 @@ public class ImageViewActivity extends GalleryActivity
     	mGalleryThumbnails.setOnItemSelectedListener(this);
     	
     	mTagLoaderListener = new TagLoaderListener((TextView)findViewById(R.id.textTags), (ProgressBar)findViewById(R.id.progressBarTags));
+    	mCommentLoaderListener = new CommentLoaderListener((ViewGroup)findViewById(R.id.layoutComments), (ProgressBar)findViewById(R.id.progressBarComments));
     }
 
     @Override
@@ -386,6 +392,9 @@ public class ImageViewActivity extends GalleryActivity
 		
 		mTagLoaderTask = new TagLoaderTask(mWebGallery, mTagLoaderListener);
 		mTagLoaderTask.execute(galleryObject);
+		
+		mCommentLoaderTask = new CommentLoaderTask(mWebGallery, mCommentLoaderListener);
+		mCommentLoaderTask.execute(galleryObject);
 	}
 	
 	private void extractExifInformation(GalleryObject galleryObject) {
