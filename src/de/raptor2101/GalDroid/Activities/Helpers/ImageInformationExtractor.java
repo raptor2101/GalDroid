@@ -7,6 +7,7 @@ import android.app.Activity;
 import android.media.ExifInterface;
 import android.os.AsyncTask;
 import android.os.AsyncTask.Status;
+import android.util.Log;
 import android.widget.TextView;
 import de.raptor2101.GalDroid.R;
 import de.raptor2101.GalDroid.Activities.Listeners.CommentLoaderListener;
@@ -19,7 +20,7 @@ import de.raptor2101.GalDroid.WebGallery.Tasks.CommentLoaderTask;
 import de.raptor2101.GalDroid.WebGallery.Tasks.TagLoaderTask;
 
 public class ImageInformationExtractor {
-	
+	private final static String ClassTag = "ImageInformationExtractor";
 	private final Activity mActivity;
 	private final GalleryCache mCache;
 	private final CommentLoaderListener mCommentLoaderListener;
@@ -39,6 +40,7 @@ public class ImageInformationExtractor {
 	
 	public void extractImageInformations(GalleryImageView imageView) {
 		if(imageView != null && imageView.isLoaded()) {
+			Log.d(ClassTag, "Starting decoding GalleryObject information");
 			GalleryObject galleryObject = imageView.getGalleryObject();
 			extractObjectInformation(galleryObject);
 			extractExifInformation(galleryObject);
@@ -108,17 +110,21 @@ public class ImageInformationExtractor {
 		textUploadDate.setText(galleryObject.getDateUploaded().toLocaleString());
 		
 		if(mTagLoaderTask != null && (mTagLoaderTask.getStatus() == Status.RUNNING || mTagLoaderTask.getStatus() == Status.PENDING)) {
+			Log.d(ClassTag, "Aborting TagLoaderTask");
 			mTagLoaderTask.cancel(true);
-			while(mTagLoaderTask.getStatus() != Status.FINISHED) {
+			while(mTagLoaderTask.getStatus() == Status.RUNNING) {
 				Thread.yield();
 			}
+			Log.d(ClassTag, "TagLoaderTask aborted");
 		}
 		
 		if(mCommentLoaderTask != null && (mCommentLoaderTask.getStatus() == Status.RUNNING || mCommentLoaderTask.getStatus() == Status.PENDING)) {
+			Log.d(ClassTag, "Aborting CommentLoaderTask");
 			mCommentLoaderTask.cancel(true);
-			while(mCommentLoaderTask.getStatus() != Status.FINISHED) {
+			while(mCommentLoaderTask.getStatus() == Status.RUNNING) {
 				Thread.yield();
 			}
+			Log.d(ClassTag, "CommentLoaderTask aborted");
 		}
 		
 		mTagLoaderTask = new TagLoaderTask(mWebGallery, mTagLoaderListener);

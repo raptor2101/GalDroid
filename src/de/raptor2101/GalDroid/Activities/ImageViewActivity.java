@@ -70,6 +70,7 @@ public class ImageViewActivity extends GalleryActivity
 	private ImageInformationExtractor mInformationExtractor;
 	
 	private ActionBarHider mActionBarHider;
+	private ImageViewImageLoaderTaskListener mImageViewImageLoaderTaskListener;
 	
 	@Override
     public void onCreate(Bundle savedInstanceState) {
@@ -85,6 +86,10 @@ public class ImageViewActivity extends GalleryActivity
     	actionBar.hide();
     	mActionBarHider = new ActionBarHider(actionBar);
     	
+    	GalDroidApp app = (GalDroidApp) getApplication();
+    	WebGallery webGallery = app.getWebGallery();
+    	GalleryCache cache = app.getGalleryCache();
+    	
     	mInformationView = (TableLayout) findViewById(R.id.viewImageInformations);
     	boolean showInfo =  getIntent().getExtras().getBoolean(GalDroidApp.INTENT_EXTRA_SHOW_IMAGE_INFO);
     	if(showInfo) {
@@ -99,20 +104,21 @@ public class ImageViewActivity extends GalleryActivity
     	
     	LayoutParams params = this.getWindow().getAttributes();
     	
+    	TagLoaderListener tagLoaderListener = new TagLoaderListener((TextView)findViewById(R.id.textTags), (ProgressBar)findViewById(R.id.progressBarTags));
+    	CommentLoaderListener commentLoaderListener = new CommentLoaderListener((ViewGroup)findViewById(R.id.layoutComments), (ProgressBar)findViewById(R.id.progressBarComments));
+    	
+    	mInformationExtractor = new ImageInformationExtractor(this, cache, webGallery, tagLoaderListener, commentLoaderListener);
+    	
     	ImageViewOnTouchListener touchListener = new ImageViewOnTouchListener(mGalleryFullscreen, mGalleryThumbnails, params.height/5f);
-    	ImageViewImageLoaderTaskListener imageLoaderListener = new ImageViewImageLoaderTaskListener();
+    	mImageViewImageLoaderTaskListener = new ImageViewImageLoaderTaskListener(mGalleryFullscreen, mInformationExtractor);
     	
-    	
-    	GalDroidApp app = (GalDroidApp) getApplication();
-    	WebGallery webGallery = app.getWebGallery();
-    	GalleryCache cache = app.getGalleryCache();
     	
     	mAdapterFullscreen = new GalleryImageAdapter(this, new Gallery.LayoutParams(params.width,params.height), ScaleMode.ScaleSource);
     	mAdapterFullscreen.setTitleConfig(TitleConfig.HideTitle);
     	mAdapterFullscreen.setDisplayTarget(DisplayTarget.FullScreen);
     	mAdapterFullscreen.setCleanupMode(CleanupMode.ForceCleanup);
     	mAdapterFullscreen.setMaxActiveDownloads(3);
-    	mAdapterFullscreen.setListener(imageLoaderListener);
+    	mAdapterFullscreen.setListener(mImageViewImageLoaderTaskListener);
     	
     	
     	mAdapterThumbnails = new GalleryImageAdapter(this, new Gallery.LayoutParams(100,100), ScaleMode.DontScale);
@@ -127,13 +133,6 @@ public class ImageViewActivity extends GalleryActivity
     	mGalleryFullscreen.setOnTouchListener(touchListener);
     	mGalleryFullscreen.setOnItemSelectedListener(this);
     	mGalleryThumbnails.setOnItemSelectedListener(this);
-    	
-    	
-    	
-    	TagLoaderListener tagLoaderListener = new TagLoaderListener((TextView)findViewById(R.id.textTags), (ProgressBar)findViewById(R.id.progressBarTags));
-    	CommentLoaderListener commentLoaderListener = new CommentLoaderListener((ViewGroup)findViewById(R.id.layoutComments), (ProgressBar)findViewById(R.id.progressBarComments));
-    	
-    	mInformationExtractor = new ImageInformationExtractor(this, cache, webGallery, tagLoaderListener, commentLoaderListener);
     }
 
     @Override
@@ -172,12 +171,13 @@ public class ImageViewActivity extends GalleryActivity
 		setCurrentIndex(position);
 		if(gallery == mGalleryFullscreen){
 			mGalleryThumbnails.setSelection(position);
-			mInformationExtractor.extractImageInformations((GalleryImageView) view );
+			
 		}
 		else {
 			mGalleryFullscreen.setSelection(position);
+			view = mGalleryFullscreen.getSelectedView();
 		}
-		
+		mInformationExtractor.extractImageInformations((GalleryImageView) view );
 	}
 
 	public void onNothingSelected(AdapterView<?> arg0) {
