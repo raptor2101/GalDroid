@@ -111,8 +111,13 @@ public class ImageLoaderTask extends AsyncTask<Void, Progress, Bitmap> {
 				
 				Log.d(ClassTag, String.format("%s - Decoding local image", mDownloadObject));
 				Bitmap bitmap = BitmapFactory.decodeStream(inputStream, null, options);
-				mCache.cacheBitmap(uniqueId, bitmap);
-				Log.d(ClassTag, String.format("%s - Decoding local image - complete", mDownloadObject));
+				if(bitmap != null) {
+					mCache.cacheBitmap(uniqueId, bitmap);
+					Log.i(ClassTag, String.format("%s - Decoding local image - complete", mDownloadObject));
+				} else {
+					Log.w(ClassTag, String.format("Something goes wrong while Decoding %s, removing CachedFile", mDownloadObject));
+					mCache.removeCacheFile(uniqueId);
+				}
 				return bitmap;
 			}
 		} catch (Exception e) {
@@ -151,7 +156,10 @@ public class ImageLoaderTask extends AsyncTask<Void, Progress, Bitmap> {
 			fileStream.close();
 			networkStream.close();
 			
-			if(!isCancelled()) {
+			if(isCancelled()){
+				// if the download is aborted, the file is waste of bytes...
+				mCache.removeCacheFile(uniqueId);
+			} else {
 				mCache.refreshCacheFile(uniqueId);
 			}
 			Log.d(ClassTag, String.format("%s - Downloading to local cache file - complete", mDownloadObject));
