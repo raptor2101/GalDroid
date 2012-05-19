@@ -13,10 +13,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.util.Log;
+
 import de.raptor2101.GalDroid.WebGallery.GalleryStream;
 
 public class RestCall {
-	
+	private static final String ClassTag = "RestCall";
 	private final HttpUriRequest mRequest;
 	private final long mSuggestedLength;
 	private final Gallery3Imp mWebGallery;
@@ -28,7 +30,9 @@ public class RestCall {
 	}
 	
 	public GalleryStream open() throws IOException, ClientProtocolException {
+		Log.i(ClassTag, String.format("Open HttpRequest to %s", mRequest.getURI().toURL()));
 		HttpResponse response = mWebGallery.getHttpClient().execute(mRequest);
+		
 		if(response.getStatusLine().getStatusCode() > 200) {
 			throw new IOException("Something goes wrong!");
 		}
