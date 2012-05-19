@@ -18,6 +18,7 @@ import android.util.Log;
 
 public class CommentLoaderTask extends AsyncTask<GalleryObject, Progress, List<GalleryObjectComment>> implements GalleryProgressListener {
 
+	private static final String ClassTag = "CommentLoaderTask";
 	private final WebGallery mWebGallery;
 	private final WeakReference<CommentLoaderTaskListener> mListener;
 	
@@ -29,7 +30,9 @@ public class CommentLoaderTask extends AsyncTask<GalleryObject, Progress, List<G
 	@Override
 	protected List<GalleryObjectComment> doInBackground(GalleryObject... params) {
 		try {
-			return mWebGallery.getDisplayObjectComments(params[0], this);
+			GalleryObject galleryObject = params[0];
+			Log.d(ClassTag,String.format("doInBackground - loading comments for %s",galleryObject));
+			return mWebGallery.getDisplayObjectComments(galleryObject, this);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -44,6 +47,7 @@ public class CommentLoaderTask extends AsyncTask<GalleryObject, Progress, List<G
 	@Override
 	protected void onPreExecute() {
 		CommentLoaderTaskListener listener = mListener.get();
+		Log.d(ClassTag, String.format("onPreExecute ListenerAvaible: %s",listener != null));
 		if(listener != null){
 			listener.onLoadingStarted();
 		}
@@ -52,6 +56,7 @@ public class CommentLoaderTask extends AsyncTask<GalleryObject, Progress, List<G
 	@Override
 	protected void onProgressUpdate(Progress... values) {
 		CommentLoaderTaskListener listener = mListener.get();
+		Log.d(ClassTag, String.format("onProgressUpdate Parameter: %d ListenerAvaible: %s",values.length,listener != null));
 		if(values.length > 0 && listener != null)
 		{
 			listener.onLoadingProgress(values[0].curValue,values[0].maxValue);
@@ -61,14 +66,25 @@ public class CommentLoaderTask extends AsyncTask<GalleryObject, Progress, List<G
 	@Override
 	protected void onPostExecute(List<GalleryObjectComment> comments) {
 		CommentLoaderTaskListener listener = mListener.get();
-		Log.d("CommentLoaderTask", String.format("onPostExecute isCanceled: %s isListenerAvaible: %s",isCancelled(),listener != null));
-		if(!isCancelled() && listener != null)
+		Log.d(ClassTag, String.format("onPostExecute ListenerAvaible: %s",listener != null));
+		if(listener != null)
 		{
 			listener.onLoadingCompleted(comments);
 		}
 	}
 	
+	@Override
+	protected void onCancelled() {
+		CommentLoaderTaskListener listener = mListener.get();
+		Log.d(ClassTag, String.format("onCancelled ListenerAvaible: %s",listener != null));
+		if(listener != null)
+		{
+			listener.onLoadingCanceled();
+		}
+	}
+	
 	public void handleProgress(int curValue, int maxValue) {
+		Log.d(ClassTag, String.format("handleProgress curValue: %d maxValue: %d",curValue,maxValue));
 		publishProgress(new Progress(curValue, maxValue));
 	}
 

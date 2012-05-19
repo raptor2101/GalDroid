@@ -52,10 +52,20 @@ public class TagLoaderTask extends AsyncTask<GalleryObject, Progress, List<Strin
 	@Override
 	protected void onPostExecute(List<String> tags) {
 		TagLoaderTaskListener listener = mListener.get();
-		Log.d("TagLoaderTask", String.format("onPostExecute isCanceled: %s isListenerAvaible: %s",isCancelled(),listener != null));
-		if(!isCancelled() && listener != null)
+		Log.d("TagLoaderTask", String.format("onPostExecute isListenerAvaible: %s", listener != null));
+		if(listener != null)
 		{
 			listener.onLoadingCompleted(tags);
+		}
+	}
+	
+	@Override
+	protected void onCancelled() {
+		TagLoaderTaskListener listener = mListener.get();
+		Log.d("TagLoaderTask", String.format("onCancelled isListenerAvaible: %s", listener != null));
+		if(listener != null)
+		{
+			listener.onLoadingCanceled();
 		}
 	}
 	

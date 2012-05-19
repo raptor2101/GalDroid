@@ -158,6 +158,7 @@ public class ImageLoaderTask extends AsyncTask<Void, Progress, Bitmap> {
 			
 			if(isCancelled()){
 				// if the download is aborted, the file is waste of bytes...
+				Log.i(ClassTag, String.format("%s - Download canceled", mDownloadObject));
 				mCache.removeCacheFile(uniqueId);
 			} else {
 				mCache.refreshCacheFile(uniqueId);
