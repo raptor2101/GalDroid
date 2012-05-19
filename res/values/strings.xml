@@ -19,7 +19,11 @@
         <item>Gallery 3</item>
     </string-array>
     <string name="gallery_types_prompt">Choose a gallery type</string>
-    <string name="gallery_name">Gallery name</string><string name="object_title">Title</string><string name="object_tags">Tags</string><string name="object_createdate">Created</string><string name="object_uploaddate">Released</string><string name="object_comments">Comments</string>
+    <string name="gallery_name">Gallery name</string><string name="object_title">Title</string>
+    <string name="object_tags">Tags</string>
+    <string name="object_createdate">Created</string>
+    <string name="object_uploaddate">Released</string>
+    <string name="object_comments">Comments</string>
     <string name="menu_image_info">Additional Info</string>
     <string name="object_informations">Gallery Informations</string>
     <string name="object_exif_informations">EXIF Informationen</string>

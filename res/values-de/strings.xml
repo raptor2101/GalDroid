@@ -22,6 +22,7 @@
     <string name="gallery_name">Galerie - Name</string>
     <string name="object_title">Titel</string>
     <string name="object_tags">Schlagwörter</string>
+    <string name="object_createdate">Erzeugt</string>
     <string name="object_uploaddate">Veröffentlicht</string>
     <string name="object_comments">Kommentare</string>
     <string name="menu_image_info">Bildinformationen</string>
@@ -42,4 +43,5 @@
     <string name="object_geo_lat">Breitengrad</string>
     <string name="object_geo_long">Längengrad</string>
     <string name="object_geo_height">Höhe</string>
+    <string name="comment_wrote_at">schrieb</string>
 </resources>
