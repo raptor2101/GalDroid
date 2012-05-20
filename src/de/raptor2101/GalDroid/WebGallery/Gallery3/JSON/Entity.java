@@ -28,12 +28,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.sax.RootElement;
 
 
 import de.raptor2101.GalDroid.WebGallery.Gallery3.DownloadObject;
 import de.raptor2101.GalDroid.WebGallery.Gallery3.Gallery3Imp;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryObject;
+import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryDownloadObject;
 
 public abstract class Entity implements GalleryObject {
 	private final Pattern mPatternExtractTagId = Pattern.compile("tag_item/(\\d+),\\d+");
@@ -98,15 +98,15 @@ public abstract class Entity implements GalleryObject {
 		return mUploadDate;
 	}
 	
-	public DownloadObject getImage() {
+	public GalleryDownloadObject getImage() {
 		return createDownloadObject(mLink_Full, mFileSize_Full);
 	}
 	
-	public DownloadObject getThumbnail() {
+	public GalleryDownloadObject getThumbnail() {
 		return createDownloadObject(mLink_Thumb, mFileSize_Thumb);
 	}
 	
-	private DownloadObject createDownloadObject(String link, int fileSize) {
+	private GalleryDownloadObject createDownloadObject(String link, int fileSize) {
 		return !link.equals("")? new DownloadObject(mRootLink, link, fileSize) : null;
 	}
 	
