@@ -138,7 +138,9 @@ public class Gallery3Imp implements WebGallery {
 					for(int i=0; i<jsonArray.length(); i++) {
 						try {
 							jsonObjects.add(jsonArray.getJSONObject(i));
-							listener.handleProgress(jsonObjects.size(), objectSize);
+							if(listener != null) {
+								listener.handleProgress(jsonObjects.size(), objectSize);
+							}
 						} catch (JSONException e) {
 							e.printStackTrace();
 						}
