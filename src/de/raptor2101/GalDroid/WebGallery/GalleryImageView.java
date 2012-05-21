@@ -52,7 +52,7 @@ public class GalleryImageView extends LinearLayout implements ImageLoaderTaskLis
 		
 		mImageView = CreateImageView(context);
 		
-		mProgressBar = new ProgressBar(context,null,android.R.attr.progressBarStyleLarge);
+		mProgressBar = new ProgressBar(context,null,android.R.attr.progressBarStyleHorizontal);
 		mProgressBar.setVisibility(GONE);
 		this.addView(mProgressBar);
 		
@@ -135,6 +135,10 @@ public class GalleryImageView extends LinearLayout implements ImageLoaderTaskLis
 	public void setImageLoaderTask(ImageLoaderTask downloadTask) {
 		Log.d(CLASS_TAG, String.format("Reference downloadTask %s",mGalleryObject.getObjectId()));
 		mImageLoaderTask = downloadTask;		
+	}
+	
+	public ImageLoaderTask getImageLoaderTask() {
+		return mImageLoaderTask;		
 	}
 
 	public boolean isLoaded() {
