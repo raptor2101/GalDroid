@@ -32,7 +32,7 @@ public class ImageViewImageLoaderTaskListener implements ImageLoaderTaskListener
 		// so start decoding of its embeded informations
 		
 		GalleryImageView imageView = (GalleryImageView) mGallery.getSelectedView();
-		if(imageView.getGalleryObject().getImage().getUniqueId() == uniqueId) {
+		if(imageView != null && imageView.getGalleryObject().getImage().getUniqueId() == uniqueId) {
 			mInformationExtractor.extractImageInformations(imageView);
 		}
 	}
