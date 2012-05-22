@@ -168,6 +168,10 @@ public abstract class GalleryActivity extends Activity {
 		mConfigInstance.currentIndex = index;
 	}
 	
+	public boolean areGalleryObjectsAvailable() {
+		return mConfigInstance.mGalleryObjects != null;
+	}
+	
 	public GalleryLoaderTask getDownloadTask() {
 		if(mDownloadTask != null) {
 			return mDownloadTask.get();
