@@ -18,6 +18,7 @@
 
 package de.raptor2101.GalDroid.Activities;
 
+import java.lang.ref.WeakReference;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
@@ -52,7 +53,8 @@ public abstract class GalleryActivity extends Activity {
 			app.storeGalleryObjects(getDisplayedGallery(), galleryObjects);
 			mConfigInstance.mGalleryObjects = galleryObjects;
 			Log.d("GalleryActivity","Call onGalleryObjectsLoaded");
-			onGalleryObjectsLoaded(galleryObjects);		
+			onGalleryObjectsLoaded(galleryObjects);
+			
 		}
 	}
 	
@@ -65,6 +67,7 @@ public abstract class GalleryActivity extends Activity {
 	private ProgressDialog mProgressDialog;
 	private GalleryLoaderTaskListener mListener;
 	
+	private WeakReference<GalleryLoaderTask> mDownloadTask;
 	
 	@Override
     public void onCreate(Bundle savedInstanceState) {
@@ -113,6 +116,7 @@ public abstract class GalleryActivity extends Activity {
 				mListener = new GalleryLoadingListener();
 				GalleryLoaderTask task = new GalleryLoaderTask(gallery, mListener);
 				task.execute(diplayedGallery);
+				mDownloadTask = new WeakReference<GalleryLoaderTask>(task);
 		    } else {
 		    	// Without a valid Gallery nothing can be displayed... back to previous activity
 		    	this.finish();
@@ -162,5 +166,14 @@ public abstract class GalleryActivity extends Activity {
 	
 	protected void setCurrentIndex(int index){
 		mConfigInstance.currentIndex = index;
+	}
+	
+	public GalleryLoaderTask getDownloadTask() {
+		if(mDownloadTask != null) {
+			return mDownloadTask.get();
+		} else {
+			return null;
+		}
+		
 	}
 }
