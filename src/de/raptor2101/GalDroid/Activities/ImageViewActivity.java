@@ -24,6 +24,7 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -156,14 +157,15 @@ public class ImageViewActivity extends GalleryActivity
 	public void onItemSelected(AdapterView<?> gallery, View view, int position,
 			long arg3) {
 		setCurrentIndex(position);
+		
 		if(gallery == mGalleryFullscreen){
 			mGalleryThumbnails.setSelection(position);
-			
 		}
 		else {
 			mGalleryFullscreen.setSelection(position);
 			view = mGalleryFullscreen.getSelectedView();
 		}
+		
 		mInformationView.setGalleryImageView((GalleryImageView) view);
 	}
 
