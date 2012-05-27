@@ -101,9 +101,11 @@ public class ImageInformationView extends TableLayout {
 	}
 	
 	private void executeExtrationTask() {
-		clearImageInformations();
-		mExtractTask = new ExtractInformationTask(mCurrentImageView);
-		mExtractTask.execute();
+		if (mCurrentImageView != null) {
+			clearImageInformations();
+			mExtractTask = new ExtractInformationTask(mCurrentImageView);
+			mExtractTask.execute();
+		}
 	}
 
 	private void initialize(){
@@ -198,6 +200,7 @@ public class ImageInformationView extends TableLayout {
 	
 	private void extractExifInformation(GalleryObject galleryObject, GalleryCache galleryCache) {
 		File cachedFile = galleryCache.getFile(galleryObject.getImage().getUniqueId());
+		
 		try {
 			ExifInterface exif = new ExifInterface(cachedFile.getAbsolutePath());
 			
@@ -298,5 +301,13 @@ public class ImageInformationView extends TableLayout {
 	
 	public ExtractInformationTask getExtractionInfromationTask() {
 		return mExtractTask;
+	}
+
+	public CommentLoaderTask getCommentLoaderTask() {
+		return mCommentLoaderTask;
+	}
+	
+	public TagLoaderTask getTagLoaderTask() {
+		return mTagLoaderTask;
 	}
 }
