@@ -41,14 +41,15 @@ public class CommentLoaderListener implements CommentLoaderTaskListener {
 	public void onLoadingCompleted(List<GalleryObjectComment> comments) {
 		Context context = mRootView.getContext();
 		LayoutInflater inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		
+		DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM,Locale.getDefault());
+		
 		for(GalleryObjectComment comment:comments) {
 			View commentView = inflater.inflate(R.layout.comment_entry, null);
 			
 			TextView textAuthor = (TextView) commentView.findViewById(R.id.textCommentAuthor);
 			TextView textDate = (TextView) commentView.findViewById(R.id.textCommentPosted);
 			TextView textMessage = (TextView) commentView.findViewById(R.id.textCommentMessage);
-			
-			DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM,Locale.getDefault());
 			
 			textAuthor.setText(comment.getAuthorName());
 			textDate.setText(dateFormat.format(comment.getCreateDate()));
