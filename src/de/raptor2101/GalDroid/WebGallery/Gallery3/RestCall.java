@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -30,19 +31,22 @@ public class RestCall {
 	}
 	
 	public GalleryStream open() throws IOException, ClientProtocolException {
-		Log.i(ClassTag, String.format("Open HttpRequest to %s", mRequest.getURI().toURL()));
-		HttpResponse response = mWebGallery.getHttpClient().execute(mRequest);
-		
-		if(response.getStatusLine().getStatusCode() > 200) {
-			throw new IOException("Something goes wrong!");
+		HttpClient client = mWebGallery.getHttpClient();
+		synchronized (client) {
+			Log.i(ClassTag, String.format("Open HttpRequest to %s", mRequest.getURI().toURL()));
+			HttpResponse response = mWebGallery.getHttpClient().execute(mRequest);
+			Log.d(ClassTag, String.format("Response to %s opened", mRequest.getURI().toURL()));
+			if(response.getStatusLine().getStatusCode() > 200) {
+				throw new IOException("Something goes wrong!");
+			}
+	        Header[] headers = response.getHeaders("Content-Length");
+	        if(headers.length > 0) {
+	        	long contentLength = Long.parseLong(headers[0].getValue());
+	        	return new GalleryStream(response.getEntity().getContent(),contentLength);
+	        } else {
+	        	return new GalleryStream(response.getEntity().getContent(), mSuggestedLength);
+	        }
 		}
-        Header[] headers = response.getHeaders("Content-Length");
-        if(headers.length > 0) {
-        	long contentLength = Long.parseLong(headers[0].getValue());
-        	return new GalleryStream(response.getEntity().getContent(),contentLength);
-        } else {
-        	return new GalleryStream(response.getEntity().getContent(), mSuggestedLength);
-        }
 	}
 	
 	public JSONObject loadJSONObject() throws ClientProtocolException, IOException, JSONException {
