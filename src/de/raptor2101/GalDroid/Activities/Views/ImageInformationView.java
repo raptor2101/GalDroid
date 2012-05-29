@@ -2,6 +2,7 @@ package de.raptor2101.GalDroid.Activities.Views;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 
 import de.raptor2101.GalDroid.R;
@@ -44,12 +45,11 @@ public class ImageInformationView extends TableLayout {
 				if(task!=null) {
 					try {
 						task.get();
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (ExecutionException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+					} catch (Exception e) {
+						/* 
+						 * nothing to do here cause this task is only waiting for the image loader task
+						 * if it fails, all error handling is done by the surrounding logic
+						 */
 					}
 				}
 			}
@@ -67,8 +67,6 @@ public class ImageInformationView extends TableLayout {
 	private TagLoaderListener mTagLoaderListener;
 	private CommentLoaderListener mCommentLoaderListener;
 	
-	private TagLoaderTask mTagLoaderTask;
-	private CommentLoaderTask mCommentLoaderTask;
 	private ExtractInformationTask mExtractTask;
 	
 	private GalleryImageView mCurrentImageView;
@@ -107,18 +105,24 @@ public class ImageInformationView extends TableLayout {
 			clearImageInformations();
 			Log.d(ClassTag, "create ExtractInformationTask");
 			
-			if(mTagLoaderTask != null && mTagLoaderTask.getStatus() != Status.FINISHED) {
-				mTagLoaderTask.cancel(true);
-			}
-			mTagLoaderTask = null;
-			
-			if(mCommentLoaderTask != null && mCommentLoaderTask.getStatus() != Status.FINISHED) {
-				mCommentLoaderTask.cancel(true);
-			}
-			mCommentLoaderTask = null;
+			CheckAndAbortExistingTask();
 			
 			mExtractTask = new ExtractInformationTask(mCurrentImageView);
 			mExtractTask.execute();
+		}
+	}
+
+	private void CheckAndAbortExistingTask() {
+		TagLoaderTask tagLoaderTask = mTagLoaderListener.getTagLoaderTask();
+		if(tagLoaderTask != null && tagLoaderTask.getStatus() != Status.FINISHED) {
+			Log.d(ClassTag, "Aborting TagLoaderTask");
+			tagLoaderTask.cancel(true);
+		}
+		
+		CommentLoaderTask commentLoaderTask = mCommentLoaderListener.getCommentLoaderTask();
+		if(commentLoaderTask != null && commentLoaderTask.getStatus() != Status.FINISHED) {
+			Log.d(ClassTag, "Aborting CommentLoaderTask");
+			commentLoaderTask.cancel(true);
 		}
 	}
 
@@ -197,21 +201,17 @@ public class ImageInformationView extends TableLayout {
 		textTitle.setText(galleryObject.getTitle());
 		textUploadDate.setText(galleryObject.getDateUploaded().toLocaleString());
 		
-		if(mTagLoaderTask != null && (mTagLoaderTask.getStatus() == Status.RUNNING || mTagLoaderTask.getStatus() == Status.PENDING)) {
-			Log.d(ClassTag, "Aborting TagLoaderTask");
-			mTagLoaderTask.cancel(true);
-		}
+		CheckAndAbortExistingTask();
 		
-		if(mCommentLoaderTask != null && (mCommentLoaderTask.getStatus() == Status.RUNNING || mCommentLoaderTask.getStatus() == Status.PENDING)) {
-			Log.d(ClassTag, "Aborting CommentLoaderTask");
-			mCommentLoaderTask.cancel(true);
-		}
+		TagLoaderTask tagLoaderTask = new TagLoaderTask(webGallery, mTagLoaderListener);
+		mTagLoaderListener.setTagLoaderTask(tagLoaderTask);
+		tagLoaderTask.execute(galleryObject);
 		
-		mTagLoaderTask = new TagLoaderTask(webGallery, mTagLoaderListener);
-		mTagLoaderTask.execute(galleryObject);
 		
-		mCommentLoaderTask = new CommentLoaderTask(webGallery, mCommentLoaderListener);
-		mCommentLoaderTask.execute(galleryObject);
+		
+		CommentLoaderTask commentLoaderTask = new CommentLoaderTask(webGallery, mCommentLoaderListener);
+		mCommentLoaderListener.setCommentLoaderTask(commentLoaderTask);
+		commentLoaderTask.execute(galleryObject);
 		
 		extractExifInformation(galleryObject, galleryCache);
 	}
@@ -322,10 +322,10 @@ public class ImageInformationView extends TableLayout {
 	}
 
 	public CommentLoaderTask getCommentLoaderTask() {
-		return mCommentLoaderTask;
+		return mCommentLoaderListener.getCommentLoaderTask();
 	}
 	
 	public TagLoaderTask getTagLoaderTask() {
-		return mTagLoaderTask;
+		return mTagLoaderListener.getTagLoaderTask();
 	}
 }

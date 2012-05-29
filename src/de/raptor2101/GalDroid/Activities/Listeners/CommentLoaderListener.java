@@ -6,6 +6,7 @@ import java.util.Locale;
 
 import de.raptor2101.GalDroid.R;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryObjectComment;
+import de.raptor2101.GalDroid.WebGallery.Tasks.CommentLoaderTask;
 import de.raptor2101.GalDroid.WebGallery.Tasks.CommentLoaderTaskListener;
 
 import android.content.Context;
@@ -19,6 +20,7 @@ import android.widget.TextView;
 public class CommentLoaderListener implements CommentLoaderTaskListener {
 	private final ViewGroup mRootView;
 	private final ProgressBar mProgressBar;
+	private CommentLoaderTask mCommentLoaderTask;
 	
 	public CommentLoaderListener(ViewGroup rootView, ProgressBar progressBar) {
 		mProgressBar = progressBar;
@@ -64,11 +66,21 @@ public class CommentLoaderListener implements CommentLoaderTaskListener {
 		
 		mProgressBar.setVisibility(View.GONE);
 		mRootView.setVisibility(View.VISIBLE);
+		mCommentLoaderTask = null;
 	}
 
 	public void onLoadingCanceled() {
 		mProgressBar.setVisibility(View.GONE);
 		mRootView.setVisibility(View.VISIBLE);
+		mCommentLoaderTask = null;
+	}
+
+	public CommentLoaderTask getCommentLoaderTask() {
+		return mCommentLoaderTask;
+	}
+
+	public void setCommentLoaderTask(CommentLoaderTask commentLoaderTask) {
+		mCommentLoaderTask = commentLoaderTask;
 	}
 	
 };

@@ -5,11 +5,13 @@ import java.util.List;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import de.raptor2101.GalDroid.WebGallery.Tasks.TagLoaderTask;
 import de.raptor2101.GalDroid.WebGallery.Tasks.TagLoaderTaskListener;
 
 public class TagLoaderListener implements TagLoaderTaskListener {
 	private final TextView mTagTextView;
 	private final ProgressBar mProgressBar;
+	private TagLoaderTask mTagLoaderTask;
 	
 	public TagLoaderListener(TextView targetTextView, ProgressBar progressBar) {
 		mProgressBar = progressBar;
@@ -42,12 +44,23 @@ public class TagLoaderListener implements TagLoaderTaskListener {
 		
 		mProgressBar.setVisibility(View.GONE);
 		mTagTextView.setVisibility(View.VISIBLE);
+		mTagLoaderTask = null;
 	}
 
 	public void onLoadingCanceled() {
 		mTagTextView.setText(null);
 		mProgressBar.setVisibility(View.GONE);
 		mTagTextView.setVisibility(View.VISIBLE);
+		mTagLoaderTask = null;
 	}
+
+	public TagLoaderTask getTagLoaderTask() {
+		return mTagLoaderTask;
+	}
+
+	public void setTagLoaderTask(TagLoaderTask tagLoaderTask) {
+		mTagLoaderTask = tagLoaderTask;
+	}
+	
 	
 };
