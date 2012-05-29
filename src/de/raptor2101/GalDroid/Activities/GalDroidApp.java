@@ -74,6 +74,8 @@ public class GalDroidApp extends Application{
 	
 	public void setWebGallery(WebGallery webGallery) {
 		mWebGallery = webGallery;
+		mGalleryChildObjects = null;
+		mStoredGalleryObject = null;
 	}
 	
 	public void storeGalleryObjects(GalleryObject parent, List<GalleryObject> childObjects) {
