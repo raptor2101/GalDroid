@@ -83,6 +83,7 @@ public class ImageLoaderTask extends AsyncTask<Void, Progress, Bitmap> {
 
 	@Override
 	protected Bitmap doInBackground(Void... params) {
+		Thread.currentThread().setName(toString());
 		try {
 			Log.d(ClassTag, String.format("%s - Task running", mDownloadObject));
 			String uniqueId = mDownloadObject.getUniqueId();
@@ -224,5 +225,10 @@ public class ImageLoaderTask extends AsyncTask<Void, Progress, Bitmap> {
 	public String getUniqueId() {
 		
 		return mDownloadObject.getUniqueId();
+	}
+	
+	@Override
+	public String toString() {
+		return String.format("%s for %s", ClassTag, mDownloadObject.getUniqueId());
 	}
 }

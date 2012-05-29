@@ -40,6 +40,7 @@ public class ImageInformationView extends TableLayout {
 		
 		@Override
 		protected Void doInBackground(Void... params) {
+			Thread.currentThread().setName(toString());
 			if(!mGalleryImageView.isLoaded()) {
 				ImageLoaderTask task = mGalleryImageView.getImageLoaderTask();
 				if(task!=null) {
@@ -61,6 +62,11 @@ public class ImageInformationView extends TableLayout {
 			if(mGalleryImageView.isLoaded()) {
 				extractObjectInformation(mGalleryImageView.getGalleryObject());
 			}
+		}
+		
+		@Override
+		public String toString() {
+					return String.format("%s for %s", ClassTag, mGalleryImageView.getGalleryObject());
 		}
 	}
 	

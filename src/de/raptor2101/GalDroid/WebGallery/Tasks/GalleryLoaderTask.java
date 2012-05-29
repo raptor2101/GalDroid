@@ -45,8 +45,10 @@ public class GalleryLoaderTask extends AsyncTask<GalleryObject, Progress, List<G
 		
 		if (mWebGallery != null) {
 			if (params.length == 0 || params[0] == null) {
+				Thread.currentThread().setName(String.format("GalleryLoaderTask"));
 				objects = mWebGallery.getDisplayObjects(this);
 			} else {
+				Thread.currentThread().setName(String.format("GalleryLoaderTask for %s", params[0]));
 				objects = mWebGallery.getDisplayObjects(params[0], this);
 			}
 		}

@@ -31,6 +31,7 @@ public class CommentLoaderTask extends AsyncTask<GalleryObject, Progress, List<G
 	protected List<GalleryObjectComment> doInBackground(GalleryObject... params) {
 		try {
 			GalleryObject galleryObject = params[0];
+			Thread.currentThread().setName(String.format("%s for %s", ClassTag, params[0]));
 			Log.d(ClassTag,String.format("doInBackground - loading comments for %s",galleryObject));
 			return mWebGallery.getDisplayObjectComments(galleryObject, this);
 		} catch (IOException e) {
@@ -87,5 +88,4 @@ public class CommentLoaderTask extends AsyncTask<GalleryObject, Progress, List<G
 		Log.d(ClassTag, String.format("handleProgress curValue: %d maxValue: %d",curValue,maxValue));
 		publishProgress(new Progress(curValue, maxValue));
 	}
-
 }

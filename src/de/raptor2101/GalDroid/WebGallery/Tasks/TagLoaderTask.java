@@ -13,6 +13,7 @@ import android.util.Log;
 
 public class TagLoaderTask extends AsyncTask<GalleryObject, Progress, List<String>> implements GalleryProgressListener{
 	
+	private static final String ClassTag = "TagLoaderTask";
 	private final WebGallery mWebGallery;
 	private final WeakReference<TagLoaderTaskListener> mListener;
 	
@@ -24,6 +25,7 @@ public class TagLoaderTask extends AsyncTask<GalleryObject, Progress, List<Strin
 	@Override
 	protected List<String> doInBackground(GalleryObject... params) {
 		try {
+			Thread.currentThread().setName(String.format("%s for %s", ClassTag, params[0]));
 			return mWebGallery.getDisplayObjectTags(params[0], this);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
