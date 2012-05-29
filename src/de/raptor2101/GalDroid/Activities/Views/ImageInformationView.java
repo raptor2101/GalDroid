@@ -22,7 +22,6 @@ import android.os.AsyncTask.Status;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TableLayout;
@@ -85,6 +84,7 @@ public class ImageInformationView extends TableLayout {
 	}
 	
 	public void setGalleryImageView(GalleryImageView imageView) {
+		Log.d(ClassTag, "setGalleryImageView");
 		mCurrentImageView = imageView;
 		if(getVisibility() == VISIBLE) {
 			executeExtrationTask();
@@ -93,6 +93,7 @@ public class ImageInformationView extends TableLayout {
 	
 	@Override
 	public void setVisibility(int visibility) {
+		Log.d(ClassTag, "setVisibility");
 		if(visibility == VISIBLE) {
 			executeExtrationTask();
 		}
@@ -101,8 +102,10 @@ public class ImageInformationView extends TableLayout {
 	}
 	
 	private void executeExtrationTask() {
+		Log.d(ClassTag, "executeExtrationTask");
 		if (mCurrentImageView != null) {
 			clearImageInformations();
+			Log.d(ClassTag, "create ExtractInformationTask");
 			mExtractTask = new ExtractInformationTask(mCurrentImageView);
 			mExtractTask.execute();
 		}
