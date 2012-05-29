@@ -106,6 +106,17 @@ public class ImageInformationView extends TableLayout {
 		if (mCurrentImageView != null) {
 			clearImageInformations();
 			Log.d(ClassTag, "create ExtractInformationTask");
+			
+			if(mTagLoaderTask != null && mTagLoaderTask.getStatus() != Status.FINISHED) {
+				mTagLoaderTask.cancel(true);
+			}
+			mTagLoaderTask = null;
+			
+			if(mCommentLoaderTask != null && mCommentLoaderTask.getStatus() != Status.FINISHED) {
+				mCommentLoaderTask.cancel(true);
+			}
+			mCommentLoaderTask = null;
+			
 			mExtractTask = new ExtractInformationTask(mCurrentImageView);
 			mExtractTask.execute();
 		}
@@ -121,6 +132,10 @@ public class ImageInformationView extends TableLayout {
 	}
 	
 	private void clearImageInformations() {
+		
+		ViewGroup commentView = (ViewGroup)findViewById(R.id.layoutComments);
+		commentView.removeAllViews();
+		
 		TextView textView = (TextView) findViewById(R.id.textTitle);
 		textView.setText("");
 		
