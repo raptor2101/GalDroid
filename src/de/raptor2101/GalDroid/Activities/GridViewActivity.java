@@ -41,13 +41,14 @@ import de.raptor2101.GalDroid.WebGallery.GalleryImageView;
 
 import de.raptor2101.GalDroid.WebGallery.GalleryImageAdapter.TitleConfig;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryObject;
+import de.raptor2101.GalDroid.WebGallery.Tasks.ImageLoaderTask;
 
 public class GridViewActivity extends GalleryActivity implements OnItemClickListener {
 	
 	private static final int CURRENT_INDEX = 0;
 	private GridView mGridView;
 	private GalleryImageAdapter mAdapter;
-	
+	private ImageLoaderTask mImageLoaderTask;
 	@Override
     public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -58,7 +59,9 @@ public class GridViewActivity extends GalleryActivity implements OnItemClickList
     	mGridView.setWillNotCacheDrawing(true);
         mGridView.setOnItemClickListener(this);
         
-        mAdapter = new GalleryImageAdapter(this, new GridView.LayoutParams(295, 295), ScaleMode.ScaleSource);
+        GalDroidApp app = (GalDroidApp) getApplicationContext();
+        mImageLoaderTask = new ImageLoaderTask(app.getWebGallery(), app.getGalleryCache());
+        mAdapter = new GalleryImageAdapter(this, new GridView.LayoutParams(295, 295), ScaleMode.ScaleSource, mImageLoaderTask);
         mAdapter.setTitleConfig(TitleConfig.ShowTitle);
 		
         mGridView.setAdapter(mAdapter);

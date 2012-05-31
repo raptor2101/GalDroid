@@ -43,7 +43,6 @@ public class GalleryImageView extends LinearLayout implements ImageLoaderTaskLis
 	private final boolean mShowTitle;
 	private GalleryObject mGalleryObject;
 	private Bitmap mBitmap;
-	private ImageLoaderTask mImageLoaderTask;
 	private WeakReference<ImageLoaderTaskListener> mListener;
 	
 	public GalleryImageView(Context context, android.view.ViewGroup.LayoutParams layoutParams, boolean showTitle) {
@@ -75,7 +74,6 @@ public class GalleryImageView extends LinearLayout implements ImageLoaderTaskLis
 			mTitleTextView = null;
 		}
 		
-		mImageLoaderTask = null;
 		mListener = new WeakReference<ImageLoaderTaskListener>(null);
 	}
 	
@@ -123,30 +121,8 @@ public class GalleryImageView extends LinearLayout implements ImageLoaderTaskLis
 		mImageView.setImageMatrix(matrix);
 	}
 
-	public void cancelImageLoaderTask(){
-		
-		if(mImageLoaderTask != null){
-			Log.d(CLASS_TAG, String.format("Cancel downloadTask %s",mGalleryObject.getObjectId()));
-			mImageLoaderTask.cancel(true);
-			mImageLoaderTask = null;
-		}
-	}
-
-	public void setImageLoaderTask(ImageLoaderTask downloadTask) {
-		Log.d(CLASS_TAG, String.format("Reference downloadTask %s",mGalleryObject.getObjectId()));
-		mImageLoaderTask = downloadTask;		
-	}
-	
-	public ImageLoaderTask getImageLoaderTask() {
-		return mImageLoaderTask;		
-	}
-
 	public boolean isLoaded() {
 		return mBitmap != null;
-	}
-
-	public boolean isLoading() {
-		return mImageLoaderTask != null && mImageLoaderTask.getStatus() != Status.FINISHED;
 	}
 
 	public String getObjectId() {
@@ -177,7 +153,6 @@ public class GalleryImageView extends LinearLayout implements ImageLoaderTaskLis
 		mProgressBar.setVisibility(GONE);
 		mImageView.setImageBitmap(bitmap);
 		mBitmap = bitmap;
-		mImageLoaderTask = null;
 		Log.d(CLASS_TAG, String.format("Loading done %s",uniqueId));
 		
 		ImageLoaderTaskListener listener = mListener.get();
@@ -188,7 +163,6 @@ public class GalleryImageView extends LinearLayout implements ImageLoaderTaskLis
 
 	public void onLoadingCancelled(String uniqueId) {
 		Log.d(CLASS_TAG, String.format("DownloadTask was cancalled %s",uniqueId));
-		mImageLoaderTask = null;
 		mProgressBar.setVisibility(GONE);
 		mBitmap = null;
 		

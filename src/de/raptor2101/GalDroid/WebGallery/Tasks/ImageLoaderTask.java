@@ -31,67 +31,70 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.view.ViewGroup.LayoutParams;
 import de.raptor2101.GalDroid.WebGallery.GalleryCache;
+import de.raptor2101.GalDroid.WebGallery.GalleryImageView;
 import de.raptor2101.GalDroid.WebGallery.GalleryStream;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryDownloadObject;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.WebGallery;
 
-public class ImageLoaderTask extends AsyncTask<Void, Progress, Bitmap> {
-	private final static String ClassTag = "ImageLoaderTask";
+
+public class ImageLoaderTask extends WorkerTask<ListenedParameter<GalleryDownloadObject, ImageLoaderTaskListener>, Progress, Bitmap> {
+	private final static String CLASS_TAG = "ImageLoaderTask";
 	private GalleryCache mCache;
-	private GalleryDownloadObject mDownloadObject;
-	private WeakReference<ImageLoaderTaskListener> mListener;
+	
 	private LayoutParams mLayoutParams;
 	private WebGallery mWebGallery;
 	
-	public ImageLoaderTask(WebGallery webGallery, GalleryCache cache, GalleryDownloadObject downloadObject){
+	public ImageLoaderTask(WebGallery webGallery, GalleryCache cache){
 		mWebGallery = webGallery;
 		mCache = cache;
-		mDownloadObject = downloadObject;
-		mListener = new WeakReference<ImageLoaderTaskListener>(null); 
-	}
-	
-	public void setListener(ImageLoaderTaskListener listener){
-		mListener = new WeakReference<ImageLoaderTaskListener>(listener); 
 	}
 	
 	public void setLayoutParams(LayoutParams layoutParams) {
 		mLayoutParams = layoutParams;
 	}
 	
+	public void download(GalleryDownloadObject galleryDownloadObject, ImageLoaderTaskListener listener) {
+		Log.d(CLASS_TAG,String.format("Enqueue download for %s", galleryDownloadObject));
+		ListenedParameter<GalleryDownloadObject, ImageLoaderTaskListener> parameter = new ListenedParameter<GalleryDownloadObject, ImageLoaderTaskListener>(galleryDownloadObject,listener);
+		enqueue(parameter);
+	}
+	
 	@Override
-	protected void onPreExecute() {
-		Log.d(ClassTag, String.format("%s - Task started", mDownloadObject));
-		ImageLoaderTaskListener listener = mListener.get();
+	protected void onPreExecute(ListenedParameter<GalleryDownloadObject, ImageLoaderTaskListener> parameter) {
+		GalleryDownloadObject galleryDownloadObject = parameter.getObject();
+		Log.d(CLASS_TAG, String.format("%s - Task started", galleryDownloadObject));
+		ImageLoaderTaskListener listener = parameter.getListener();
 		if(listener != null){
-			listener.onLoadingStarted(mDownloadObject.getUniqueId());
+			listener.onLoadingStarted(galleryDownloadObject.getUniqueId());
 		}
 	};
 	
 	@Override
-	protected void onCancelled() {
-		Log.d(ClassTag, String.format("%s - Task canceled", mDownloadObject));
+	protected void onCancelled(ListenedParameter<GalleryDownloadObject, ImageLoaderTaskListener> parameter, Bitmap bitmap) {
+		GalleryDownloadObject galleryDownloadObject = parameter.getObject();
+		Log.d(CLASS_TAG, String.format("%s - Task canceled", galleryDownloadObject));
 		
 		synchronized (mCache) {
-			mCache.removeCacheFile(mDownloadObject.getUniqueId());
+			mCache.removeCacheFile(galleryDownloadObject.getUniqueId());
 		}
 		
-		ImageLoaderTaskListener listener = mListener.get();
+		ImageLoaderTaskListener listener = parameter.getListener();
 		if(listener != null){
-			listener.onLoadingCancelled(mDownloadObject.getUniqueId());
+			listener.onLoadingCancelled(galleryDownloadObject.getUniqueId());
 		}
 	}
 
 	@Override
-	protected Bitmap doInBackground(Void... params) {
-		Thread.currentThread().setName(toString());
+	protected Bitmap doInBackground(ListenedParameter<GalleryDownloadObject, ImageLoaderTaskListener> parameter) {
+		GalleryDownloadObject galleryDownloadObject = parameter.getObject();
 		try {
-			Log.d(ClassTag, String.format("%s - Task running", mDownloadObject));
-			String uniqueId = mDownloadObject.getUniqueId();
+			Log.d(CLASS_TAG, String.format("%s - Task running", galleryDownloadObject));
+			String uniqueId = galleryDownloadObject.getUniqueId();
 			InputStream inputStream = mCache.getFileStream(uniqueId);
 			
 			if(inputStream == null) {
-				DownloadImage(uniqueId);
-				ScaleImage(uniqueId);
+				DownloadImage(galleryDownloadObject, parameter.getListener());
+				ScaleImage(galleryDownloadObject);
 				inputStream = mCache.getFileStream(uniqueId);
 			}
 			
@@ -110,39 +113,40 @@ public class ImageLoaderTask extends AsyncTask<Void, Progress, Bitmap> {
 					return null;
 				}
 				
-				Log.d(ClassTag, String.format("%s - Decoding local image", mDownloadObject));
+				Log.d(CLASS_TAG, String.format("%s - Decoding local image", galleryDownloadObject));
 				Bitmap bitmap = BitmapFactory.decodeStream(inputStream, null, options);
 				if(bitmap != null) {
 					mCache.cacheBitmap(uniqueId, bitmap);
-					Log.i(ClassTag, String.format("%s - Decoding local image - complete", mDownloadObject));
+					Log.i(CLASS_TAG, String.format("%s - Decoding local image - complete", galleryDownloadObject));
 				} else {
-					Log.w(ClassTag, String.format("Something goes wrong while Decoding %s, removing CachedFile", mDownloadObject));
+					Log.w(CLASS_TAG, String.format("Something goes wrong while Decoding %s, removing CachedFile", galleryDownloadObject));
 					mCache.removeCacheFile(uniqueId);
 				}
 				return bitmap;
 			}
 		} catch (Exception e) {
-			Log.w(ClassTag, String.format("Something goes wrong while Downloading %s. ExceptionMessage: %s",mDownloadObject,e.getMessage()));
+			Log.w(CLASS_TAG, String.format("Something goes wrong while Downloading %s. ExceptionMessage: %s",galleryDownloadObject,e.getMessage()));
 			return null;
 		}
 	}
 
 	@Override
-	protected void onPostExecute(Bitmap bitmap) {
-		Log.d(ClassTag, String.format("%s - Task done", mDownloadObject));
-		ImageLoaderTaskListener listener = mListener.get();
+	protected void onPostExecute(ListenedParameter<GalleryDownloadObject, ImageLoaderTaskListener> parameter, Bitmap bitmap) {
+		GalleryDownloadObject galleryDownloadObject = parameter.getObject();
+		Log.d(CLASS_TAG, String.format("%s - Task done", galleryDownloadObject));
+		ImageLoaderTaskListener listener = parameter.getListener();
 		if(!isCancelled() && listener != null)
 		{
-			listener.onLoadingCompleted(mDownloadObject.getUniqueId(), bitmap);
+			listener.onLoadingCompleted(galleryDownloadObject.getUniqueId(), bitmap);
 		}
 	}
 
-	private void DownloadImage(String uniqueId) throws IOException {
-		ImageLoaderTaskListener listener = mListener.get();		
+	private void DownloadImage(GalleryDownloadObject galleryDownloadObject, ImageLoaderTaskListener listener) throws IOException {
 		if(listener != null) {
-			Log.d(ClassTag, String.format("%s - Downloading to local cache file", mDownloadObject));
+			Log.d(CLASS_TAG, String.format("%s - Downloading to local cache file", galleryDownloadObject));
 			
-			GalleryStream networkStream = mWebGallery.getFileStream(mDownloadObject);
+			GalleryStream networkStream = mWebGallery.getFileStream(galleryDownloadObject);
+			String uniqueId = galleryDownloadObject.getUniqueId();
 			OutputStream fileStream = mCache.createCacheFile(uniqueId);
 			
 			byte[] writeCache = new byte[10*1024];
@@ -159,20 +163,21 @@ public class ImageLoaderTask extends AsyncTask<Void, Progress, Bitmap> {
 			
 			if(isCancelled()){
 				// if the download is aborted, the file is waste of bytes...
-				Log.i(ClassTag, String.format("%s - Download canceled", mDownloadObject));
+				Log.i(CLASS_TAG, String.format("%s - Download canceled", galleryDownloadObject));
 				mCache.removeCacheFile(uniqueId);
 			} else {
 				mCache.refreshCacheFile(uniqueId);
 			}
-			Log.d(ClassTag, String.format("%s - Downloading to local cache file - complete", mDownloadObject));
+			Log.d(CLASS_TAG, String.format("%s - Downloading to local cache file - complete", galleryDownloadObject));
 		}
 	}
 
-	private void ScaleImage(String uniqueId) throws IOException {
+	private void ScaleImage(GalleryDownloadObject galleryDownloadObject) throws IOException {
 		if(mLayoutParams != null) {
-			Log.d(ClassTag, String.format("%s - Decoding Bounds", mDownloadObject));
+			Log.d(CLASS_TAG, String.format("%s - Decoding Bounds", galleryDownloadObject));
 			
-			FileInputStream bitmapStream = mCache.getFileStream(uniqueId);
+			String uniqueId = galleryDownloadObject.getUniqueId();
+			FileInputStream bitmapStream = mCache.getFileStream(uniqueId );
 			Options options = new Options();
 			options.inJustDecodeBounds = true;
 			
@@ -185,7 +190,7 @@ public class ImageLoaderTask extends AsyncTask<Void, Progress, Bitmap> {
 			}
 			
 			bitmapStream.close();
-			Log.d(ClassTag, String.format("%s - Decoding Bounds - done", mDownloadObject));
+			Log.d(CLASS_TAG, String.format("%s - Decoding Bounds - done", galleryDownloadObject));
 			
 			int imgHeight = options.outHeight;
 			int imgWidth = options.outWidth;
@@ -212,23 +217,21 @@ public class ImageLoaderTask extends AsyncTask<Void, Progress, Bitmap> {
 				}
 				
 				bitmapStream = mCache.getFileStream(uniqueId);
-				Log.d(ClassTag, String.format("%s - Resize Image", mDownloadObject));
+				Log.d(CLASS_TAG, String.format("%s - Resize Image", galleryDownloadObject));
 				Bitmap bitmap = BitmapFactory.decodeStream(bitmapStream, null, options);
 				bitmapStream.close();
 				mCache.storeBitmap(uniqueId, bitmap);
 				bitmap.recycle();
-				Log.d(ClassTag, String.format("%s - Resize Image - done", mDownloadObject));
+				Log.d(CLASS_TAG, String.format("%s - Resize Image - done", galleryDownloadObject));
 			}
 		}
 	}
 
-	public String getUniqueId() {
-		
-		return mDownloadObject.getUniqueId();
-	}
-	
-	@Override
-	public String toString() {
-		return String.format("%s for %s", ClassTag, mDownloadObject.getUniqueId());
+	public boolean isDownloading(GalleryDownloadObject galleryDownloadObject) {
+		ListenedParameter<GalleryDownloadObject, ImageLoaderTaskListener> parameter = new ListenedParameter<GalleryDownloadObject, ImageLoaderTaskListener>(galleryDownloadObject, null);
+		boolean isActive = isActive(parameter);
+		boolean isEnqueued = isEnqueued(parameter);
+		Log.d(CLASS_TAG, String.format("isActive: %s isEnqueued %s", isActive, isEnqueued));
+		return isActive||isEnqueued;
 	}
 }

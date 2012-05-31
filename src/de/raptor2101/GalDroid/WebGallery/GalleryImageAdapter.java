@@ -61,30 +61,27 @@ public class GalleryImageAdapter extends BaseAdapter {
 		None
 	}
 	
-	private WebGallery mWebGallery;
+	//private WebGallery mWebGallery;
 	private GalleryCache mCache;
 	private Context mContext;
 	
 	private List<GalleryObject> mGalleryObjects;
 	private TitleConfig mTitleConfig;
 	private LayoutParams mLayoutParams;
-	private ScaleMode mScaleMode;
 	private ImageSize mImageSize;
+	private ScaleMode mScaleMode;
 	private CleanupMode mCleanupMode;
 	
 	private WeakReference<ImageLoaderTaskListener> mListener;
 	private ArrayList<WeakReference<GalleryImageView>> mImageViews;
 	
-	private Queue<WeakReference<ImageLoaderTask>> mActiveDownloadTasks;
-	private int mMaxActiveDownloadTask; 
+	private ImageLoaderTask mImageLoaderTask;
 	
-	public GalleryImageAdapter(Context context, LayoutParams layoutParams, ScaleMode scaleMode) {
+	public GalleryImageAdapter(Context context, LayoutParams layoutParams, ScaleMode scaleMode, ImageLoaderTask loaderTask) {
 		super();
 		GalDroidApp appContext = (GalDroidApp)context.getApplicationContext();
 		mContext = context;
 		mCache = appContext.getGalleryCache();
-		mWebGallery = appContext.getWebGallery();
-		mLayoutParams = layoutParams;
 		
 		mGalleryObjects = new ArrayList<GalleryObject>(0);
 		mImageViews = new ArrayList<WeakReference<GalleryImageView>>(0);
@@ -92,10 +89,11 @@ public class GalleryImageAdapter extends BaseAdapter {
 		mTitleConfig = TitleConfig.ShowTitle;
 		mImageSize = ImageSize.Thumbnail;
 		mCleanupMode = CleanupMode.None;
-		mScaleMode = scaleMode;
-		mActiveDownloadTasks = new LinkedList<WeakReference<ImageLoaderTask>>(); 
-		mMaxActiveDownloadTask = -1;
+		mLayoutParams = layoutParams;
+		
 		mListener = new WeakReference<ImageLoaderTaskListener>(null);
+		mImageLoaderTask = loaderTask;
+		mScaleMode = scaleMode;
 	}
 	
 	public void setListener(ImageLoaderTaskListener listener) {
@@ -126,10 +124,6 @@ public class GalleryImageAdapter extends BaseAdapter {
 	
 	public void setCleanupMode(CleanupMode cleanupMode) {
 		mCleanupMode = cleanupMode;
-	}
-	
-	public void setMaxActiveDownloads(int maxActiveDownloads) {
-		mMaxActiveDownloadTask = maxActiveDownloads;
 	}
 	
 	public List<GalleryObject> getGalleryObjects()
@@ -164,13 +158,19 @@ public class GalleryImageAdapter extends BaseAdapter {
 			mImageViews.set(position, new WeakReference<GalleryImageView>(imageView));
 		}
 		
+		GalleryDownloadObject downloadObject = getDownloadObject(galleryObject);
 		
-		if(!imageView.isLoaded() && ! imageView.isLoading()){
+		if(!imageView.isLoaded() && ! mImageLoaderTask.isDownloading(downloadObject)){
 			Log.d(ClassTag, String.format("Init Reload", galleryObject.getObjectId()));
-			loadGalleryImage(imageView, galleryObject);
+			loadGalleryImage(imageView, downloadObject);
 		}
 		
 		return imageView;
+	}
+
+	private GalleryDownloadObject getDownloadObject(GalleryObject galleryObject) {
+		GalleryDownloadObject downloadObject = mImageSize == ImageSize.Full ? galleryObject.getImage() : galleryObject.getThumbnail();
+		return downloadObject;
 	}
 
 	private GalleryImageView CreateImageView(GalleryObject galleryObject) {
@@ -189,7 +189,7 @@ public class GalleryImageAdapter extends BaseAdapter {
 			Log.d(ClassTag, String.format("Cached View %s", imageView.getObjectId()));
 			if(imageView.getGalleryObject().getObjectId() != galleryObject.getObjectId()) {
 				Log.d(ClassTag, String.format("Abort downloadTask %s", imageView.getObjectId()));
-				imageView.cancelImageLoaderTask();
+				// TODO abort...
 				if(mCleanupMode == CleanupMode.ForceCleanup) {
 					imageView.recylceBitmap();
 				}
@@ -198,42 +198,20 @@ public class GalleryImageAdapter extends BaseAdapter {
 		return imageView;
 	}
 
-	private void loadGalleryImage(GalleryImageView imageView, GalleryObject galleryObject) {
-		GalleryDownloadObject downloadObject = mImageSize == ImageSize.Full ? galleryObject.getImage() : galleryObject.getThumbnail();
-		
+	private void loadGalleryImage(GalleryImageView imageView, GalleryDownloadObject downloadObject) {
 		if(downloadObject == null) {
 			return;
 		}
 		
 		Bitmap cachedBitmap = mCache.getBitmap(downloadObject.getUniqueId());
 		if(cachedBitmap == null){
-			ImageLoaderTask downloadTask = new ImageLoaderTask(mWebGallery, mCache, downloadObject);
-			imageView.setImageLoaderTask(downloadTask);
-			downloadTask.setListener(imageView);
-			if (mScaleMode == ScaleMode.ScaleSource) {
-				downloadTask.setLayoutParams(mLayoutParams);
-			}
-			mActiveDownloadTasks.offer(new WeakReference<ImageLoaderTask>(downloadTask));
-			checkActiveDownloads();
-			downloadTask.execute();
+			// TODO Scale mode wieder einbauen
+			mImageLoaderTask.download(downloadObject, imageView);
 		}
 		else
 		{
 			imageView.onLoadingCompleted(downloadObject.getUniqueId(), cachedBitmap);
 		}
-	}
-
-	private void checkActiveDownloads() {
-		while(mMaxActiveDownloadTask >-1 && mActiveDownloadTasks.size()>mMaxActiveDownloadTask) {
-			WeakReference<ImageLoaderTask> reference = mActiveDownloadTasks.poll();
-			ImageLoaderTask task = reference.get();
-			
-			if(task != null) {
-				task.cancel(true);
-				reference.clear();
-			}
-		}
-		
 	}
 
 	public void cleanUp() {
@@ -242,10 +220,10 @@ public class GalleryImageAdapter extends BaseAdapter {
 			GalleryImageView imageView = reference.get();
 			if(imageView != null) {
 				Log.d(ClassTag, String.format("CleanUp ", imageView.getObjectId()));
-				imageView.cancelImageLoaderTask();
 				imageView.recylceBitmap();
 			}
 		}
+		mImageLoaderTask.cancel();
 		System.gc();
 	}
 
@@ -255,13 +233,17 @@ public class GalleryImageAdapter extends BaseAdapter {
 			if(imageView != null && !imageView.isLoaded()) {
 				GalleryObject galleryObject = imageView.getGalleryObject();
 				Log.d(ClassTag, String.format("Relaod ", imageView.getObjectId()));
-								
-				loadGalleryImage(imageView, galleryObject);
+				GalleryDownloadObject downloadObject = getDownloadObject(galleryObject);
+				loadGalleryImage(imageView, downloadObject);
 			}
 		}
 	}
 
 	public boolean isLoaded() {
 		return mGalleryObjects.size() != 0;
+	}
+
+	public ImageLoaderTask getImageLoaderTask() {
+		return mImageLoaderTask;
 	}
 }

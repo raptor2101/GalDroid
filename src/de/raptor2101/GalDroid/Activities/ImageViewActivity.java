@@ -54,6 +54,7 @@ import de.raptor2101.GalDroid.WebGallery.GalleryImageAdapter.TitleConfig;
 import de.raptor2101.GalDroid.WebGallery.GalleryImageView;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryObject;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.WebGallery;
+import de.raptor2101.GalDroid.WebGallery.Tasks.ImageLoaderTask;
 
 
 
@@ -68,6 +69,7 @@ public class ImageViewActivity extends GalleryActivity
 	private ImageInformationView mInformationView;	
 	
 	private ActionBarHider mActionBarHider;
+	private ImageLoaderTask mImageLoaderTask;
 	
 	@Override
     public void onCreate(Bundle savedInstanceState) {
@@ -102,17 +104,15 @@ public class ImageViewActivity extends GalleryActivity
     	ImageViewOnTouchListener touchListener = new ImageViewOnTouchListener(mGalleryFullscreen, mGalleryThumbnails, params.height/5f);
     	
     	
-    	mAdapterFullscreen = new GalleryImageAdapter(this, new Gallery.LayoutParams(params.width,params.height), ScaleMode.ScaleSource);
+    	mAdapterFullscreen = new GalleryImageAdapter(this, new Gallery.LayoutParams(params.width,params.height), ScaleMode.ScaleSource, mImageLoaderTask);
     	mAdapterFullscreen.setTitleConfig(TitleConfig.HideTitle);
     	mAdapterFullscreen.setDisplayTarget(DisplayTarget.FullScreen);
     	mAdapterFullscreen.setCleanupMode(CleanupMode.ForceCleanup);
-    	mAdapterFullscreen.setMaxActiveDownloads(3);
     	
     	
-    	mAdapterThumbnails = new GalleryImageAdapter(this, new Gallery.LayoutParams(100,100), ScaleMode.DontScale);
+    	mAdapterThumbnails = new GalleryImageAdapter(this, new Gallery.LayoutParams(100,100), ScaleMode.DontScale, mImageLoaderTask);
     	mAdapterThumbnails.setTitleConfig(TitleConfig.HideTitle);
     	mAdapterThumbnails.setDisplayTarget(DisplayTarget.Thumbnails);
-    	mAdapterThumbnails.setMaxActiveDownloads(20);
     	
     	mGalleryFullscreen.setAdapter(mAdapterFullscreen);
     	mGalleryThumbnails.setAdapter(mAdapterThumbnails);
@@ -186,6 +186,7 @@ public class ImageViewActivity extends GalleryActivity
         
         mGalleryFullscreen.setSelection(currentIndex);
         mGalleryThumbnails.setSelection(currentIndex);
+        mImageLoaderTask.start();
 	}
 
 	
