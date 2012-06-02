@@ -35,147 +35,140 @@ import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryObject;
 import de.raptor2101.GalDroid.WebGallery.Tasks.ImageLoaderTask;
 import de.raptor2101.GalDroid.WebGallery.Tasks.ImageLoaderTaskListener;
 
-public class GalleryImageView extends LinearLayout implements ImageLoaderTaskListener{
-	private static final String CLASS_TAG = "GalleryImageView";
-	private final ProgressBar mProgressBar;
-	private final ImageView mImageView;
-	private final TextView mTitleTextView;
-	private final boolean mShowTitle;
-	private GalleryObject mGalleryObject;
-	private Bitmap mBitmap;
-	private WeakReference<ImageLoaderTaskListener> mListener;
-	
-	public GalleryImageView(Context context, android.view.ViewGroup.LayoutParams layoutParams, boolean showTitle) {
-		super(context);
-		mShowTitle = showTitle;
-		
-		mImageView = CreateImageView(context);
-		
-		mProgressBar = new ProgressBar(context,null,android.R.attr.progressBarStyleHorizontal);
-		mProgressBar.setVisibility(GONE);
-		this.addView(mProgressBar);
-		
-		this.setOrientation(VERTICAL);
-		this.setGravity(Gravity.CENTER_VERTICAL|Gravity.CENTER_HORIZONTAL);
-		this.setLayoutParams(layoutParams);
-		
-		this.addView(mImageView);
-		
-		
-		
-		if(mShowTitle){
-			mTitleTextView = new TextView(context);
-			mTitleTextView.setTextSize(16);
-			mTitleTextView.setGravity(Gravity.CENTER_HORIZONTAL);
-			mTitleTextView.setTypeface(Typeface.create("Tahoma", Typeface.BOLD));
-			this.addView(mTitleTextView);
-		}
-		else{
-			mTitleTextView = null;
-		}
-		
-		mListener = new WeakReference<ImageLoaderTaskListener>(null);
-	}
-	
-	public void setGalleryObject(GalleryObject galleryObject)
-	{
-		mGalleryObject = galleryObject;
-		this.setTitle(galleryObject.getTitle());
-	}
-	
-	public GalleryObject getGalleryObject(){
-		return mGalleryObject;
-	}
-		
-	public void setTitle(String title)
-	{
-		if(mTitleTextView != null){
-			mTitleTextView.setText(title);
-		}
-	}
-	
-	private ImageView CreateImageView(Context context) {
-		ImageView imageView = new ImageView(context);
-		imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-        imageView.setPadding(5, 5, 5, 5);
-        imageView.setDrawingCacheEnabled(false);
-        
-		return imageView;
+public class GalleryImageView extends LinearLayout implements ImageLoaderTaskListener {
+    private static final String CLASS_TAG = "GalleryImageView";
+    private final ProgressBar mProgressBar;
+    private final ImageView mImageView;
+    private final TextView mTitleTextView;
+    private final boolean mShowTitle;
+    private GalleryObject mGalleryObject;
+    private Bitmap mBitmap;
+    private WeakReference<GalleryImageViewListener> mListener;
+
+    public GalleryImageView(Context context, android.view.ViewGroup.LayoutParams layoutParams, boolean showTitle) {
+	super(context);
+	mShowTitle = showTitle;
+
+	mImageView = CreateImageView(context);
+
+	mProgressBar = new ProgressBar(context, null, android.R.attr.progressBarStyleHorizontal);
+	mProgressBar.setVisibility(GONE);
+	this.addView(mProgressBar);
+
+	this.setOrientation(VERTICAL);
+	this.setGravity(Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL);
+	this.setLayoutParams(layoutParams);
+
+	this.addView(mImageView);
+
+	if (mShowTitle) {
+	    mTitleTextView = new TextView(context);
+	    mTitleTextView.setTextSize(16);
+	    mTitleTextView.setGravity(Gravity.CENTER_HORIZONTAL);
+	    mTitleTextView.setTypeface(Typeface.create("Tahoma", Typeface.BOLD));
+	    this.addView(mTitleTextView);
+	} else {
+	    mTitleTextView = null;
 	}
 
-	public void recylceBitmap(){
-		if (mBitmap != null) {
-			Log.d(CLASS_TAG, String.format("Recycle %s",mGalleryObject.getObjectId()));
-			mImageView.setImageBitmap(null);
-			mBitmap.recycle();
-			mBitmap = null;
-		}
-	}
-	
-	public Matrix getImageMatrix(){
-		return mImageView.getMatrix();
-	}
-	
-	public void setImageMatrix(Matrix matrix) {
-		mImageView.setScaleType(ImageView.ScaleType.MATRIX);
-		mImageView.setImageMatrix(matrix);
-	}
+	mListener = new WeakReference<GalleryImageViewListener>(null);
+    }
 
-	public boolean isLoaded() {
-		return mBitmap != null;
-	}
+    public void setGalleryObject(GalleryObject galleryObject) {
+	mGalleryObject = galleryObject;
+	this.setTitle(galleryObject.getTitle());
+    }
 
-	public String getObjectId() {
-		return mGalleryObject.getObjectId();
-	}
+    public GalleryObject getGalleryObject() {
+	return mGalleryObject;
+    }
 
-	public void onLoadingStarted(String uniqueId) {
-		mProgressBar.setVisibility(VISIBLE);
-		Log.d(CLASS_TAG, String.format("Loading started %s",uniqueId));
-		
-		ImageLoaderTaskListener listener = mListener.get();
-		if(listener != null) {
-			listener.onLoadingStarted(uniqueId);
-		}
+    public void setTitle(String title) {
+	if (mTitleTextView != null) {
+	    mTitleTextView.setText(title);
 	}
-	
-	public void onLoadingProgress(String uniqueId, int currentValue, int maxValue) {
-		mProgressBar.setMax(maxValue);
-		mProgressBar.setProgress(currentValue);
-		
-		ImageLoaderTaskListener listener = mListener.get();
-		if(listener != null) {
-			listener.onLoadingProgress(uniqueId, currentValue, maxValue);
-		}
-	}
+    }
 
-	public void onLoadingCompleted(String uniqueId, Bitmap bitmap) {
-		mProgressBar.setVisibility(GONE);
-		mImageView.setImageBitmap(bitmap);
-		mBitmap = bitmap;
-		Log.d(CLASS_TAG, String.format("Loading done %s",uniqueId));
-		
-		ImageLoaderTaskListener listener = mListener.get();
-		if(listener != null) {
-			listener.onLoadingCompleted(uniqueId, bitmap);
-		}
-	}
+    private ImageView CreateImageView(Context context) {
+	ImageView imageView = new ImageView(context);
+	imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+	imageView.setPadding(5, 5, 5, 5);
+	imageView.setDrawingCacheEnabled(false);
 
-	public void onLoadingCancelled(String uniqueId) {
-		Log.d(CLASS_TAG, String.format("DownloadTask was cancalled %s",uniqueId));
-		mProgressBar.setVisibility(GONE);
-		mBitmap = null;
-		
-		ImageLoaderTaskListener listener = mListener.get();
-		if(listener != null) {
-			listener.onLoadingCancelled(uniqueId);
-		}
-	}
+	return imageView;
+    }
 
-	public void setListener(ImageLoaderTaskListener listener) {
-		mListener = new WeakReference<ImageLoaderTaskListener>(listener);
+    public void recylceBitmap() {
+	if (mBitmap != null) {
+	    Log.d(CLASS_TAG, String.format("Recycle %s", mGalleryObject.getObjectId()));
+	    mImageView.setImageBitmap(null);
+	    mBitmap.recycle();
+	    mBitmap = null;
 	}
+    }
 
-	
+    public Matrix getImageMatrix() {
+	return mImageView.getMatrix();
+    }
+
+    public void setImageMatrix(Matrix matrix) {
+	mImageView.setScaleType(ImageView.ScaleType.MATRIX);
+	mImageView.setImageMatrix(matrix);
+    }
+
+    public boolean isLoaded() {
+	return mBitmap != null;
+    }
+
+    public String getObjectId() {
+	return mGalleryObject.getObjectId();
+    }
+
+    public void onLoadingStarted(String uniqueId) {
+	mProgressBar.setVisibility(VISIBLE);
+	Log.d(CLASS_TAG, String.format("Loading started %s", uniqueId));
+
+	GalleryImageViewListener listener = mListener.get();
+	if (listener != null) {
+	    listener.onLoadingStarted(mGalleryObject);
+	}
+    }
+
+    public void onLoadingProgress(String uniqueId, int currentValue, int maxValue) {
+	mProgressBar.setMax(maxValue);
+	mProgressBar.setProgress(currentValue);
+
+	GalleryImageViewListener listener = mListener.get();
+	if (listener != null) {
+	    listener.onLoadingProgress(mGalleryObject, currentValue, maxValue);
+	}
+    }
+
+    public void onLoadingCompleted(String uniqueId, Bitmap bitmap) {
+	mProgressBar.setVisibility(GONE);
+	mImageView.setImageBitmap(bitmap);
+	mBitmap = bitmap;
+	Log.d(CLASS_TAG, String.format("Loading done %s", uniqueId));
+
+	GalleryImageViewListener listener = mListener.get();
+	if (listener != null) {
+	    listener.onLoadingCompleted(mGalleryObject);
+	}
+    }
+
+    public void onLoadingCancelled(String uniqueId) {
+	Log.d(CLASS_TAG, String.format("DownloadTask was cancalled %s", uniqueId));
+	mProgressBar.setVisibility(GONE);
+	mBitmap = null;
+
+	GalleryImageViewListener listener = mListener.get();
+	if (listener != null) {
+	    listener.onLoadingCancelled(mGalleryObject);
+	}
+    }
+
+    public void setListener(GalleryImageViewListener listener) {
+	mListener = new WeakReference<GalleryImageViewListener>(listener);
+    }
+
 }
-

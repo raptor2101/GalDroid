@@ -18,6 +18,6 @@
 
 package de.raptor2101.GalDroid.WebGallery;
 
-public class GalleryTitleConfig {
-	public boolean ShowTitle;
+public class TitleConfig {
+    public boolean ShowTitle;
 }
