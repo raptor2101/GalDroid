@@ -21,8 +21,11 @@ package de.raptor2101.GalDroid.WebGallery.Tasks;
 import android.graphics.Bitmap;
 
 public interface ImageLoaderTaskListener {
-	void onLoadingStarted(String uniqueId);
-	void onLoadingProgress(String uniqueId, int currentValue, int maxValue);
-	void onLoadingCompleted(String uniqueId, Bitmap bitmap);
-	void onLoadingCancelled(String uniqueId);
+    void onLoadingStarted(String uniqueId);
+
+    void onLoadingProgress(String uniqueId, int currentValue, int maxValue);
+
+    void onLoadingCompleted(String uniqueId, Bitmap bitmap);
+
+    void onLoadingCancelled(String uniqueId);
 }
