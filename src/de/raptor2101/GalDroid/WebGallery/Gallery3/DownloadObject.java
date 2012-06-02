@@ -21,31 +21,31 @@ package de.raptor2101.GalDroid.WebGallery.Gallery3;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryDownloadObject;
 
 public class DownloadObject implements GalleryDownloadObject {
-	
-	private final String mSourceLink;
-	private final String mRootLink;
-	private final int mFileSize;
-	
-	public DownloadObject(String rootLink, String sourceLink, int fileSize){				
-		mSourceLink = sourceLink;
-		mRootLink = rootLink;
-		mFileSize = fileSize;
-	}
-	
-	public String getRootLink() {
-		return mRootLink;
-	}
-	
-	public String getUniqueId() {
-		return mSourceLink;
-	}
-	
-	public int getFileSize() {
-		return mFileSize;
-	}
-	
-	@Override
-	public String toString() {
-		return mSourceLink;
-	}
+
+    private final String mSourceLink;
+    private final String mRootLink;
+    private final int mFileSize;
+
+    public DownloadObject(String rootLink, String sourceLink, int fileSize) {
+	mSourceLink = sourceLink;
+	mRootLink = rootLink;
+	mFileSize = fileSize;
+    }
+
+    public String getRootLink() {
+	return mRootLink;
+    }
+
+    public String getUniqueId() {
+	return mSourceLink;
+    }
+
+    public int getFileSize() {
+	return mFileSize;
+    }
+
+    @Override
+    public String toString() {
+	return mSourceLink;
+    }
 }

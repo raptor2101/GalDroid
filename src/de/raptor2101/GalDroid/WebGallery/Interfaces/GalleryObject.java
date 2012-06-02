@@ -21,13 +21,16 @@ package de.raptor2101.GalDroid.WebGallery.Interfaces;
 import java.io.Serializable;
 import java.util.Date;
 
+public interface GalleryObject extends Serializable {
+    public String getTitle();
 
-public interface GalleryObject extends Serializable
-{
-	public String getTitle();
-	public Date getDateUploaded();
-	public boolean hasChildren();	
-	public String getObjectId();
-	public GalleryDownloadObject getImage();
-	public GalleryDownloadObject getThumbnail();
+    public Date getDateUploaded();
+
+    public boolean hasChildren();
+
+    public String getObjectId();
+
+    public GalleryDownloadObject getImage();
+
+    public GalleryDownloadObject getThumbnail();
 }
