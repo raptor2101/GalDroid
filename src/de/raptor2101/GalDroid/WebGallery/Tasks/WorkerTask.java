@@ -99,7 +99,11 @@ public abstract class WorkerTask<ParameterType, ProgressType, ResultType> implem
 	private WorkerTask getOuterType() {
 	    return WorkerTask.this;
 	}
-
+	
+	@Override
+	public String toString() {
+	    return mParameter.toString();
+	}
     }
 
     private final Queue<WorkerCallable> mCallables = new LinkedList<WorkerCallable>();
