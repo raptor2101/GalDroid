@@ -122,6 +122,7 @@ public class GridViewActivity extends GalleryActivity implements OnItemClickList
 
     public void onGalleryObjectsLoaded(List<GalleryObject> galleryObjects) {
 	mAdapter.setGalleryObjects(galleryObjects);
+	mImageLoaderTask.start();
     }
 
     @Override
