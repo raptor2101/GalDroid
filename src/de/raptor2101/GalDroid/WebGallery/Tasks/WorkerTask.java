@@ -178,6 +178,21 @@ public abstract class WorkerTask<ParameterType, ProgressType, ResultType> implem
 	    }
 	}
     }
+    
+    protected void removeEnqueued(ParameterType parameter) {
+	Log.d(String.format("%s (%s)", CLASS_TAG, mThreadName), String.format("Remove enqueued %s", parameter));
+	synchronized (mCallables) {
+	    mCallables.remove(parameter);
+	}
+    }
+    
+    protected void cancelCurrent(){
+	mIsCancelled = true;
+	mWorkerThread.interrupt();
+    }
+
+
+    
 
     public final void start() {
 	if (mWorkerThread == null || mWorkerThread.getState() == State.TERMINATED) {

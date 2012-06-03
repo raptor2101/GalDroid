@@ -229,4 +229,13 @@ public class ImageLoaderTask extends WorkerTask<ListenedParameter<GalleryDownloa
 	Log.d(CLASS_TAG, String.format("isActive: %s isEnqueued %s", isActive, isEnqueued));
 	return isActive || isEnqueued;
     }
+
+    public void cancel(GalleryDownloadObject downloadObject) {
+	ListenedParameter<GalleryDownloadObject, ImageLoaderTaskListener> parameter = new ListenedParameter<GalleryDownloadObject, ImageLoaderTaskListener>(downloadObject, null);
+	if(isEnqueued(parameter)) {
+	    removeEnqueued(parameter);
+	} else if (isActive(parameter)){
+	    cancelCurrent();
+	}
+    }
 }

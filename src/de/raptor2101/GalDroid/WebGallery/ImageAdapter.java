@@ -184,10 +184,13 @@ public class ImageAdapter extends BaseAdapter {
 	if (cachedView != null) {
 	    imageView = (GalleryImageView) cachedView;
 	    Log.d(ClassTag, String.format("Cached View %s", imageView.getObjectId()));
-	    if (imageView.getGalleryObject().getObjectId() != galleryObject.getObjectId()) {
-		Log.d(ClassTag, String.format("Abort downloadTask %s", imageView.getObjectId()));
-		// TODO abort...
-		if (mCleanupMode == CleanupMode.ForceCleanup) {
+	    GalleryObject originGalleryObject = imageView.getGalleryObject();
+	    if (originGalleryObject.getObjectId() != galleryObject.getObjectId()) {
+		
+		if(!imageView.isLoaded()) {
+		    Log.d(ClassTag, String.format("Abort downloadTask %s", imageView.getObjectId()));
+		    mImageLoaderTask.cancel(getDownloadObject(originGalleryObject));
+		} else if (mCleanupMode == CleanupMode.ForceCleanup) {
 		    imageView.recylceBitmap();
 		}
 	    }
