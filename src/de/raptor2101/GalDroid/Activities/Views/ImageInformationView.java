@@ -53,6 +53,8 @@ public class ImageInformationView extends TableLayout implements ImageInformatio
 
     private boolean mCommentsLoaded;
 
+    private GalleryObject mCurrentLoadingObject;
+
     public ImageInformationView(Context context, AttributeSet attrs) {
 	super(context, attrs);
 	initialize(context);
@@ -84,6 +86,12 @@ public class ImageInformationView extends TableLayout implements ImageInformatio
     }
 
     private void extractImageInformation(GalleryImageView imageView) {
+	Log.d(ClassTag, String.format("extractImageInformation: %s",imageView.getGalleryObject()));
+	
+	if(mCurrentLoadingObject != null) {
+	    mLoadImageInformationTask.cancel(mCurrentLoadingObject);
+	}
+	
 	clearImageInformations();
 	
 	mCommentsLoaded = false;
@@ -91,14 +99,15 @@ public class ImageInformationView extends TableLayout implements ImageInformatio
 	mImageInformationsLoaded = false;
 	
 	if (imageView.isLoaded()) {
-	    enqueueExtrationTask(imageView.getGalleryObject());
+	    enqueueLoadingTask(imageView.getGalleryObject());
 	} else {
 	    registerLoadingListener(imageView);
 	}
     }
 
-    private void enqueueExtrationTask(GalleryObject galleryObject) {
+    private void enqueueLoadingTask(GalleryObject galleryObject) {
 	Log.d(ClassTag, String.format("enqueueExtrationTask: %s",galleryObject));
+	mCurrentLoadingObject = galleryObject;
 	mLoadImageInformationTask.load(galleryObject);
     }
 
@@ -245,6 +254,8 @@ public class ImageInformationView extends TableLayout implements ImageInformatio
 	mProgressBarComments.setVisibility(VISIBLE);
 	mProgressBarTags.setVisibility(VISIBLE);
 	mImageInformationsLoaded = true;
+	
+	resetCurrentLoadingImage();
     }
 
     public void onImageTagsLoaded(GalleryObject galleryObject, List<String> tags) {
@@ -263,6 +274,8 @@ public class ImageInformationView extends TableLayout implements ImageInformatio
 	mProgressBarTags.setVisibility(View.GONE);
 	mViewTags.setVisibility(View.VISIBLE);
 	mTagsLoaded = true;
+	
+	resetCurrentLoadingImage();
     }
 
     public void onImageCommetsLoaded(GalleryObject galleryObject, List<GalleryObjectComment> comments) {
@@ -292,6 +305,15 @@ public class ImageInformationView extends TableLayout implements ImageInformatio
 	mViewComments.setVisibility(View.VISIBLE);
 	mProgressBarComments.setVisibility(GONE);
 	mCommentsLoaded = true;
+	
+	resetCurrentLoadingImage();
+    }
+
+    private void resetCurrentLoadingImage() {
+	if(isLoaded()) {
+	    mCurrentLoadingObject = null;
+	}
+	
     }
 
     public ImageInformationLoaderTask getImageInformationLoaderTask() {
@@ -309,7 +331,7 @@ public class ImageInformationView extends TableLayout implements ImageInformatio
     }
 
     public void onLoadingCompleted(GalleryObject galleryObject) {
-	enqueueExtrationTask(galleryObject);
+	enqueueLoadingTask(galleryObject);
 	
     }
 

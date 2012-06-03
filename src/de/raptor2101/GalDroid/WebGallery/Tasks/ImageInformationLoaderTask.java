@@ -12,6 +12,7 @@ import de.raptor2101.GalDroid.WebGallery.DegMinSec;
 import de.raptor2101.GalDroid.WebGallery.ImageCache;
 import de.raptor2101.GalDroid.WebGallery.ImageInformation;
 import de.raptor2101.GalDroid.WebGallery.ImageInformation.WhiteBalance;
+import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryDownloadObject;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryObject;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryObjectComment;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.WebGallery;
@@ -70,11 +71,44 @@ public class ImageInformationLoaderTask extends WorkerTask<GalleryObject, Void, 
     }
 
     public void load(GalleryObject galleryObject) {
+	Log.d(CLASS_TAG,String.format("enqueuing %s for loading of ImageInformations",galleryObject));
 	enqueue(galleryObject);
     }
 
     @Override
     protected Void doInBackground(GalleryObject galleryObject) {
+	ImageInformation imageInformation = loadImageInformations(galleryObject);
+	
+	Message message = mResponseHandler.obtainMessage(MESSAGE_IMAGE_INFORMATION, new MessageBody(galleryObject, imageInformation));
+	message.sendToTarget();
+	
+	if (!isCancelled()) {
+	    try {
+		Log.d(CLASS_TAG, String.format("Try to load tags for %s", galleryObject));
+
+		List<String> tags = mWebGallery.getDisplayObjectTags(galleryObject, null);
+		message = mResponseHandler.obtainMessage(MESSAGE_IMAGE_TAGS, new MessageBody(galleryObject, tags));
+		message.sendToTarget();
+	    } catch (Exception e) {
+		Log.e(CLASS_TAG, String.format("Something goes wrong while loading tags for %s", galleryObject), e);
+	    }
+	}
+	
+	if (!isCancelled()) {
+        	try {
+        	    Log.d(CLASS_TAG,String.format("Try to load comments for %s", galleryObject));
+        	    List<GalleryObjectComment> comments = mWebGallery.getDisplayObjectComments(galleryObject, null);
+        	    message = mResponseHandler.obtainMessage(MESSAGE_IMAGE_COMMENTS, new MessageBody(galleryObject, comments));
+        	    message.sendToTarget();
+        	} catch (Exception e) {
+        	    Log.e(CLASS_TAG,String.format("Something goes wrong while comments tags for %s", galleryObject),e);
+        	}
+	}
+	    
+	return null;
+    }
+
+    private ImageInformation loadImageInformations(GalleryObject galleryObject) {
 	ImageInformation imageInformation = new ImageInformation();
 	
 	imageInformation.mTitle = galleryObject.getTitle();
@@ -127,29 +161,7 @@ public class ImageInformationLoaderTask extends WorkerTask<GalleryObject, Void, 
 	} catch (Exception e) {
 	    Log.e(CLASS_TAG,String.format("Something goes wrong while decoding ExifInformations from %s", galleryObject),e);
 	}
-	
-	Message message = mResponseHandler.obtainMessage(MESSAGE_IMAGE_INFORMATION, new MessageBody(galleryObject, imageInformation));
-	message.sendToTarget();
-	
-	try {
-	    Log.d(CLASS_TAG,String.format("Try to load tags for %s", galleryObject));
-
-	    List<String> tags = mWebGallery.getDisplayObjectTags(galleryObject, null);
-	    message = mResponseHandler.obtainMessage(MESSAGE_IMAGE_TAGS, new MessageBody(galleryObject, tags));
-	    message.sendToTarget();
-	} catch (Exception e) {
-	    Log.e(CLASS_TAG,String.format("Something goes wrong while loading tags for %s", galleryObject),e);
-	} 
-	
-	try {
-	    Log.d(CLASS_TAG,String.format("Try to load comments for %s", galleryObject));
-	    List<GalleryObjectComment> comments = mWebGallery.getDisplayObjectComments(galleryObject, null);
-	    message = mResponseHandler.obtainMessage(MESSAGE_IMAGE_COMMENTS, new MessageBody(galleryObject, comments));
-	    message.sendToTarget();
-	} catch (Exception e) {
-	    Log.e(CLASS_TAG,String.format("Something goes wrong while comments tags for %s", galleryObject),e);
-	}
-	return null;
+	return imageInformation;
     }
 
     private float parseHeight(String tagGpsValue) {
@@ -178,8 +190,19 @@ public class ImageInformationLoaderTask extends WorkerTask<GalleryObject, Void, 
 	// TODO Auto-generated method stub
 
     }
-
     public boolean isLoading(GalleryObject galleryObject) {
-	return isEnqueued(galleryObject);
+	boolean isActive = isActive(galleryObject);
+	boolean isEnqueued = isEnqueued(galleryObject);
+	Log.d(CLASS_TAG, String.format("isActive: %s isEnqueued %s", isActive, isEnqueued));
+	return isActive || isEnqueued;
+    }
+
+    public void cancel(GalleryObject galleryObject) {
+	if(isEnqueued(galleryObject)) {
+	    removeEnqueued(galleryObject);
+	} else if (isActive(galleryObject)){
+	    cancelCurrent();
+	}
+	
     }
 }
