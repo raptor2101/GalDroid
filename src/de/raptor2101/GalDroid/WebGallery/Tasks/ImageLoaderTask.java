@@ -223,6 +223,9 @@ public class ImageLoaderTask extends WorkerTask<ListenedParameter<GalleryDownloa
     }
 
     public boolean isDownloading(GalleryDownloadObject galleryDownloadObject) {
+	if(galleryDownloadObject == null) {
+	    return false;
+	}
 	ListenedParameter<GalleryDownloadObject, ImageLoaderTaskListener> parameter = new ListenedParameter<GalleryDownloadObject, ImageLoaderTaskListener>(galleryDownloadObject, null);
 	boolean isActive = isActive(parameter);
 	boolean isEnqueued = isEnqueued(parameter);
@@ -231,6 +234,10 @@ public class ImageLoaderTask extends WorkerTask<ListenedParameter<GalleryDownloa
     }
 
     public void cancel(GalleryDownloadObject downloadObject) {
+	if(downloadObject == null) {
+	    return ;
+	}
+	
 	ListenedParameter<GalleryDownloadObject, ImageLoaderTaskListener> parameter = new ListenedParameter<GalleryDownloadObject, ImageLoaderTaskListener>(downloadObject, null);
 	if(isEnqueued(parameter)) {
 	    removeEnqueued(parameter);
