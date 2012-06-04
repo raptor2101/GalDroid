@@ -28,35 +28,35 @@ import org.json.JSONException;
 import de.raptor2101.GalDroid.WebGallery.Stream;
 
 public interface WebGallery {
-    public enum ImageSize {
-	Thumbnail, Full
-    }
+  public enum ImageSize {
+    Thumbnail, Full
+  }
 
-    public GalleryObject getDisplayObject(String path) throws ClientProtocolException, IOException, JSONException;
+  public GalleryObject getDisplayObject(String path) throws ClientProtocolException, IOException, JSONException;
 
-    public List<GalleryObject> getDisplayObjects();
+  public List<GalleryObject> getDisplayObjects();
 
-    public List<GalleryObject> getDisplayObjects(GalleryProgressListener progressListener);
+  public List<GalleryObject> getDisplayObjects(GalleryProgressListener progressListener);
 
-    public List<GalleryObject> getDisplayObjects(String path);
+  public List<GalleryObject> getDisplayObjects(String path);
 
-    public List<GalleryObject> getDisplayObjects(String path, GalleryProgressListener progressListener);
+  public List<GalleryObject> getDisplayObjects(String path, GalleryProgressListener progressListener);
 
-    public List<GalleryObject> getDisplayObjects(GalleryObject galleryObject);
+  public List<GalleryObject> getDisplayObjects(GalleryObject galleryObject);
 
-    public List<GalleryObject> getDisplayObjects(GalleryObject galleryObject, GalleryProgressListener progressListener);
+  public List<GalleryObject> getDisplayObjects(GalleryObject galleryObject, GalleryProgressListener progressListener);
 
-    public List<String> getDisplayObjectTags(GalleryObject galleryObject, GalleryProgressListener progressListener) throws IOException;
+  public List<String> getDisplayObjectTags(GalleryObject galleryObject, GalleryProgressListener progressListener) throws IOException;
 
-    public List<GalleryObjectComment> getDisplayObjectComments(GalleryObject galleryObject, GalleryProgressListener progressListener) throws IOException, ClientProtocolException, JSONException;
+  public List<GalleryObjectComment> getDisplayObjectComments(GalleryObject galleryObject, GalleryProgressListener progressListener) throws IOException, ClientProtocolException, JSONException;
 
-    public void setPreferedDimensions(int height, int width);
+  public void setPreferedDimensions(int height, int width);
 
-    public String getSecurityToken(String user, String password) throws SecurityException;
+  public String getSecurityToken(String user, String password) throws SecurityException;
 
-    public Stream getFileStream(GalleryDownloadObject downloadObject) throws IOException, ClientProtocolException;
+  public Stream getFileStream(GalleryDownloadObject downloadObject) throws IOException, ClientProtocolException;
 
-    public void setSecurityToken(String token);
+  public void setSecurityToken(String token);
 
-    public void setHttpClient(HttpClient httpClient);
+  public void setHttpClient(HttpClient httpClient);
 }

@@ -32,71 +32,71 @@ import android.app.Application;
 import android.net.http.AndroidHttpClient;
 
 public class GalDroidApp extends Application {
-    public static final String INTENT_EXTRA_DISPLAY_GALLERY = ".de.raptor2101.GalDroid.GalleryObject";
-    public static final String INTENT_EXTRA_DISPLAY_INDEX = ".de.raptor2101.GalDroid.DisplayIndex";
-    public static final String INTENT_EXTRA_DISPLAY_OBJECT = ".de.raptor2101.GalDroid.DisplayObject";
-    public static final String INTENT_EXTRA_GALLERY_PROVIDER = ".de.raptor2101.GalDroid.GalleryProvider";
-    public static final String INTENT_EXTRA_SHOW_IMAGE_INFO = ".de.raptor2101.GalDroid.ShowImageInfo";
+  public static final String INTENT_EXTRA_DISPLAY_GALLERY = ".de.raptor2101.GalDroid.GalleryObject";
+  public static final String INTENT_EXTRA_DISPLAY_INDEX = ".de.raptor2101.GalDroid.DisplayIndex";
+  public static final String INTENT_EXTRA_DISPLAY_OBJECT = ".de.raptor2101.GalDroid.DisplayObject";
+  public static final String INTENT_EXTRA_GALLERY_PROVIDER = ".de.raptor2101.GalDroid.GalleryProvider";
+  public static final String INTENT_EXTRA_SHOW_IMAGE_INFO = ".de.raptor2101.GalDroid.ShowImageInfo";
 
-    private WebGallery mWebGallery = null;
-    private ImageCache mGalleryCache = null;
-    private List<GalleryObject> mGalleryChildObjects = null;
-    private GalleryObject mStoredGalleryObject = null;
+  private WebGallery mWebGallery = null;
+  private ImageCache mGalleryCache = null;
+  private List<GalleryObject> mGalleryChildObjects = null;
+  private GalleryObject mStoredGalleryObject = null;
 
-    public WebGallery getWebGallery() {
-	return mWebGallery;
+  public WebGallery getWebGallery() {
+    return mWebGallery;
+  }
+
+  public ImageCache getImageCache() {
+    return mGalleryCache;
+  }
+
+  public void Initialize(Activity activity) throws NoSuchAlgorithmException {
+    GalDroidPreference.Initialize(this);
+
+    if (mGalleryCache == null) {
+      mGalleryCache = new ImageCache(activity);
     }
 
-    public ImageCache getImageCache() {
-	return mGalleryCache;
+    if (mWebGallery == null) {
+      try {
+        String galleryName = activity.getIntent().getExtras().getString(INTENT_EXTRA_GALLERY_PROVIDER);
+        if (galleryName != null) {
+          GalleryConfig galleryConfig = GalDroidPreference.getSetupByName(galleryName);
+          mWebGallery = GalleryFactory.createFromName(galleryConfig.TypeName, galleryConfig.RootLink, AndroidHttpClient.newInstance("GalDroid"));
+          mWebGallery.setSecurityToken(galleryConfig.SecurityToken);
+        }
+      } catch (NullPointerException e) {
+        mWebGallery = null;
+      }
+    }
+  }
+
+  public void setWebGallery(WebGallery webGallery) {
+    mWebGallery = webGallery;
+    mGalleryChildObjects = null;
+    mStoredGalleryObject = null;
+  }
+
+  public void storeGalleryObjects(GalleryObject parent, List<GalleryObject> childObjects) {
+    if (parent != null) {
+      mStoredGalleryObject = parent;
+      mGalleryChildObjects = childObjects;
+    } else {
+      parent = null;
+      childObjects = null;
+    }
+  }
+
+  public List<GalleryObject> loadStoredGalleryObjects(GalleryObject parent) {
+    if (parent == null) {
+      return null;
     }
 
-    public void Initialize(Activity activity) throws NoSuchAlgorithmException {
-	GalDroidPreference.Initialize(this);
-
-	if (mGalleryCache == null) {
-	    mGalleryCache = new ImageCache(activity);
-	}
-
-	if (mWebGallery == null) {
-	    try {
-		String galleryName = activity.getIntent().getExtras().getString(INTENT_EXTRA_GALLERY_PROVIDER);
-		if (galleryName != null) {
-		    GalleryConfig galleryConfig = GalDroidPreference.getSetupByName(galleryName);
-		    mWebGallery = GalleryFactory.createFromName(galleryConfig.TypeName, galleryConfig.RootLink, AndroidHttpClient.newInstance("GalDroid"));
-		    mWebGallery.setSecurityToken(galleryConfig.SecurityToken);
-		}
-	    } catch (NullPointerException e) {
-		mWebGallery = null;
-	    }
-	}
+    if (!parent.equals(mStoredGalleryObject)) {
+      return null;
     }
 
-    public void setWebGallery(WebGallery webGallery) {
-	mWebGallery = webGallery;
-	mGalleryChildObjects = null;
-	mStoredGalleryObject = null;
-    }
-
-    public void storeGalleryObjects(GalleryObject parent, List<GalleryObject> childObjects) {
-	if (parent != null) {
-	    mStoredGalleryObject = parent;
-	    mGalleryChildObjects = childObjects;
-	} else {
-	    parent = null;
-	    childObjects = null;
-	}
-    }
-
-    public List<GalleryObject> loadStoredGalleryObjects(GalleryObject parent) {
-	if (parent == null) {
-	    return null;
-	}
-
-	if (!parent.equals(mStoredGalleryObject)) {
-	    return null;
-	}
-
-	return mGalleryChildObjects;
-    }
+    return mGalleryChildObjects;
+  }
 }

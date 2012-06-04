@@ -80,13 +80,13 @@ public class ImageInformationView extends TableLayout implements ImageInformatio
   public void setGalleryImageView(GalleryImageView imageView) {
     GalleryObject requestedObject = imageView.getGalleryObject();
     Log.d(CLASS_TAG, String.format("setGalleryImageView: %s", requestedObject));
-    
+
     GalleryImageView currentView = mCurrentSelectedImageView.get();
-    if(currentView != null && currentView.getGalleryObject().equals(requestedObject)){
+    if (currentView != null && currentView.getGalleryObject().equals(requestedObject)) {
       Log.d(CLASS_TAG, "extractImageInformation: view already selected!");
       return;
     }
-    
+
     mCurrentSelectedImageView = new WeakReference<GalleryImageView>(imageView);
     if (getVisibility() == VISIBLE) {
       extractImageInformation(imageView);

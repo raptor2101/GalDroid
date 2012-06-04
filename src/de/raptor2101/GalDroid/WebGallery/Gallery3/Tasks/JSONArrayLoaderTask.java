@@ -11,23 +11,23 @@ import android.os.AsyncTask;
 
 public class JSONArrayLoaderTask extends AsyncTask<RestCall, Void, JSONArray> {
 
-    @Override
-    protected JSONArray doInBackground(RestCall... params) {
-	JSONArray jsonArray = null;
-	try {
-	    RestCall restCall = params[0];
-	    jsonArray = restCall.loadJSONArray();
+  @Override
+  protected JSONArray doInBackground(RestCall... params) {
+    JSONArray jsonArray = null;
+    try {
+      RestCall restCall = params[0];
+      jsonArray = restCall.loadJSONArray();
 
-	} catch (ClientProtocolException e) {
-	    // TODO Auto-generated catch block
-	    e.printStackTrace();
-	} catch (IOException e) {
-	    // TODO Auto-generated catch block
-	    e.printStackTrace();
-	} catch (JSONException e) {
-	    // TODO Auto-generated catch block
-	    e.printStackTrace();
-	}
-	return jsonArray;
+    } catch (ClientProtocolException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (JSONException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
     }
+    return jsonArray;
+  }
 }

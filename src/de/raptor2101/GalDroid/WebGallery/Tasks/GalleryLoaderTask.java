@@ -30,59 +30,59 @@ import de.raptor2101.GalDroid.WebGallery.Interfaces.WebGallery;
 
 public class GalleryLoaderTask extends AsyncTask<GalleryObject, Progress, List<GalleryObject>> implements GalleryProgressListener {
 
-    private WeakReference<GalleryLoaderTaskListener> mListener;
-    private WebGallery mWebGallery;
+  private WeakReference<GalleryLoaderTaskListener> mListener;
+  private WebGallery mWebGallery;
 
-    public GalleryLoaderTask(WebGallery webGallery, GalleryLoaderTaskListener listener) {
-	mListener = new WeakReference<GalleryLoaderTaskListener>(listener);
-	mWebGallery = webGallery;
+  public GalleryLoaderTask(WebGallery webGallery, GalleryLoaderTaskListener listener) {
+    mListener = new WeakReference<GalleryLoaderTaskListener>(listener);
+    mWebGallery = webGallery;
+  }
+
+  @Override
+  protected List<GalleryObject> doInBackground(GalleryObject... params) {
+    List<GalleryObject> objects;
+
+    if (mWebGallery != null) {
+      if (params.length == 0 || params[0] == null) {
+        Thread.currentThread().setName(String.format("GalleryLoaderTask"));
+        objects = mWebGallery.getDisplayObjects(this);
+      } else {
+        Thread.currentThread().setName(String.format("GalleryLoaderTask for %s", params[0]));
+        objects = mWebGallery.getDisplayObjects(params[0], this);
+      }
+    } else {
+      objects = new ArrayList<GalleryObject>(0);
     }
+    return objects;
+  }
 
-    @Override
-    protected List<GalleryObject> doInBackground(GalleryObject... params) {
-	List<GalleryObject> objects;
-
-	if (mWebGallery != null) {
-	    if (params.length == 0 || params[0] == null) {
-		Thread.currentThread().setName(String.format("GalleryLoaderTask"));
-		objects = mWebGallery.getDisplayObjects(this);
-	    } else {
-		Thread.currentThread().setName(String.format("GalleryLoaderTask for %s", params[0]));
-		objects = mWebGallery.getDisplayObjects(params[0], this);
-	    }
-	} else {
-	    objects = new ArrayList<GalleryObject>(0);
-	}
-	return objects;
+  @Override
+  protected void onPreExecute() {
+    GalleryLoaderTaskListener listener = mListener.get();
+    if (listener != null) {
+      listener.onDownloadStarted();
     }
+  };
 
-    @Override
-    protected void onPreExecute() {
-	GalleryLoaderTaskListener listener = mListener.get();
-	if (listener != null) {
-	    listener.onDownloadStarted();
-	}
-    };
-
-    @Override
-    protected void onProgressUpdate(Progress... values) {
-	GalleryLoaderTaskListener listener = mListener.get();
-	if (values.length > 0 && listener != null) {
-	    listener.onDownloadProgress(values[0].curValue, values[0].maxValue);
-	}
+  @Override
+  protected void onProgressUpdate(Progress... values) {
+    GalleryLoaderTaskListener listener = mListener.get();
+    if (values.length > 0 && listener != null) {
+      listener.onDownloadProgress(values[0].curValue, values[0].maxValue);
     }
+  }
 
-    @Override
-    protected void onPostExecute(List<GalleryObject> galleryObjects) {
-	GalleryLoaderTaskListener listener = mListener.get();
-	Log.d("GalleryLoaderTask", String.format("onPostExecute isCanceled: %s isListenerAvaible: %s", isCancelled(), listener != null));
-	if (!isCancelled() && listener != null) {
-	    listener.onDownloadCompleted(galleryObjects);
-	}
+  @Override
+  protected void onPostExecute(List<GalleryObject> galleryObjects) {
+    GalleryLoaderTaskListener listener = mListener.get();
+    Log.d("GalleryLoaderTask", String.format("onPostExecute isCanceled: %s isListenerAvaible: %s", isCancelled(), listener != null));
+    if (!isCancelled() && listener != null) {
+      listener.onDownloadCompleted(galleryObjects);
     }
+  }
 
-    public void handleProgress(int curValue, int maxValue) {
-	publishProgress(new Progress(curValue, maxValue));
-    }
+  public void handleProgress(int curValue, int maxValue) {
+    publishProgress(new Progress(curValue, maxValue));
+  }
 
 }

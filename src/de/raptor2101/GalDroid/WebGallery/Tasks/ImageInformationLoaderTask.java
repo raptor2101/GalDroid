@@ -72,7 +72,7 @@ public class ImageInformationLoaderTask extends WorkerTask<GalleryObject, Void, 
   }
 
   public void load(GalleryObject galleryObject) {
-    if(galleryObject == null) {
+    if (galleryObject == null) {
       return;
     }
     Log.d(CLASS_TAG, String.format("enqueuing %s for loading of ImageInformations", galleryObject));
@@ -91,7 +91,7 @@ public class ImageInformationLoaderTask extends WorkerTask<GalleryObject, Void, 
         Log.d(CLASS_TAG, String.format("Try to load tags for %s", galleryObject));
 
         List<String> tags = mWebGallery.getDisplayObjectTags(galleryObject, null);
-        
+
         message = mResponseHandler.obtainMessage(MESSAGE_IMAGE_TAGS, new MessageBody(galleryObject, tags));
         message.sendToTarget();
       } catch (Exception e) {
@@ -103,7 +103,7 @@ public class ImageInformationLoaderTask extends WorkerTask<GalleryObject, Void, 
       try {
         Log.d(CLASS_TAG, String.format("Try to load comments for %s", galleryObject));
         List<GalleryObjectComment> comments = mWebGallery.getDisplayObjectComments(galleryObject, null);
-        
+
         message = mResponseHandler.obtainMessage(MESSAGE_IMAGE_COMMENTS, new MessageBody(galleryObject, comments));
         message.sendToTarget();
       } catch (Exception e) {

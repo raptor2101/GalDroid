@@ -22,15 +22,15 @@ import java.io.Serializable;
 import java.util.Date;
 
 public interface GalleryObject extends Serializable {
-    public String getTitle();
+  public String getTitle();
 
-    public Date getDateUploaded();
+  public Date getDateUploaded();
 
-    public boolean hasChildren();
+  public boolean hasChildren();
 
-    public String getObjectId();
+  public String getObjectId();
 
-    public GalleryDownloadObject getImage();
+  public GalleryDownloadObject getImage();
 
-    public GalleryDownloadObject getThumbnail();
+  public GalleryDownloadObject getThumbnail();
 }

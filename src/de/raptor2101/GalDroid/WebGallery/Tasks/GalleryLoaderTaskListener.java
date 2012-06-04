@@ -23,9 +23,9 @@ import java.util.List;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryObject;
 
 public interface GalleryLoaderTaskListener {
-    void onDownloadStarted();
+  void onDownloadStarted();
 
-    void onDownloadProgress(int elementCount, int maxCount);
+  void onDownloadProgress(int elementCount, int maxCount);
 
-    void onDownloadCompleted(List<GalleryObject> galleryObjects);
+  void onDownloadCompleted(List<GalleryObject> galleryObjects);
 }

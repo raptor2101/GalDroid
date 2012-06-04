@@ -49,138 +49,138 @@ import de.raptor2101.GalDroid.WebGallery.Tasks.ImageLoaderTask;
 
 public class ImageViewActivity extends GalleryActivity implements OnItemSelectedListener, OnItemClickListener {
 
-    private Gallery mGalleryFullscreen;
-    private Gallery mGalleryThumbnails;
+  private Gallery mGalleryFullscreen;
+  private Gallery mGalleryThumbnails;
 
-    private ImageAdapter mAdapterFullscreen, mAdapterThumbnails;
+  private ImageAdapter mAdapterFullscreen, mAdapterThumbnails;
 
-    private ImageInformationView mInformationView;
+  private ImageInformationView mInformationView;
 
-    private ActionBarHider mActionBarHider;
-    private ImageLoaderTask mImageLoaderTask;
+  private ActionBarHider mActionBarHider;
+  private ImageLoaderTask mImageLoaderTask;
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-	requestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
+  @Override
+  public void onCreate(Bundle savedInstanceState) {
+    requestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
 
-	setContentView(R.layout.image_view_activity);
-	super.onCreate(savedInstanceState);
+    setContentView(R.layout.image_view_activity);
+    super.onCreate(savedInstanceState);
 
-	ActionBar actionBar = getActionBar();
+    ActionBar actionBar = getActionBar();
 
-	actionBar.setDisplayShowHomeEnabled(false);
-	actionBar.setDisplayShowTitleEnabled(false);
-	actionBar.hide();
-	mActionBarHider = new ActionBarHider(actionBar);
+    actionBar.setDisplayShowHomeEnabled(false);
+    actionBar.setDisplayShowTitleEnabled(false);
+    actionBar.hide();
+    mActionBarHider = new ActionBarHider(actionBar);
 
-	GalDroidApp app = (GalDroidApp) getApplication();
-	mImageLoaderTask = new ImageLoaderTask(app.getWebGallery(), app.getImageCache());
+    GalDroidApp app = (GalDroidApp) getApplication();
+    mImageLoaderTask = new ImageLoaderTask(app.getWebGallery(), app.getImageCache());
 
-	mInformationView = (ImageInformationView) findViewById(R.id.viewImageInformations);
-	boolean showInfo = getIntent().getExtras().getBoolean(GalDroidApp.INTENT_EXTRA_SHOW_IMAGE_INFO);
-	if (showInfo) {
-	    mInformationView.setVisibility(View.VISIBLE);
-	} else {
-	    mInformationView.setVisibility(View.GONE);
-	}
-	mInformationView.initialize();
-	
-	mGalleryFullscreen = (Gallery) findViewById(R.id.singleImageGallery);
-	mGalleryThumbnails = (Gallery) findViewById(R.id.thumbnailImageGallery);
-	mGalleryThumbnails.setWillNotCacheDrawing(true);
+    mInformationView = (ImageInformationView) findViewById(R.id.viewImageInformations);
+    boolean showInfo = getIntent().getExtras().getBoolean(GalDroidApp.INTENT_EXTRA_SHOW_IMAGE_INFO);
+    if (showInfo) {
+      mInformationView.setVisibility(View.VISIBLE);
+    } else {
+      mInformationView.setVisibility(View.GONE);
+    }
+    mInformationView.initialize();
 
-	LayoutParams params = this.getWindow().getAttributes();
+    mGalleryFullscreen = (Gallery) findViewById(R.id.singleImageGallery);
+    mGalleryThumbnails = (Gallery) findViewById(R.id.thumbnailImageGallery);
+    mGalleryThumbnails.setWillNotCacheDrawing(true);
 
-	ImageViewOnTouchListener touchListener = new ImageViewOnTouchListener(mGalleryFullscreen, mGalleryThumbnails, params.height / 5f);
+    LayoutParams params = this.getWindow().getAttributes();
 
-	mAdapterFullscreen = new ImageAdapter(this, new Gallery.LayoutParams(params.width, params.height), ScaleMode.ScaleSource, mImageLoaderTask);
-	mAdapterFullscreen.setTitleConfig(TitleConfig.HideTitle);
-	mAdapterFullscreen.setDisplayTarget(DisplayTarget.FullScreen);
-	mAdapterFullscreen.setCleanupMode(CleanupMode.ForceCleanup);
+    ImageViewOnTouchListener touchListener = new ImageViewOnTouchListener(mGalleryFullscreen, mGalleryThumbnails, params.height / 5f);
 
-	mAdapterThumbnails = new ImageAdapter(this, new Gallery.LayoutParams(100, 100), ScaleMode.DontScale, mImageLoaderTask);
-	mAdapterThumbnails.setTitleConfig(TitleConfig.HideTitle);
-	mAdapterThumbnails.setDisplayTarget(DisplayTarget.Thumbnails);
+    mAdapterFullscreen = new ImageAdapter(this, new Gallery.LayoutParams(params.width, params.height), ScaleMode.ScaleSource, mImageLoaderTask);
+    mAdapterFullscreen.setTitleConfig(TitleConfig.HideTitle);
+    mAdapterFullscreen.setDisplayTarget(DisplayTarget.FullScreen);
+    mAdapterFullscreen.setCleanupMode(CleanupMode.ForceCleanup);
 
-	mGalleryFullscreen.setAdapter(mAdapterFullscreen);
-	mGalleryThumbnails.setAdapter(mAdapterThumbnails);
+    mAdapterThumbnails = new ImageAdapter(this, new Gallery.LayoutParams(100, 100), ScaleMode.DontScale, mImageLoaderTask);
+    mAdapterThumbnails.setTitleConfig(TitleConfig.HideTitle);
+    mAdapterThumbnails.setDisplayTarget(DisplayTarget.Thumbnails);
 
-	mGalleryFullscreen.setOnItemClickListener(this);
-	mGalleryFullscreen.setOnTouchListener(touchListener);
-	mGalleryFullscreen.setOnItemSelectedListener(this);
-	mGalleryThumbnails.setOnItemSelectedListener(this);
+    mGalleryFullscreen.setAdapter(mAdapterFullscreen);
+    mGalleryThumbnails.setAdapter(mAdapterThumbnails);
+
+    mGalleryFullscreen.setOnItemClickListener(this);
+    mGalleryFullscreen.setOnTouchListener(touchListener);
+    mGalleryFullscreen.setOnItemSelectedListener(this);
+    mGalleryThumbnails.setOnItemSelectedListener(this);
+  }
+
+  @Override
+  public void onBackPressed() {
+    ImageAdapter adapter = (ImageAdapter) mGalleryFullscreen.getAdapter();
+    adapter.cleanUp();
+    adapter = (ImageAdapter) mGalleryThumbnails.getAdapter();
+    Intent resultIntent = new Intent(this, ImageViewActivity.class);
+    resultIntent.putExtra(GalDroidApp.INTENT_EXTRA_DISPLAY_INDEX, getCurrentIndex());
+    setResult(Activity.RESULT_OK, resultIntent);
+
+    super.onBackPressed();
+  }
+
+  @Override
+  public boolean onCreateOptionsMenu(Menu menu) {
+    MenuInflater inflater = getMenuInflater();
+    inflater.inflate(R.menu.image_view_options_menu, menu);
+    return true;
+  }
+
+  @Override
+  public boolean onOptionsItemSelected(MenuItem item) {
+    if (item.getItemId() == R.id.item_additional_info_object) {
+      if (mInformationView.getVisibility() == View.GONE) {
+        mInformationView.setVisibility(View.VISIBLE);
+      } else {
+        mInformationView.setVisibility(View.GONE);
+      }
+    }
+    return true;
+  }
+
+  public void onItemSelected(AdapterView<?> gallery, View view, int position, long arg3) {
+    setCurrentIndex(position);
+
+    if (gallery == mGalleryFullscreen) {
+      mGalleryThumbnails.setSelection(position);
+    } else {
+      mGalleryFullscreen.setSelection(position);
+      view = mGalleryFullscreen.getSelectedView();
     }
 
-    @Override
-    public void onBackPressed() {
-	ImageAdapter adapter = (ImageAdapter) mGalleryFullscreen.getAdapter();
-	adapter.cleanUp();
-	adapter = (ImageAdapter) mGalleryThumbnails.getAdapter();
-	Intent resultIntent = new Intent(this, ImageViewActivity.class);
-	resultIntent.putExtra(GalDroidApp.INTENT_EXTRA_DISPLAY_INDEX, getCurrentIndex());
-	setResult(Activity.RESULT_OK, resultIntent);
+    mInformationView.setGalleryImageView((GalleryImageView) view);
+  }
 
-	super.onBackPressed();
+  public void onNothingSelected(AdapterView<?> arg0) {
+    // Empty Stub, cause nothing to do
+  }
+
+  @Override
+  public void onGalleryObjectsLoaded(List<GalleryObject> galleryObjects) {
+    mAdapterFullscreen.setGalleryObjects(galleryObjects);
+    mAdapterThumbnails.setGalleryObjects(galleryObjects);
+
+    int currentIndex = getCurrentIndex();
+    if (currentIndex == -1) {
+      GalleryObject currentObject = (GalleryObject) getIntent().getExtras().getSerializable(GalDroidApp.INTENT_EXTRA_DISPLAY_OBJECT);
+      currentIndex = galleryObjects.indexOf(currentObject);
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-	MenuInflater inflater = getMenuInflater();
-	inflater.inflate(R.menu.image_view_options_menu, menu);
-	return true;
+    mGalleryFullscreen.setSelection(currentIndex);
+    mGalleryThumbnails.setSelection(currentIndex);
+    mImageLoaderTask.start();
+  }
+
+  public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+    if (mActionBarHider.isShowing()) {
+      mActionBarHider.hide();
+    } else {
+      mActionBarHider.show();
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-	if (item.getItemId() == R.id.item_additional_info_object) {
-	    if (mInformationView.getVisibility() == View.GONE) {
-		mInformationView.setVisibility(View.VISIBLE);
-	    } else {
-		mInformationView.setVisibility(View.GONE);
-	    }
-	}
-	return true;
-    }
-
-    public void onItemSelected(AdapterView<?> gallery, View view, int position, long arg3) {
-	setCurrentIndex(position);
-
-	if (gallery == mGalleryFullscreen) {
-	    mGalleryThumbnails.setSelection(position);
-	} else {
-	    mGalleryFullscreen.setSelection(position);
-	    view = mGalleryFullscreen.getSelectedView();
-	}
-
-	mInformationView.setGalleryImageView((GalleryImageView) view);
-    }
-
-    public void onNothingSelected(AdapterView<?> arg0) {
-	// Empty Stub, cause nothing to do
-    }
-
-    @Override
-    public void onGalleryObjectsLoaded(List<GalleryObject> galleryObjects) {
-	mAdapterFullscreen.setGalleryObjects(galleryObjects);
-	mAdapterThumbnails.setGalleryObjects(galleryObjects);
-
-	int currentIndex = getCurrentIndex();
-	if (currentIndex == -1) {
-	    GalleryObject currentObject = (GalleryObject) getIntent().getExtras().getSerializable(GalDroidApp.INTENT_EXTRA_DISPLAY_OBJECT);
-	    currentIndex = galleryObjects.indexOf(currentObject);
-	}
-
-	mGalleryFullscreen.setSelection(currentIndex);
-	mGalleryThumbnails.setSelection(currentIndex);
-	mImageLoaderTask.start();
-    }
-
-    public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-	if (mActionBarHider.isShowing()) {
-	    mActionBarHider.hide();
-	} else {
-	    mActionBarHider.show();
-	}
-
-    }
+  }
 }
