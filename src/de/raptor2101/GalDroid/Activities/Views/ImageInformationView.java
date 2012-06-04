@@ -32,7 +32,7 @@ import de.raptor2101.GalDroid.WebGallery.Tasks.ImageLoaderTaskListener;
 import de.raptor2101.GalDroid.WebGallery.Tasks.ImageInformationLoaderTask;
 
 public class ImageInformationView extends TableLayout implements ImageInformationLoaderTaskListener, GalleryImageViewListener {
-  private final static String ClassTag = "ImageInformationView";
+  private final static String CLASS_TAG = "ImageInformationView";
 
   private ImageInformationLoaderTask mLoadImageInformationTask;
 
@@ -78,7 +78,15 @@ public class ImageInformationView extends TableLayout implements ImageInformatio
   }
 
   public void setGalleryImageView(GalleryImageView imageView) {
-    Log.d(ClassTag, String.format("setGalleryImageView: %s", imageView.getGalleryObject()));
+    GalleryObject requestedObject = imageView.getGalleryObject();
+    Log.d(CLASS_TAG, String.format("setGalleryImageView: %s", requestedObject));
+    
+    GalleryImageView currentView = mCurrentSelectedImageView.get();
+    if(currentView != null && currentView.getGalleryObject().equals(requestedObject)){
+      Log.d(CLASS_TAG, "extractImageInformation: view already selected!");
+      return;
+    }
+    
     mCurrentSelectedImageView = new WeakReference<GalleryImageView>(imageView);
     if (getVisibility() == VISIBLE) {
       extractImageInformation(imageView);
@@ -86,7 +94,8 @@ public class ImageInformationView extends TableLayout implements ImageInformatio
   }
 
   private void extractImageInformation(GalleryImageView imageView) {
-    Log.d(ClassTag, String.format("extractImageInformation: %s", imageView.getGalleryObject()));
+    GalleryObject requestedObject = imageView.getGalleryObject();
+    Log.d(CLASS_TAG, String.format("extractImageInformation: %s", requestedObject));
 
     if (mCurrentLoadingObject != null) {
       mLoadImageInformationTask.cancel(mCurrentLoadingObject);
@@ -99,20 +108,20 @@ public class ImageInformationView extends TableLayout implements ImageInformatio
     mImageInformationsLoaded = false;
 
     if (imageView.isLoaded()) {
-      enqueueLoadingTask(imageView.getGalleryObject());
+      enqueueLoadingTask(requestedObject);
     } else {
       registerLoadingListener(imageView);
     }
   }
 
   private void enqueueLoadingTask(GalleryObject galleryObject) {
-    Log.d(ClassTag, String.format("enqueueExtrationTask: %s", galleryObject));
+    Log.d(CLASS_TAG, String.format("enqueueExtrationTask: %s", galleryObject));
     mCurrentLoadingObject = galleryObject;
     mLoadImageInformationTask.load(galleryObject);
   }
 
   private void registerLoadingListener(GalleryImageView imageView) {
-    Log.d(ClassTag, String.format("registerLoadingListener: %s", imageView.getGalleryObject()));
+    Log.d(CLASS_TAG, String.format("registerLoadingListener: %s", imageView.getGalleryObject()));
     if (mCurrentListenedImageView != null) {
       mCurrentListenedImageView.setListener(null);
     }
@@ -123,7 +132,7 @@ public class ImageInformationView extends TableLayout implements ImageInformatio
 
   @Override
   public void setVisibility(int visibility) {
-    Log.d(ClassTag, "setVisibility");
+    Log.d(CLASS_TAG, "setVisibility");
     GalleryImageView imageView = mCurrentSelectedImageView.get();
     if (visibility == VISIBLE && imageView != null) {
       extractImageInformation(imageView);
@@ -201,7 +210,7 @@ public class ImageInformationView extends TableLayout implements ImageInformatio
   }
 
   public void onImageInformationLoaded(GalleryObject galleryObject, ImageInformation info) {
-    Log.d(ClassTag, String.format("ImageInformation loaded for %s", galleryObject));
+    Log.d(CLASS_TAG, String.format("ImageInformation loaded for %s", galleryObject));
     TextView textField = (TextView) findViewById(R.id.textTitle);
     textField.setText(info.mTitle);
 
@@ -259,7 +268,7 @@ public class ImageInformationView extends TableLayout implements ImageInformatio
   }
 
   public void onImageTagsLoaded(GalleryObject galleryObject, List<String> tags) {
-    Log.d(ClassTag, String.format("Tags (Count: %d) loaded for %s", tags.size(), galleryObject));
+    Log.d(CLASS_TAG, String.format("Tags (Count: %d) loaded for %s", tags.size(), galleryObject));
     StringBuilder stringBuilder = new StringBuilder(tags.size() * 10);
     for (String tag : tags) {
       stringBuilder.append(String.format("%s, ", tag));
@@ -279,7 +288,7 @@ public class ImageInformationView extends TableLayout implements ImageInformatio
   }
 
   public void onImageCommetsLoaded(GalleryObject galleryObject, List<GalleryObjectComment> comments) {
-    Log.d(ClassTag, String.format("Comments (Count: %d) loaded for %s", comments.size(), galleryObject));
+    Log.d(CLASS_TAG, String.format("Comments (Count: %d) loaded for %s", comments.size(), galleryObject));
     Context context = getContext();
     LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
