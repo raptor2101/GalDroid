@@ -22,7 +22,7 @@ import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryDownloadObject;
 
 public class DownloadObject implements GalleryDownloadObject {
 
-    @Override
+  @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;
@@ -47,30 +47,30 @@ public class DownloadObject implements GalleryDownloadObject {
     return true;
   }
 
-    private final String mSourceLink;
-    private final String mRootLink;
-    private final int mFileSize;
+  private final String mSourceLink;
+  private final String mRootLink;
+  private final int mFileSize;
 
-    public DownloadObject(String rootLink, String sourceLink, int fileSize) {
-	mSourceLink = sourceLink;
-	mRootLink = rootLink;
-	mFileSize = fileSize;
-    }
+  public DownloadObject(String rootLink, String sourceLink, int fileSize) {
+    mSourceLink = sourceLink;
+    mRootLink = rootLink;
+    mFileSize = fileSize;
+  }
 
-    public String getRootLink() {
-	return mRootLink;
-    }
+  public String getRootLink() {
+    return mRootLink;
+  }
 
-    public String getUniqueId() {
-	return mSourceLink;
-    }
+  public String getUniqueId() {
+    return mSourceLink;
+  }
 
-    public int getFileSize() {
-	return mFileSize;
-    }
+  public int getFileSize() {
+    return mFileSize;
+  }
 
-    @Override
-    public String toString() {
-	return mSourceLink;
-    }
+  @Override
+  public String toString() {
+    return mSourceLink;
+  }
 }
