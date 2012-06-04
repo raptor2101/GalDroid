@@ -144,7 +144,7 @@ public class ImageAdapter extends BaseAdapter {
     GalleryObject galleryObject = mGalleryObjects.get(position);
 
     String objectId = galleryObject.getObjectId();
-    Log.d(ClassTag, String.format("Request View %s", objectId));
+    Log.d(ClassTag, String.format("Request Pos %s View %s", position, objectId));
 
     GalleryImageView imageView = getCachedView(cachedView, galleryObject);
 
@@ -156,8 +156,10 @@ public class ImageAdapter extends BaseAdapter {
     }
 
     GalleryDownloadObject downloadObject = getDownloadObject(galleryObject);
-
-    if (!imageView.isLoaded() && !mImageLoaderTask.isDownloading(downloadObject)) {
+    boolean isLoaded = imageView.isLoaded();
+    boolean isDownloading = mImageLoaderTask.isDownloading(downloadObject);
+    Log.d(ClassTag, String.format("isLoaded: %s isDownloading: %s", isLoaded, isDownloading));
+    if (!isLoaded && !isDownloading) {
       Log.d(ClassTag, String.format("Init Reload", galleryObject.getObjectId()));
       loadGalleryImage(imageView, downloadObject);
     }
@@ -185,8 +187,7 @@ public class ImageAdapter extends BaseAdapter {
       imageView = (GalleryImageView) cachedView;
       Log.d(ClassTag, String.format("Cached View %s", imageView.getObjectId()));
       GalleryObject originGalleryObject = imageView.getGalleryObject();
-      if (originGalleryObject.getObjectId() != galleryObject.getObjectId()) {
-
+      if (!originGalleryObject.getObjectId().equals(galleryObject.getObjectId())) {
         if (!imageView.isLoaded()) {
           Log.d(ClassTag, String.format("Abort downloadTask %s", imageView.getObjectId()));
           mImageLoaderTask.cancel(getDownloadObject(originGalleryObject));
