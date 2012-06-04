@@ -22,6 +22,31 @@ import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryDownloadObject;
 
 public class DownloadObject implements GalleryDownloadObject {
 
+    @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((mSourceLink == null) ? 0 : mSourceLink.hashCode());
+    return mSourceLink.hashCode();
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    DownloadObject other = (DownloadObject) obj;
+    if (mSourceLink == null) {
+      if (other.mSourceLink != null)
+        return false;
+    } else if (!mSourceLink.equals(other.mSourceLink))
+      return false;
+    return true;
+  }
+
     private final String mSourceLink;
     private final String mRootLink;
     private final int mFileSize;
