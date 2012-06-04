@@ -153,16 +153,16 @@ public class ImageInformationView extends TableLayout implements ImageInformatio
   }
 
   private void clearImageInformations() {
-
-    ViewGroup commentView = (ViewGroup) findViewById(R.id.layoutComments);
-    commentView.removeAllViews();
-
+    mViewTags.setText("");
+    mViewTags.setVisibility(View.GONE);
+    
+    mViewComments.removeAllViews();
+    mViewComments.setVisibility(View.GONE);
+    
     TextView textView = (TextView) findViewById(R.id.textTitle);
     textView.setText("");
 
-    textView = (TextView) findViewById(R.id.textTags);
-    textView.setText("");
-
+    
     textView = (TextView) findViewById(R.id.textUploadDate);
     textView.setText("");
 
@@ -204,7 +204,7 @@ public class ImageInformationView extends TableLayout implements ImageInformatio
 
     textView = (TextView) findViewById(R.id.textGeoHeight);
     textView.setText("");
-
+    
     mProgressBarComments.setVisibility(GONE);
     mProgressBarTags.setVisibility(GONE);
   }
