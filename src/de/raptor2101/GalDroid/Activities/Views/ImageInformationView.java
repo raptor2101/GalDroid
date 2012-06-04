@@ -332,7 +332,8 @@ public class ImageInformationView extends TableLayout implements ImageInformatio
 
     public void onLoadingCompleted(GalleryObject galleryObject) {
 	enqueueLoadingTask(galleryObject);
-	
+	mCurrentListenedImageView.setListener(null);
+	mCurrentListenedImageView = null;	
     }
 
     public void onLoadingCancelled(GalleryObject galleryObject) {
@@ -342,5 +343,25 @@ public class ImageInformationView extends TableLayout implements ImageInformatio
 
     public boolean isLoaded() {
 	return mImageInformationsLoaded&&mTagsLoaded&&mCommentsLoaded;
+    }
+
+    public boolean areImageInformationsLoaded() {
+	return mImageInformationsLoaded;
+    }
+    
+    public boolean areTagsLoaded() {
+	return mTagsLoaded;
+    }
+    
+    public boolean areCommentsLoaded() {
+	return mCommentsLoaded;
+    }
+
+    public GalleryImageView getCurrentListenedImageView() {
+	return mCurrentListenedImageView;
+    }
+
+    public GalleryObject getCurrentLoadingObject() {
+	return mCurrentLoadingObject;
     }
 }
