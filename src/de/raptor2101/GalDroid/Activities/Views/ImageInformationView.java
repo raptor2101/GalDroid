@@ -77,6 +77,20 @@ public class ImageInformationView extends TableLayout implements ImageInformatio
     mCurrentSelectedImageView = new WeakReference<GalleryImageView>(null);
   }
 
+  @Override
+  protected void onDetachedFromWindow() {
+    super.onDetachedFromWindow();
+    
+    mCurrentListenedImageView = null;
+    
+    try {
+      mLoadImageInformationTask.cancel(true);
+    } catch (InterruptedException e) {
+      
+    }
+    mLoadImageInformationTask = null;
+  }
+  
   public void setGalleryImageView(GalleryImageView imageView) {
     GalleryObject requestedObject = imageView.getGalleryObject();
     Log.d(CLASS_TAG, String.format("setGalleryImageView: %s", requestedObject));

@@ -222,7 +222,6 @@ public class ImageAdapter extends BaseAdapter {
         imageView.recylceBitmap();
       }
     }
-    mImageLoaderTask.cancel();
     System.gc();
   }
 

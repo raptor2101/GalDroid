@@ -115,7 +115,7 @@ public class ImageViewActivity extends GalleryActivity implements OnItemSelected
   public void onBackPressed() {
     ImageAdapter adapter = (ImageAdapter) mGalleryFullscreen.getAdapter();
     adapter.cleanUp();
-    adapter = (ImageAdapter) mGalleryThumbnails.getAdapter();
+    
     Intent resultIntent = new Intent(this, ImageViewActivity.class);
     resultIntent.putExtra(GalDroidApp.INTENT_EXTRA_DISPLAY_INDEX, getCurrentIndex());
     setResult(Activity.RESULT_OK, resultIntent);
@@ -123,6 +123,40 @@ public class ImageViewActivity extends GalleryActivity implements OnItemSelected
     super.onBackPressed();
   }
 
+  @Override
+  protected void onPause() {
+    super.onPause();
+    
+    try {
+      mImageLoaderTask.stop(false);
+    } catch (InterruptedException e) {
+      
+    }
+  }
+  
+  @Override
+  protected void onResume() {
+    super.onResume();
+    mImageLoaderTask.start();
+  }
+  
+  @Override
+  protected void onStop() {
+    super.onStop();
+    
+    try {
+      mImageLoaderTask.cancel(true);
+    } catch (InterruptedException e) {
+      
+    }
+    mImageLoaderTask = null;
+    
+    ImageAdapter adapter = (ImageAdapter) mGalleryFullscreen.getAdapter();
+    adapter.cleanUp();
+    adapter = (ImageAdapter) mGalleryThumbnails.getAdapter();
+    adapter.cleanUp();
+  }
+  
   @Override
   public boolean onCreateOptionsMenu(Menu menu) {
     MenuInflater inflater = getMenuInflater();

@@ -204,17 +204,29 @@ public abstract class WorkerTask<ParameterType, ProgressType, ResultType> implem
     }
   }
 
-  public final void stop() {
-    mWorkerRunnable.mRunning = false;
+  public final void stop(boolean waitForStopped) throws InterruptedException{
+    if (mWorkerThread != null) {
+      mWorkerRunnable.mRunning = false;
+      if (waitForStopped) {
+        mWorkerThread.join();
+      }
+      mWorkerThread = null;
+    }
   }
 
-  public final void cancel() {
-    mIsCancelled = true;
-    mWorkerRunnable.mRunning = false;
-    synchronized (mCallables) {
-      mCallables.clear();
+  public final void cancel(boolean waitForCancel) throws InterruptedException {
+    if (mWorkerThread != null) {
+      mIsCancelled = true;
+      mWorkerRunnable.mRunning = false;
+      synchronized (mCallables) {
+        mCallables.clear();
+      }
+      mWorkerThread.interrupt();
+      if (waitForCancel) {
+        mWorkerThread.join();
+      }
+      mWorkerThread = null;
     }
-    mWorkerThread.interrupt();
   }
 
   private void finish(ParameterType parameter, ResultType result) {

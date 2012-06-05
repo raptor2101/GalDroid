@@ -83,6 +83,8 @@ public class GridViewActivity extends GalleryActivity implements OnItemClickList
     if (adapter != null) {
       adapter.refreshImages();
     }
+    
+    mImageLoaderTask.start();
   }
 
   @Override
@@ -148,4 +150,27 @@ public class GridViewActivity extends GalleryActivity implements OnItemClickList
     return true;
   }
 
+  protected void onPause() {
+    super.onPause();
+    
+    try {
+      mImageLoaderTask.stop(false);
+    } catch (InterruptedException e) {
+      
+    }
+  }
+  
+  @Override
+  protected void onStop() {
+    super.onStop();
+    
+    try {
+      mImageLoaderTask.cancel(true);
+    } catch (InterruptedException e) {
+      
+    }
+    mImageLoaderTask = null;
+    
+    mAdapter.cleanUp();
+  }
 }

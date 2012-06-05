@@ -9,7 +9,7 @@ public interface WorkerTaskInterface {
 
   public void start();
 
-  public void stop();
+  public void stop(boolean waitForStopped) throws InterruptedException;
 
-  public void cancel();
+  public void cancel(boolean waitForCancel) throws InterruptedException;
 }
