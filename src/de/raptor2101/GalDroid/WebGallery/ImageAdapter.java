@@ -64,7 +64,6 @@ public class ImageAdapter extends BaseAdapter {
   private TitleConfig mTitleConfig;
   private LayoutParams mLayoutParams;
   private ImageSize mImageSize;
-  private ScaleMode mScaleMode;
 
   private WeakReference<GalleryImageViewListener> mListener;
   private ArrayList<WeakReference<GalleryImageView>> mImageViews;
@@ -82,11 +81,10 @@ public class ImageAdapter extends BaseAdapter {
 
     mTitleConfig = TitleConfig.ShowTitle;
     mImageSize = ImageSize.Thumbnail;
-    mLayoutParams = layoutParams;
+    mLayoutParams = scaleMode == ScaleMode.ScaleSource ? layoutParams : null;
 
     mListener = new WeakReference<GalleryImageViewListener>(null);
     mImageLoaderTask = loaderTask;
-    mScaleMode = scaleMode;
   }
 
   public void setListener(GalleryImageViewListener listener) {
@@ -149,7 +147,7 @@ public class ImageAdapter extends BaseAdapter {
 
     GalleryDownloadObject downloadObject = getDownloadObject(galleryObject);
     boolean isLoaded = imageView.isLoaded();
-    boolean isDownloading = mImageLoaderTask.isDownloading(downloadObject);
+    boolean isDownloading = mImageLoaderTask.isDownloading(downloadObject, mLayoutParams);
     Log.d(ClassTag, String.format("isLoaded: %s isDownloading: %s", isLoaded, isDownloading));
     if (!isLoaded && !isDownloading) {
       Log.d(ClassTag, String.format("Init Reload", galleryObject.getObjectId()));
@@ -182,7 +180,7 @@ public class ImageAdapter extends BaseAdapter {
       if (!originGalleryObject.getObjectId().equals(galleryObject.getObjectId())) {
         if (!imageView.isLoaded()) {
           Log.d(ClassTag, String.format("Abort downloadTask %s", imageView.getObjectId()));
-          mImageLoaderTask.cancel(getDownloadObject(originGalleryObject));
+          mImageLoaderTask.cancel(getDownloadObject(originGalleryObject), mLayoutParams);
         }
       }
     }
@@ -196,8 +194,7 @@ public class ImageAdapter extends BaseAdapter {
 
     Bitmap cachedBitmap = mCache.getBitmap(downloadObject.getUniqueId());
     if (cachedBitmap == null) {
-      // TODO Scale mode wieder einbauen
-      mImageLoaderTask.download(downloadObject, imageView);
+      mImageLoaderTask.download(downloadObject, mLayoutParams, imageView);
     } else {
       imageView.onLoadingCompleted(downloadObject.getUniqueId(), cachedBitmap);
     }
