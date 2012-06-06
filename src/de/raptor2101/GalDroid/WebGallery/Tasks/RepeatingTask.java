@@ -60,7 +60,7 @@ public abstract class RepeatingTask<ParameterType, ProgressType, ResultType> imp
   private final MessageHandler mMessageHandler = new MessageHandler();
 
   private class Task implements Callable<ResultType> {
-    private ParameterType mParameter;
+    private final ParameterType mParameter;
 
     public Task(ParameterType parameter) {
       mParameter = parameter;
@@ -110,10 +110,12 @@ public abstract class RepeatingTask<ParameterType, ProgressType, ResultType> imp
 
   private class InternRunnable implements Runnable {
 
-    private boolean mRunning = true;
+    boolean mRunning = true;
     Task mCurrentCallable;
-
+    long mThreadID;
     public void run() {
+      mThreadID = Thread.currentThread().getId();
+      Log.d(this.buildLogTag(), "Thread started");
       mIsStarted = true;
       while (mRunning) {
         try {
@@ -124,36 +126,41 @@ public abstract class RepeatingTask<ParameterType, ProgressType, ResultType> imp
             message = mMessageHandler.obtainMessage(MESSAGE_PRE_EXECUTION, messageBody);
             message.sendToTarget();
 
-            Log.d(String.format("%s (%s)", CLASS_TAG, mThreadName), String.format("Executing callable for %s", mCurrentCallable.mParameter));
+            Log.d(this.buildLogTag(), String.format("Executing callable for %s", mCurrentCallable.mParameter));
             ResultType result = mCurrentCallable.call();
             messageBody = new TaskMessage<ResultType>(mCurrentCallable.mParameter, result);
             message = mMessageHandler.obtainMessage(MESSAGE_POST_RESULT, messageBody);
           } catch (Exception e) {
-            Log.e(String.format("%s (%s)", CLASS_TAG, mThreadName), String.format("Something goes wrong while executing callable for %s", mCurrentCallable.mParameter), e);
+            Log.e(this.buildLogTag(), "Exceptions commes up", e);
+            Log.e(this.buildLogTag(), String.format("Something goes wrong while executing callable for %s", mCurrentCallable.mParameter), e);
             TaskMessage<Exception> messageBody = new TaskMessage<Exception>(mCurrentCallable.mParameter, e);
             message = mMessageHandler.obtainMessage(MESSAGE_POST_ERROR, messageBody);
           }
-          Log.d(String.format("%s (%s)", CLASS_TAG, mThreadName), String.format("Invoke callback for %s", mCurrentCallable.mParameter));
+          Log.d(buildLogTag(), String.format("Invoke callback for %s", mCurrentCallable.mParameter));
           message.sendToTarget();
           mCurrentCallable = null;
           mIsCancelled = false;
         } catch (InterruptedException e) {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
+          Log.d(buildLogTag(), "got interrupted");
         }
       }
+      Log.d(this.buildLogTag(), "Thread finished");
     }
 
+    private String buildLogTag() {
+      return String.format("%s (%d:%s)", CLASS_TAG, mThreadID, mThreadName);
+    }
+    
     private Task waitForCallable() throws InterruptedException {
       synchronized (mTaskQueue) {
-        Log.d(String.format("%s (%s)", CLASS_TAG, mThreadName), "Looking for enqueued task");
+        Log.d(this.buildLogTag(), "Looking for enqueued task");
         while (mTaskQueue.size() == 0) {
           mIsSleeping = true;
           Log.d(String.format("%s (%s)", CLASS_TAG, mThreadName), "Waiting for enqueued task");
           mTaskQueue.wait();
         }
         mIsSleeping = false;
-        Log.d(String.format("%s (%s)", CLASS_TAG, mThreadName), "Returning enqueued task");
+        Log.d(this.buildLogTag(), "Returning enqueued task");
         return mTaskQueue.poll();
       }
     }
@@ -170,17 +177,22 @@ public abstract class RepeatingTask<ParameterType, ProgressType, ResultType> imp
 
   protected void enqueueTask(ParameterType parameter) {
     if (!mIsStopping) {
-      Log.d(String.format("%s (%s)", CLASS_TAG, mThreadName), String.format("Enqueuing %s", parameter));
+      Log.d(buildLogTag(), String.format("Enqueuing %s", parameter));
       synchronized (mTaskQueue) {
         mTaskQueue.add(new Task(parameter));
-        Log.d(String.format("%s (%s)", CLASS_TAG, mThreadName), "Notify waiting WorkerThread");
+        Log.d(buildLogTag(), "Notify waiting WorkerThread");
         mTaskQueue.notifyAll();
       }
     }
   }
 
+  private String buildLogTag() {
+    long threadID = mThread != null? mThread.getId() : -1;
+    return String.format("%s (%d:%s)", CLASS_TAG, threadID, mThreadName);
+  }
+
   protected void removeEnqueuedTask(ParameterType parameter) {
-    Log.d(String.format("%s (%s)", CLASS_TAG, mThreadName), String.format("Remove enqueued %s", parameter));
+    Log.d(buildLogTag(), String.format("Remove enqueued %s", parameter));
     synchronized (mTaskQueue) {
       mTaskQueue.remove(parameter);
     }
@@ -201,7 +213,7 @@ public abstract class RepeatingTask<ParameterType, ProgressType, ResultType> imp
       mRunnable.mRunning = true;
       mThread = new Thread(mRunnable, mThreadName);
       mThread.setDaemon(false);
-      Log.d(String.format("%s (%s)", CLASS_TAG, mThreadName), "Starting WorkerThread");
+      Log.d(buildLogTag(), "Starting WorkerThread");
       mThread.start();
     }
   }
@@ -209,6 +221,10 @@ public abstract class RepeatingTask<ParameterType, ProgressType, ResultType> imp
   public final void stop(boolean waitForStopped) throws InterruptedException{
     if (mThread != null) {
       mRunnable.mRunning = false;
+      if(mIsSleeping) {
+        mThread.interrupt();
+      }
+      
       if (waitForStopped) {
         mThread.join();
       }
@@ -291,11 +307,11 @@ public abstract class RepeatingTask<ParameterType, ProgressType, ResultType> imp
 
   protected boolean isActive(ParameterType parameter) {
     Status status = getStatus();
-    Log.d(String.format("%s (%s)", CLASS_TAG, mThreadName), String.format("Status: %s", status));
+    Log.d(buildLogTag(), String.format("Status: %s", status));
     if (status != Status.RUNNING) {
       return false;
     }
-    Log.d(String.format("%s (%s)", CLASS_TAG, mThreadName), String.format("CurrentCallable %s Parameter %s", mRunnable.mCurrentCallable, parameter));
+    Log.d(buildLogTag(), String.format("CurrentCallable %s Parameter %s", mRunnable.mCurrentCallable, parameter));
     return mRunnable.mCurrentCallable != null && mRunnable.mCurrentCallable.mParameter.equals(parameter);
   }
 }
