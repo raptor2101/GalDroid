@@ -91,7 +91,7 @@ public class ImageLoaderTask extends RepeatingTask<ListenedParameter<GalleryDown
       InputStream inputStream = mCache.getFileStream(uniqueId);
 
       if (inputStream == null) {
-        DownloadImage(galleryDownloadObject, parameter.getListener());
+        DownloadImage(galleryDownloadObject);
         ScaleImage(galleryDownloadObject);
         inputStream = mCache.getFileStream(uniqueId);
       }
@@ -145,7 +145,7 @@ public class ImageLoaderTask extends RepeatingTask<ListenedParameter<GalleryDown
     }
   }
 
-  private void DownloadImage(GalleryDownloadObject galleryDownloadObject, ImageLoaderTaskListener listener) throws IOException {
+  private void DownloadImage(GalleryDownloadObject galleryDownloadObject) throws IOException {
     Log.d(CLASS_TAG, String.format("%s - Downloading to local cache file", galleryDownloadObject));
 
     Stream networkStream = mWebGallery.getFileStream(galleryDownloadObject);
@@ -156,12 +156,16 @@ public class ImageLoaderTask extends RepeatingTask<ListenedParameter<GalleryDown
     int readCounter;
     int currentPos = 0;
     int length = (int) networkStream.getContentLength();
+    
     while ((readCounter = networkStream.read(writeCache)) > 0 && !isCancelled()) {
       fileStream.write(writeCache, 0, readCounter);
       currentPos += readCounter;
       
       publishProgress(new Progress(currentPos, length));
     }
+    
+    publishProgress(new Progress(length, length));
+    
     fileStream.close();
     networkStream.close();
 
