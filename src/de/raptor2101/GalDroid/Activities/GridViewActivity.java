@@ -169,7 +169,6 @@ public class GridViewActivity extends GalleryActivity implements OnItemClickList
     } catch (InterruptedException e) {
       
     }
-    mImageLoaderTask = null;
     
     mAdapter.cleanUp();
   }

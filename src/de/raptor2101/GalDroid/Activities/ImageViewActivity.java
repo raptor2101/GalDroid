@@ -147,7 +147,6 @@ public class ImageViewActivity extends GalleryActivity implements OnItemSelected
     } catch (InterruptedException e) {
       
     }
-    mImageLoaderTask = null;
     
     ImageAdapter adapter = (ImageAdapter) mGalleryFullscreen.getAdapter();
     adapter.cleanUp();
