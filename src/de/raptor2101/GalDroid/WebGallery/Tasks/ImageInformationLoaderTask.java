@@ -18,7 +18,7 @@ import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryObject;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryObjectComment;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.WebGallery;
 
-public class ImageInformationLoaderTask extends WorkerTask<GalleryObject, Void, Void> {
+public class ImageInformationLoaderTask extends RepeatingTask<GalleryObject, Void, Void> {
   private final static String CLASS_TAG = "ImageInformationLoaderTask";
   public static final int MESSAGE_IMAGE_INFORMATION = 0;
   public static final int MESSAGE_IMAGE_TAGS = 1;
@@ -76,7 +76,7 @@ public class ImageInformationLoaderTask extends WorkerTask<GalleryObject, Void, 
       return;
     }
     Log.d(CLASS_TAG, String.format("enqueuing %s for loading of ImageInformations", galleryObject));
-    enqueue(galleryObject);
+    enqueueTask(galleryObject);
   }
 
   @Override
@@ -206,9 +206,9 @@ public class ImageInformationLoaderTask extends WorkerTask<GalleryObject, Void, 
 
   public void cancel(GalleryObject galleryObject) {
     if (isEnqueued(galleryObject)) {
-      removeEnqueued(galleryObject);
+      removeEnqueuedTask(galleryObject);
     } else if (isActive(galleryObject)) {
-      cancelCurrent();
+      cancelCurrentTask();
     }
   }
 }

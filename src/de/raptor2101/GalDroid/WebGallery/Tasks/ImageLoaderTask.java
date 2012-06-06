@@ -33,7 +33,7 @@ import de.raptor2101.GalDroid.WebGallery.Stream;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryDownloadObject;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.WebGallery;
 
-public class ImageLoaderTask extends WorkerTask<ListenedParameter<GalleryDownloadObject, ImageLoaderTaskListener>, Progress, Bitmap> {
+public class ImageLoaderTask extends RepeatingTask<ListenedParameter<GalleryDownloadObject, ImageLoaderTaskListener>, Progress, Bitmap> {
   protected final static String CLASS_TAG = "ImageLoaderTask";
 
   private ImageCache mCache;
@@ -54,7 +54,7 @@ public class ImageLoaderTask extends WorkerTask<ListenedParameter<GalleryDownloa
   public void download(GalleryDownloadObject galleryDownloadObject, ImageLoaderTaskListener listener) {
     Log.d(CLASS_TAG, String.format("Enqueue download for %s", galleryDownloadObject));
     ListenedParameter<GalleryDownloadObject, ImageLoaderTaskListener> parameter = new ListenedParameter<GalleryDownloadObject, ImageLoaderTaskListener>(galleryDownloadObject, listener);
-    enqueue(parameter);
+    enqueueTask(parameter);
   }
 
   @Override
@@ -240,9 +240,9 @@ public class ImageLoaderTask extends WorkerTask<ListenedParameter<GalleryDownloa
 
     ListenedParameter<GalleryDownloadObject, ImageLoaderTaskListener> parameter = new ListenedParameter<GalleryDownloadObject, ImageLoaderTaskListener>(downloadObject, null);
     if (isEnqueued(parameter)) {
-      removeEnqueued(parameter);
+      removeEnqueuedTask(parameter);
     } else if (isActive(parameter)) {
-      cancelCurrent();
+      cancelCurrentTask();
     }
   }
 }
