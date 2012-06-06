@@ -32,6 +32,8 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.BaseAdapter;
 import de.raptor2101.GalDroid.Activities.GalDroidApp;
+import de.raptor2101.GalDroid.Activities.Views.GalleryImageView;
+import de.raptor2101.GalDroid.Activities.Views.GalleryImageViewListener;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryDownloadObject;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryObject;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.WebGallery;
@@ -54,10 +56,6 @@ public class ImageAdapter extends BaseAdapter {
     ScaleSource, DontScale
   }
 
-  public enum CleanupMode {
-    ForceCleanup, None
-  }
-
   // private WebGallery mWebGallery;
   private ImageCache mCache;
   private Context mContext;
@@ -67,7 +65,6 @@ public class ImageAdapter extends BaseAdapter {
   private LayoutParams mLayoutParams;
   private ImageSize mImageSize;
   private ScaleMode mScaleMode;
-  private CleanupMode mCleanupMode;
 
   private WeakReference<GalleryImageViewListener> mListener;
   private ArrayList<WeakReference<GalleryImageView>> mImageViews;
@@ -85,7 +82,6 @@ public class ImageAdapter extends BaseAdapter {
 
     mTitleConfig = TitleConfig.ShowTitle;
     mImageSize = ImageSize.Thumbnail;
-    mCleanupMode = CleanupMode.None;
     mLayoutParams = layoutParams;
 
     mListener = new WeakReference<GalleryImageViewListener>(null);
@@ -117,10 +113,6 @@ public class ImageAdapter extends BaseAdapter {
 
   public void setDisplayTarget(DisplayTarget displayTarget) {
     mImageSize = displayTarget == DisplayTarget.FullScreen ? ImageSize.Full : ImageSize.Thumbnail;
-  }
-
-  public void setCleanupMode(CleanupMode cleanupMode) {
-    mCleanupMode = cleanupMode;
   }
 
   public List<GalleryObject> getGalleryObjects() {
@@ -174,7 +166,7 @@ public class ImageAdapter extends BaseAdapter {
 
   private GalleryImageView CreateImageView(GalleryObject galleryObject) {
     GalleryImageView imageView;
-    imageView = new GalleryImageView(mContext, this.mLayoutParams, this.mTitleConfig == TitleConfig.ShowTitle);
+    imageView = new GalleryImageView(mContext, this.mTitleConfig == TitleConfig.ShowTitle);
     imageView.setLayoutParams(mLayoutParams);
     imageView.setGalleryObject(galleryObject);
     imageView.setListener(mListener.get());
@@ -191,8 +183,6 @@ public class ImageAdapter extends BaseAdapter {
         if (!imageView.isLoaded()) {
           Log.d(ClassTag, String.format("Abort downloadTask %s", imageView.getObjectId()));
           mImageLoaderTask.cancel(getDownloadObject(originGalleryObject));
-        } else if (mCleanupMode == CleanupMode.ForceCleanup) {
-          imageView.recylceBitmap();
         }
       }
     }
@@ -219,7 +209,7 @@ public class ImageAdapter extends BaseAdapter {
       GalleryImageView imageView = reference.get();
       if (imageView != null) {
         Log.d(ClassTag, String.format("CleanUp ", imageView.getObjectId()));
-        imageView.recylceBitmap();
+        imageView.cleanup();
       }
     }
     System.gc();

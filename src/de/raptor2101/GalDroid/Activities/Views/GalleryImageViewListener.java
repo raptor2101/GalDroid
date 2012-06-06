@@ -1,4 +1,4 @@
-package de.raptor2101.GalDroid.WebGallery;
+package de.raptor2101.GalDroid.Activities.Views;
 
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryObject;
 

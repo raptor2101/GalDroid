@@ -1,6 +1,6 @@
 package de.raptor2101.GalDroid.Activities.Listeners;
 
-import de.raptor2101.GalDroid.WebGallery.GalleryImageView;
+import de.raptor2101.GalDroid.Activities.Views.GalleryImageView;
 import android.graphics.Matrix;
 import android.graphics.PointF;
 import android.util.FloatMath;

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.  
  */
 
-package de.raptor2101.GalDroid.WebGallery;
+package de.raptor2101.GalDroid.Activities.Views;
 
 import java.lang.ref.WeakReference;
 
@@ -27,55 +27,51 @@ import android.graphics.Typeface;
 import android.os.AsyncTask.Status;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import de.raptor2101.GalDroid.R;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryObject;
 import de.raptor2101.GalDroid.WebGallery.Tasks.ImageLoaderTask;
 import de.raptor2101.GalDroid.WebGallery.Tasks.ImageLoaderTaskListener;
 
 public class GalleryImageView extends LinearLayout implements ImageLoaderTaskListener {
   private static final String CLASS_TAG = "GalleryImageView";
-  private final ProgressBar mProgressBar;
+  private final ProgressBar mProgressBar_determinate;
+  private final ProgressBar mProgressBar_indeterminate;
   private final ImageView mImageView;
   private final TextView mTitleTextView;
-  private final boolean mShowTitle;
   private GalleryObject mGalleryObject;
-  private Bitmap mBitmap;
   private WeakReference<GalleryImageViewListener> mListener;
+  private boolean mLoaded;
 
-  public GalleryImageView(Context context, android.view.ViewGroup.LayoutParams layoutParams, boolean showTitle) {
+public GalleryImageView(Context context, boolean showTitle) {
     super(context);
-    mShowTitle = showTitle;
+    LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+    inflater.inflate(R.layout.gallery_image_view, this);
 
-    mImageView = CreateImageView(context);
-
-    mProgressBar = new ProgressBar(context, null, android.R.attr.progressBarStyleHorizontal);
-    mProgressBar.setVisibility(GONE);
-    this.addView(mProgressBar);
-
-    this.setOrientation(VERTICAL);
-    this.setGravity(Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL);
-    this.setLayoutParams(layoutParams);
-
-    this.addView(mImageView);
-
-    if (mShowTitle) {
-      mTitleTextView = new TextView(context);
-      mTitleTextView.setTextSize(16);
-      mTitleTextView.setGravity(Gravity.CENTER_HORIZONTAL);
-      mTitleTextView.setTypeface(Typeface.create("Tahoma", Typeface.BOLD));
-      this.addView(mTitleTextView);
+    mProgressBar_determinate = (ProgressBar) findViewById(R.id.progressBar_Determinate);
+    mProgressBar_indeterminate = (ProgressBar) findViewById(R.id.progressBar_Indeterminate);
+    
+    mTitleTextView = (TextView) findViewById(R.id.text_Title);
+    mImageView = (ImageView) findViewById(R.id.imageView_Image);
+    
+    if (showTitle) {
+      mTitleTextView.setVisibility(VISIBLE);
     } else {
-      mTitleTextView = null;
+      mTitleTextView.setVisibility(GONE);
     }
-
+    
     mListener = new WeakReference<GalleryImageViewListener>(null);
   }
 
   public void setGalleryObject(GalleryObject galleryObject) {
+    cleanup();
     mGalleryObject = galleryObject;
+    mProgressBar_determinate.setVisibility(GONE);
+    mProgressBar_indeterminate.setVisibility(VISIBLE);
     this.setTitle(galleryObject.getTitle());
   }
 
@@ -88,22 +84,20 @@ public class GalleryImageView extends LinearLayout implements ImageLoaderTaskLis
       mTitleTextView.setText(title);
     }
   }
-
-  private ImageView CreateImageView(Context context) {
-    ImageView imageView = new ImageView(context);
-    imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-    imageView.setPadding(5, 5, 5, 5);
-    imageView.setDrawingCacheEnabled(false);
-
-    return imageView;
+  
+  @Override
+  protected void onDetachedFromWindow() {
+    super.onDetachedFromWindow();
+    cleanup();
   }
 
-  public void recylceBitmap() {
-    if (mBitmap != null) {
+  public void cleanup() {
+    if(mLoaded){
       Log.d(CLASS_TAG, String.format("Recycle %s", mGalleryObject.getObjectId()));
       mImageView.setImageBitmap(null);
-      mBitmap.recycle();
-      mBitmap = null;
+      mImageView.destroyDrawingCache();
+      mImageView.setVisibility(GONE);
+      mLoaded=false;
     }
   }
 
@@ -117,7 +111,7 @@ public class GalleryImageView extends LinearLayout implements ImageLoaderTaskLis
   }
 
   public boolean isLoaded() {
-    return mBitmap != null;
+    return mLoaded;
   }
 
   public String getObjectId() {
@@ -125,7 +119,10 @@ public class GalleryImageView extends LinearLayout implements ImageLoaderTaskLis
   }
 
   public void onLoadingStarted(String uniqueId) {
-    mProgressBar.setVisibility(VISIBLE);
+    mProgressBar_indeterminate.setVisibility(GONE);
+    mProgressBar_determinate.setMax(100);
+    mProgressBar_determinate.setProgress(0);
+    mProgressBar_determinate.setVisibility(VISIBLE);
     Log.d(CLASS_TAG, String.format("Loading started %s", uniqueId));
 
     GalleryImageViewListener listener = mListener.get();
@@ -135,9 +132,14 @@ public class GalleryImageView extends LinearLayout implements ImageLoaderTaskLis
   }
 
   public void onLoadingProgress(String uniqueId, int currentValue, int maxValue) {
-    mProgressBar.setMax(maxValue);
-    mProgressBar.setProgress(currentValue);
-
+    mProgressBar_determinate.setMax(maxValue);
+    mProgressBar_determinate.setProgress(currentValue);
+    
+    if(maxValue == currentValue) {
+      mProgressBar_indeterminate.setVisibility(GONE);
+      mProgressBar_determinate.setVisibility(VISIBLE);
+    }
+    
     GalleryImageViewListener listener = mListener.get();
     if (listener != null) {
       listener.onLoadingProgress(mGalleryObject, currentValue, maxValue);
@@ -145,9 +147,11 @@ public class GalleryImageView extends LinearLayout implements ImageLoaderTaskLis
   }
 
   public void onLoadingCompleted(String uniqueId, Bitmap bitmap) {
-    mProgressBar.setVisibility(GONE);
+    mProgressBar_indeterminate.setVisibility(GONE);
+    mProgressBar_determinate.setVisibility(GONE);
+    mLoaded=true;
     mImageView.setImageBitmap(bitmap);
-    mBitmap = bitmap;
+    mImageView.setVisibility(VISIBLE);
     Log.d(CLASS_TAG, String.format("Loading done %s", uniqueId));
 
     GalleryImageViewListener listener = mListener.get();
@@ -158,8 +162,8 @@ public class GalleryImageView extends LinearLayout implements ImageLoaderTaskLis
 
   public void onLoadingCancelled(String uniqueId) {
     Log.d(CLASS_TAG, String.format("DownloadTask was cancalled %s", uniqueId));
-    mProgressBar.setVisibility(GONE);
-    mBitmap = null;
+    mProgressBar_indeterminate.setVisibility(GONE);
+    mProgressBar_determinate.setVisibility(GONE);
 
     GalleryImageViewListener listener = mListener.get();
     if (listener != null) {

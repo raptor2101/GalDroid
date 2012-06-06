@@ -37,10 +37,9 @@ import android.widget.Gallery;
 import de.raptor2101.GalDroid.R;
 import de.raptor2101.GalDroid.Activities.Helpers.ActionBarHider;
 import de.raptor2101.GalDroid.Activities.Listeners.ImageViewOnTouchListener;
+import de.raptor2101.GalDroid.Activities.Views.GalleryImageView;
 import de.raptor2101.GalDroid.Activities.Views.ImageInformationView;
-import de.raptor2101.GalDroid.WebGallery.GalleryImageView;
 import de.raptor2101.GalDroid.WebGallery.ImageAdapter;
-import de.raptor2101.GalDroid.WebGallery.ImageAdapter.CleanupMode;
 import de.raptor2101.GalDroid.WebGallery.ImageAdapter.DisplayTarget;
 import de.raptor2101.GalDroid.WebGallery.ImageAdapter.ScaleMode;
 import de.raptor2101.GalDroid.WebGallery.ImageAdapter.TitleConfig;
@@ -96,7 +95,6 @@ public class ImageViewActivity extends GalleryActivity implements OnItemSelected
     mAdapterFullscreen = new ImageAdapter(this, new Gallery.LayoutParams(params.width, params.height), ScaleMode.ScaleSource, mImageLoaderTask);
     mAdapterFullscreen.setTitleConfig(TitleConfig.HideTitle);
     mAdapterFullscreen.setDisplayTarget(DisplayTarget.FullScreen);
-    mAdapterFullscreen.setCleanupMode(CleanupMode.ForceCleanup);
 
     mAdapterThumbnails = new ImageAdapter(this, new Gallery.LayoutParams(100, 100), ScaleMode.DontScale, mImageLoaderTask);
     mAdapterThumbnails.setTitleConfig(TitleConfig.HideTitle);

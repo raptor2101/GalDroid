@@ -21,8 +21,6 @@ import android.widget.TextView;
 import de.raptor2101.GalDroid.R;
 import de.raptor2101.GalDroid.Activities.GalDroidApp;
 import de.raptor2101.GalDroid.WebGallery.DegMinSec;
-import de.raptor2101.GalDroid.WebGallery.GalleryImageView;
-import de.raptor2101.GalDroid.WebGallery.GalleryImageViewListener;
 import de.raptor2101.GalDroid.WebGallery.ImageInformation;
 import de.raptor2101.GalDroid.WebGallery.ImageInformation.WhiteBalance;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryObject;
