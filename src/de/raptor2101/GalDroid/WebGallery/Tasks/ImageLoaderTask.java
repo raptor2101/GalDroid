@@ -58,33 +58,33 @@ public class ImageLoaderTask extends RepeatingTask<ListenedParameter<GalleryDown
   }
 
   @Override
-  protected void onPreExecute(ListenedParameter<GalleryDownloadObject, ImageLoaderTaskListener> parameter) {
-    GalleryDownloadObject galleryDownloadObject = parameter.getObject();
+  protected void onPreExecute(ListenedParameter<GalleryDownloadObject, ImageLoaderTaskListener> callParameter) {
+    GalleryDownloadObject galleryDownloadObject = callParameter.getObject();
     Log.d(CLASS_TAG, String.format("%s - Task started", galleryDownloadObject));
-    ImageLoaderTaskListener listener = parameter.getListener();
+    ImageLoaderTaskListener listener = callParameter.getListener();
     if (listener != null) {
       listener.onLoadingStarted(galleryDownloadObject.getUniqueId());
     }
   };
 
   @Override
-  protected void onCancelled(ListenedParameter<GalleryDownloadObject, ImageLoaderTaskListener> parameter, Bitmap bitmap) {
-    GalleryDownloadObject galleryDownloadObject = parameter.getObject();
+  protected void onCancelled(ListenedParameter<GalleryDownloadObject, ImageLoaderTaskListener> callParameter, Bitmap bitmap) {
+    GalleryDownloadObject galleryDownloadObject = callParameter.getObject();
     Log.d(CLASS_TAG, String.format("%s - Task canceled", galleryDownloadObject));
 
     synchronized (mCache) {
       mCache.removeCacheFile(galleryDownloadObject.getUniqueId());
     }
 
-    ImageLoaderTaskListener listener = parameter.getListener();
+    ImageLoaderTaskListener listener = callParameter.getListener();
     if (listener != null) {
       listener.onLoadingCancelled(galleryDownloadObject.getUniqueId());
     }
   }
 
   @Override
-  protected Bitmap doInBackground(ListenedParameter<GalleryDownloadObject, ImageLoaderTaskListener> parameter) {
-    GalleryDownloadObject galleryDownloadObject = parameter.getObject();
+  protected Bitmap doInBackground(ListenedParameter<GalleryDownloadObject, ImageLoaderTaskListener> callParameter) {
+    GalleryDownloadObject galleryDownloadObject = callParameter.getObject();
     try {
       Log.d(CLASS_TAG, String.format("%s - Task running", galleryDownloadObject));
       String uniqueId = galleryDownloadObject.getUniqueId();
@@ -127,19 +127,19 @@ public class ImageLoaderTask extends RepeatingTask<ListenedParameter<GalleryDown
   }
 
   @Override
-  protected void onProgressUpdate(ListenedParameter<GalleryDownloadObject, ImageLoaderTaskListener> parameter, Progress progress) {
-    GalleryDownloadObject galleryDownloadObject = parameter.getObject();
-    ImageLoaderTaskListener listener = parameter.getListener();
+  protected void onProgressUpdate(ListenedParameter<GalleryDownloadObject, ImageLoaderTaskListener> callParameter, Progress progress) {
+    GalleryDownloadObject galleryDownloadObject = callParameter.getObject();
+    ImageLoaderTaskListener listener = callParameter.getListener();
     if (!isCancelled() && listener != null) {
       listener.onLoadingProgress(galleryDownloadObject.getUniqueId(), progress.curValue, progress.maxValue);
     }
   }
   
   @Override
-  protected void onPostExecute(ListenedParameter<GalleryDownloadObject, ImageLoaderTaskListener> parameter, Bitmap bitmap) {
-    GalleryDownloadObject galleryDownloadObject = parameter.getObject();
+  protected void onPostExecute(ListenedParameter<GalleryDownloadObject, ImageLoaderTaskListener> callParameter, Bitmap bitmap) {
+    GalleryDownloadObject galleryDownloadObject = callParameter.getObject();
     Log.d(CLASS_TAG, String.format("%s - Task done", galleryDownloadObject));
-    ImageLoaderTaskListener listener = parameter.getListener();
+    ImageLoaderTaskListener listener = callParameter.getListener();
     if (!isCancelled() && listener != null) {
       listener.onLoadingCompleted(galleryDownloadObject.getUniqueId(), bitmap);
     }

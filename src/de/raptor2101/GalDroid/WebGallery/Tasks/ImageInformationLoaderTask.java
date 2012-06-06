@@ -192,7 +192,7 @@ public class ImageInformationLoaderTask extends RepeatingTask<GalleryObject, Voi
   }
 
   @Override
-  protected void onPostExecute(GalleryObject parameter, Void result) {
+  protected void onPostExecute(GalleryObject galleryObject, Void result) {
     // TODO Auto-generated method stub
 
   }

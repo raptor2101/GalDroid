@@ -60,19 +60,19 @@ public abstract class RepeatingTask<ParameterType, ProgressType, ResultType> imp
   private final MessageHandler mMessageHandler = new MessageHandler();
 
   private class Task implements Callable<ResultType> {
-    private final ParameterType mParameter;
+    private final ParameterType mCallParameter;
 
-    public Task(ParameterType parameter) {
-      mParameter = parameter;
+    public Task(ParameterType callParameter) {
+      mCallParameter = callParameter;
     }
 
     public ResultType call() throws Exception {
-      return doInBackground(mParameter);
+      return doInBackground(mCallParameter);
     }
 
     @Override
     public int hashCode() {
-      return mParameter.hashCode();
+      return mCallParameter.hashCode();
     }
 
     @Override
@@ -87,10 +87,10 @@ public abstract class RepeatingTask<ParameterType, ProgressType, ResultType> imp
       Task other = (Task) obj;
       if (!getOuterType().equals(other.getOuterType()))
         return false;
-      if (mParameter == null) {
-        if (other.mParameter != null)
+      if (mCallParameter == null) {
+        if (other.mCallParameter != null)
           return false;
-      } else if (!mParameter.equals(other.mParameter))
+      } else if (!mCallParameter.equals(other.mCallParameter))
         return false;
       return true;
     }
@@ -102,7 +102,7 @@ public abstract class RepeatingTask<ParameterType, ProgressType, ResultType> imp
 
     @Override
     public String toString() {
-      return mParameter.toString();
+      return mCallParameter.toString();
     }
   }
 
@@ -122,21 +122,20 @@ public abstract class RepeatingTask<ParameterType, ProgressType, ResultType> imp
           Message message;
           mCurrentCallable = waitForCallable();
           try {
-            TaskMessage<ResultType> messageBody = new TaskMessage<ResultType>(mCurrentCallable.mParameter, null);
+            TaskMessage<ResultType> messageBody = new TaskMessage<ResultType>(mCurrentCallable.mCallParameter, null);
             message = mMessageHandler.obtainMessage(MESSAGE_PRE_EXECUTION, messageBody);
             message.sendToTarget();
 
-            Log.d(this.buildLogTag(), String.format("Executing callable for %s", mCurrentCallable.mParameter));
+            Log.d(this.buildLogTag(), String.format("Executing Task(%s)", mCurrentCallable.mCallParameter));
             ResultType result = mCurrentCallable.call();
-            messageBody = new TaskMessage<ResultType>(mCurrentCallable.mParameter, result);
+            messageBody = new TaskMessage<ResultType>(mCurrentCallable.mCallParameter, result);
             message = mMessageHandler.obtainMessage(MESSAGE_POST_RESULT, messageBody);
           } catch (Exception e) {
-            Log.e(this.buildLogTag(), "Exceptions commes up", e);
-            Log.e(this.buildLogTag(), String.format("Something goes wrong while executing callable for %s", mCurrentCallable.mParameter), e);
-            TaskMessage<Exception> messageBody = new TaskMessage<Exception>(mCurrentCallable.mParameter, e);
+            Log.e(this.buildLogTag(), String.format("Something goes wrong while executing Task(%s)", mCurrentCallable.mCallParameter), e);
+            TaskMessage<Exception> messageBody = new TaskMessage<Exception>(mCurrentCallable.mCallParameter, e);
             message = mMessageHandler.obtainMessage(MESSAGE_POST_ERROR, messageBody);
           }
-          Log.d(buildLogTag(), String.format("Invoke callback for %s", mCurrentCallable.mParameter));
+          Log.d(buildLogTag(), String.format("Invoke Task(%s)", mCurrentCallable.mCallParameter));
           message.sendToTarget();
           mCurrentCallable = null;
           mIsCancelled = false;
@@ -247,35 +246,35 @@ public abstract class RepeatingTask<ParameterType, ProgressType, ResultType> imp
     }
   }
 
-  private void finish(ParameterType parameter, ResultType result) {
+  private void finish(ParameterType callParameter, ResultType result) {
     if (mIsCancelled) {
-      onCancelled(parameter, result);
+      onCancelled(callParameter, result);
     } else {
-      onPostExecute(parameter, result);
+      onPostExecute(callParameter, result);
     }
 
   }
 
-  protected void onPreExecute(ParameterType parameter) {
+  protected void onPreExecute(ParameterType callParameter) {
   }
 
   protected final void publishProgress(ProgressType progress){
-    TaskMessage<ProgressType> messageBody = new TaskMessage<ProgressType>(mRunnable.mCurrentCallable.mParameter, progress);
+    TaskMessage<ProgressType> messageBody = new TaskMessage<ProgressType>(mRunnable.mCurrentCallable.mCallParameter, progress);
     Message message = mMessageHandler.obtainMessage(MESSAGE_POST_PROGRESS, messageBody);
     message.sendToTarget();
   }
   
-  protected abstract ResultType doInBackground(ParameterType parameter);
+  protected abstract ResultType doInBackground(ParameterType callParameter);
 
   protected abstract void onPostExecute(ParameterType parameter, ResultType result);
 
-  protected void onExceptionThrown(ParameterType parameter, Exception exception) {
+  protected void onExceptionThrown(ParameterType callParameter, Exception exception) {
   }
 
-  protected void onProgressUpdate(ParameterType parameter, ProgressType progress) {
+  protected void onProgressUpdate(ParameterType callParameter, ProgressType progress) {
   }
 
-  protected void onCancelled(ParameterType parameter, ResultType result) {
+  protected void onCancelled(ParameterType callParameter, ResultType result) {
     onCancelled();
   }
 
@@ -299,9 +298,9 @@ public abstract class RepeatingTask<ParameterType, ProgressType, ResultType> imp
     return mIsCancelled;
   }
 
-  protected boolean isEnqueued(ParameterType parameter) {
+  protected boolean isEnqueued(ParameterType callParameter) {
     synchronized (mTaskQueue) {
-      return mTaskQueue.contains(new Task(parameter));
+      return mTaskQueue.contains(new Task(callParameter));
     }
   }
 
@@ -312,6 +311,6 @@ public abstract class RepeatingTask<ParameterType, ProgressType, ResultType> imp
       return false;
     }
     Log.d(buildLogTag(), String.format("CurrentCallable %s Parameter %s", mRunnable.mCurrentCallable, parameter));
-    return mRunnable.mCurrentCallable != null && mRunnable.mCurrentCallable.mParameter.equals(parameter);
+    return mRunnable.mCurrentCallable != null && mRunnable.mCurrentCallable.mCallParameter.equals(parameter);
   }
 }
