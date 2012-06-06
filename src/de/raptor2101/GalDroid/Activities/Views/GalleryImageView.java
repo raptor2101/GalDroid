@@ -119,10 +119,6 @@ public GalleryImageView(Context context, boolean showTitle) {
   }
 
   public void onLoadingStarted(String uniqueId) {
-    mProgressBar_indeterminate.setVisibility(GONE);
-    mProgressBar_determinate.setMax(100);
-    mProgressBar_determinate.setProgress(0);
-    mProgressBar_determinate.setVisibility(VISIBLE);
     Log.d(CLASS_TAG, String.format("Loading started %s", uniqueId));
 
     GalleryImageViewListener listener = mListener.get();
@@ -135,10 +131,14 @@ public GalleryImageView(Context context, boolean showTitle) {
     mProgressBar_determinate.setMax(maxValue);
     mProgressBar_determinate.setProgress(currentValue);
     
-    if(maxValue == currentValue) {
+    if(maxValue != currentValue) {
       mProgressBar_indeterminate.setVisibility(GONE);
       mProgressBar_determinate.setVisibility(VISIBLE);
+    } else {
+      mProgressBar_indeterminate.setVisibility(VISIBLE);
+      mProgressBar_determinate.setVisibility(GONE);
     }
+    
     
     GalleryImageViewListener listener = mListener.get();
     if (listener != null) {
