@@ -20,12 +20,14 @@ package de.raptor2101.GalDroid.Activities;
 
 import java.util.List;
 
+import android.app.ActionBar;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.AdapterView;
 import android.widget.TextView;
@@ -51,12 +53,15 @@ public class GridViewActivity extends GalleryActivity implements OnItemClickList
 
   @Override
   public void onCreate(Bundle savedInstanceState) {
+    requestWindowFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
     super.onCreate(savedInstanceState);
     setContentView(R.layout.grid_view_activity);
+    ActionBar actionBar = getActionBar();
+    actionBar.setDisplayShowHomeEnabled(false);
+    actionBar.setDisplayShowTitleEnabled(false);
+    actionBar.hide();
 
     mGridView = (GridView) findViewById(R.id.gridViewWidget);
-    mGridView.setSystemUiVisibility(View.STATUS_BAR_HIDDEN);
-    mGridView.setWillNotCacheDrawing(true);
     mGridView.setOnItemClickListener(this);
 
     GalDroidApp app = (GalDroidApp) getApplicationContext();
