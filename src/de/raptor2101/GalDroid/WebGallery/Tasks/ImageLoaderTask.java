@@ -127,6 +127,15 @@ public class ImageLoaderTask extends RepeatingTask<ListenedParameter<GalleryDown
   }
 
   @Override
+  protected void onProgressUpdate(ListenedParameter<GalleryDownloadObject, ImageLoaderTaskListener> parameter, Progress progress) {
+    GalleryDownloadObject galleryDownloadObject = parameter.getObject();
+    ImageLoaderTaskListener listener = parameter.getListener();
+    if (!isCancelled() && listener != null) {
+      listener.onLoadingProgress(galleryDownloadObject.getUniqueId(), progress.curValue, progress.maxValue);
+    }
+  }
+  
+  @Override
   protected void onPostExecute(ListenedParameter<GalleryDownloadObject, ImageLoaderTaskListener> parameter, Bitmap bitmap) {
     GalleryDownloadObject galleryDownloadObject = parameter.getObject();
     Log.d(CLASS_TAG, String.format("%s - Task done", galleryDownloadObject));
@@ -137,34 +146,33 @@ public class ImageLoaderTask extends RepeatingTask<ListenedParameter<GalleryDown
   }
 
   private void DownloadImage(GalleryDownloadObject galleryDownloadObject, ImageLoaderTaskListener listener) throws IOException {
-    if (listener != null) {
-      Log.d(CLASS_TAG, String.format("%s - Downloading to local cache file", galleryDownloadObject));
+    Log.d(CLASS_TAG, String.format("%s - Downloading to local cache file", galleryDownloadObject));
 
-      Stream networkStream = mWebGallery.getFileStream(galleryDownloadObject);
-      String uniqueId = galleryDownloadObject.getUniqueId();
-      OutputStream fileStream = mCache.createCacheFile(uniqueId);
+    Stream networkStream = mWebGallery.getFileStream(galleryDownloadObject);
+    String uniqueId = galleryDownloadObject.getUniqueId();
+    OutputStream fileStream = mCache.createCacheFile(uniqueId);
 
-      byte[] writeCache = new byte[10 * 1024];
-      int readCounter;
-      int currentPos = 0;
-      int length = (int) networkStream.getContentLength();
-      while ((readCounter = networkStream.read(writeCache)) > 0 && !isCancelled()) {
-        fileStream.write(writeCache, 0, readCounter);
-        currentPos += readCounter;
-        listener.onLoadingProgress(uniqueId, currentPos, length);
-      }
-      fileStream.close();
-      networkStream.close();
-
-      if (isCancelled()) {
-        // if the download is aborted, the file is waste of bytes...
-        Log.i(CLASS_TAG, String.format("%s - Download canceled", galleryDownloadObject));
-        mCache.removeCacheFile(uniqueId);
-      } else {
-        mCache.refreshCacheFile(uniqueId);
-      }
-      Log.d(CLASS_TAG, String.format("%s - Downloading to local cache file - complete", galleryDownloadObject));
+    byte[] writeCache = new byte[10 * 1024];
+    int readCounter;
+    int currentPos = 0;
+    int length = (int) networkStream.getContentLength();
+    while ((readCounter = networkStream.read(writeCache)) > 0 && !isCancelled()) {
+      fileStream.write(writeCache, 0, readCounter);
+      currentPos += readCounter;
+      
+      publishProgress(new Progress(currentPos, length));
     }
+    fileStream.close();
+    networkStream.close();
+
+    if (isCancelled()) {
+      // if the download is aborted, the file is waste of bytes...
+      Log.i(CLASS_TAG, String.format("%s - Download canceled", galleryDownloadObject));
+      mCache.removeCacheFile(uniqueId);
+    } else {
+      mCache.refreshCacheFile(uniqueId);
+    }
+    Log.d(CLASS_TAG, String.format("%s - Downloading to local cache file - complete", galleryDownloadObject));
   }
 
   private void ScaleImage(GalleryDownloadObject galleryDownloadObject) throws IOException {
