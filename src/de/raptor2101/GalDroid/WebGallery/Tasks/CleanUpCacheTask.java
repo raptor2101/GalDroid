@@ -37,7 +37,7 @@ public class CleanUpCacheTask extends AsyncTask<Void, Long, Void> {
   protected Void doInBackground(Void... params) {
     long currentCleanUp = 0;
     if (mCleanUpSize > 0) {
-      for (int i = 0; currentCleanUp < mCleanUpSize; i++) {
+      for (int i = 0; currentCleanUp < mCleanUpSize && i < mCachedObjects.size(); i++) {
         String hash = mCachedObjects.get(i);
         File cacheFile = new File(mCacheDir, hash);
         if (cacheFile.exists()) {
