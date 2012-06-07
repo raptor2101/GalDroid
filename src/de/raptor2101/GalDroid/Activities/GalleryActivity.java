@@ -18,6 +18,7 @@
 
 package de.raptor2101.GalDroid.Activities;
 
+import java.io.Serializable;
 import java.lang.ref.WeakReference;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
@@ -34,7 +35,11 @@ import android.util.Log;
 import android.view.ViewGroup.LayoutParams;
 
 public abstract class GalleryActivity extends Activity {
-
+  private static final String INSTANCE_STATE_CURRENT_INDEX = ".de.raptor2101.GalDroid.CurrentIndex";
+  private static final String INSTANCE_STATE_GALLERY_OBJECTS = ".de.raptor2101.GalDroid.GalleryObjects";
+  private List<GalleryObject> mGalleryObjects;
+  private int mCurrentIndex;
+  
   private class GalleryLoadingListener implements GalleryLoaderTaskListener {
 
     public void onDownloadStarted() {
@@ -51,20 +56,15 @@ public abstract class GalleryActivity extends Activity {
       mProgressDialog.dismiss();
       GalDroidApp app = (GalDroidApp) getApplicationContext();
       app.storeGalleryObjects(getDisplayedGallery(), galleryObjects);
-      mConfigInstance.mGalleryObjects = galleryObjects;
+      mGalleryObjects = galleryObjects;
       Log.d("GalleryActivity", "Call onGalleryObjectsLoaded");
       onGalleryObjectsLoaded(galleryObjects);
 
     }
   }
 
-  private class GalleryNonConfigurationInstance {
-    public List<GalleryObject> mGalleryObjects;
-    public int currentIndex;
-  }
-
-  private GalleryNonConfigurationInstance mConfigInstance;
-
+  
+  
   private ProgressDialog mProgressDialog;
   private GalleryLoaderTaskListener mListener;
 
@@ -83,26 +83,30 @@ public abstract class GalleryActivity extends Activity {
     }
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   protected void onPostCreate(Bundle savedInstanceState) {
     super.onPostCreate(savedInstanceState);
     GalDroidApp app = (GalDroidApp) getApplicationContext();
-    // Try to get galleryobjects from activity cache
-    mConfigInstance = (GalleryNonConfigurationInstance) getLastNonConfigurationInstance();
-    if (mConfigInstance == null) {
-      mConfigInstance = new GalleryNonConfigurationInstance();
-      mConfigInstance.currentIndex = -1;
+    
+    if(savedInstanceState != null) {
+      mCurrentIndex = savedInstanceState.getInt(INSTANCE_STATE_CURRENT_INDEX);
+      mGalleryObjects = (List<GalleryObject>) savedInstanceState.getSerializable(INSTANCE_STATE_GALLERY_OBJECTS);
+    } else {
+      mCurrentIndex = -1;
+      mGalleryObjects = null;
     }
+      
 
     GalleryObject diplayedGallery = getDisplayedGallery();
 
     // Try to get galleryobjects from application cache
-    if (mConfigInstance.mGalleryObjects == null) {
-      mConfigInstance.mGalleryObjects = app.loadStoredGalleryObjects(diplayedGallery);
+    if (mGalleryObjects == null) {
+      mGalleryObjects = app.loadStoredGalleryObjects(diplayedGallery);
     }
 
     // Now we have time, load the object from the remote source
-    if (mConfigInstance.mGalleryObjects == null) {
+    if (mGalleryObjects == null) {
       mProgressDialog = new ProgressDialog(this);
       mProgressDialog.setTitle(R.string.progress_title_load_gallery);
       mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
@@ -123,7 +127,7 @@ public abstract class GalleryActivity extends Activity {
         this.finish();
       }
     } else {
-      onGalleryObjectsLoaded(mConfigInstance.mGalleryObjects);
+      onGalleryObjectsLoaded(mGalleryObjects);
     }
   }
 
@@ -146,8 +150,11 @@ public abstract class GalleryActivity extends Activity {
   }
 
   @Override
-  public final Object onRetainNonConfigurationInstance() {
-    return mConfigInstance;
+  public void onSaveInstanceState(Bundle savedInstanceState) {
+    savedInstanceState.putSerializable(INSTANCE_STATE_GALLERY_OBJECTS, (Serializable) mGalleryObjects);
+    savedInstanceState.putInt(INSTANCE_STATE_CURRENT_INDEX, mCurrentIndex);
+    
+    super.onSaveInstanceState(savedInstanceState);
   }
 
   public abstract void onGalleryObjectsLoaded(List<GalleryObject> galleryObjects);
@@ -162,15 +169,15 @@ public abstract class GalleryActivity extends Activity {
   }
 
   public int getCurrentIndex() {
-    return mConfigInstance.currentIndex;
+    return mCurrentIndex;
   }
 
   protected void setCurrentIndex(int index) {
-    mConfigInstance.currentIndex = index;
+    mCurrentIndex = index;
   }
 
   public boolean areGalleryObjectsAvailable() {
-    return mConfigInstance.mGalleryObjects != null;
+    return mGalleryObjects != null;
   }
 
   public GalleryLoaderTask getDownloadTask() {
