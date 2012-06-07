@@ -24,6 +24,7 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -36,13 +37,13 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.Gallery;
 import de.raptor2101.GalDroid.R;
 import de.raptor2101.GalDroid.Activities.Helpers.ActionBarHider;
+import de.raptor2101.GalDroid.Activities.Helpers.ImageAdapter;
+import de.raptor2101.GalDroid.Activities.Helpers.ImageAdapter.DisplayTarget;
+import de.raptor2101.GalDroid.Activities.Helpers.ImageAdapter.ScaleMode;
+import de.raptor2101.GalDroid.Activities.Helpers.ImageAdapter.TitleConfig;
 import de.raptor2101.GalDroid.Activities.Listeners.ImageViewOnTouchListener;
 import de.raptor2101.GalDroid.Activities.Views.GalleryImageView;
 import de.raptor2101.GalDroid.Activities.Views.ImageInformationView;
-import de.raptor2101.GalDroid.WebGallery.ImageAdapter;
-import de.raptor2101.GalDroid.WebGallery.ImageAdapter.DisplayTarget;
-import de.raptor2101.GalDroid.WebGallery.ImageAdapter.ScaleMode;
-import de.raptor2101.GalDroid.WebGallery.ImageAdapter.TitleConfig;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryObject;
 import de.raptor2101.GalDroid.WebGallery.Tasks.ImageLoaderTask;
 
@@ -182,7 +183,7 @@ public class ImageViewActivity extends GalleryActivity implements OnItemSelected
       mGalleryFullscreen.setSelection(position);
       view = mGalleryFullscreen.getSelectedView();
     }
-
+    Log.d("temp", String.format("SELECT position %d",position));
     mInformationView.setGalleryImageView((GalleryImageView) view);
   }
 

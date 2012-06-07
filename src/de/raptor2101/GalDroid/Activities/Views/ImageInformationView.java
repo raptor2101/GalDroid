@@ -352,8 +352,10 @@ public class ImageInformationView extends TableLayout implements ImageInformatio
 
   public void onLoadingCompleted(GalleryObject galleryObject) {
     enqueueLoadingTask(galleryObject);
-    mCurrentListenedImageView.setListener(null);
-    mCurrentListenedImageView = null;
+    if (mCurrentListenedImageView != null) {
+      mCurrentListenedImageView.setListener(null);
+      mCurrentListenedImageView = null;
+    }
   }
 
   public void onLoadingCancelled(GalleryObject galleryObject) {

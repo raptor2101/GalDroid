@@ -106,7 +106,7 @@ public abstract class RepeatingTask<ParameterType, ProgressType, ResultType> imp
     }
   }
 
-  private final Queue<Task> mTaskQueue = new LinkedList<Task>();
+  private final LinkedList<Task> mTaskQueue = new LinkedList<Task>();
 
   private class InternRunnable implements Runnable {
 
@@ -135,7 +135,7 @@ public abstract class RepeatingTask<ParameterType, ProgressType, ResultType> imp
             TaskMessage<Exception> messageBody = new TaskMessage<Exception>(mCurrentCallable.mCallParameter, e);
             message = mMessageHandler.obtainMessage(MESSAGE_POST_ERROR, messageBody);
           }
-          Log.d(buildLogTag(), String.format("Invoke Task(%s)", mCurrentCallable.mCallParameter));
+          Log.d(buildLogTag(), String.format("Invoke Callback for Task(%s)", mCurrentCallable.mCallParameter));
           message.sendToTarget();
           mCurrentCallable = null;
           mIsCancelled = false;
@@ -246,15 +246,6 @@ public abstract class RepeatingTask<ParameterType, ProgressType, ResultType> imp
     }
   }
 
-  private void finish(ParameterType callParameter, ResultType result) {
-    if (mIsCancelled) {
-      onCancelled(callParameter, result);
-    } else {
-      onPostExecute(callParameter, result);
-    }
-
-  }
-
   protected void onPreExecute(ParameterType callParameter) {
   }
 
@@ -306,11 +297,41 @@ public abstract class RepeatingTask<ParameterType, ProgressType, ResultType> imp
 
   protected boolean isActive(ParameterType parameter) {
     Status status = getStatus();
-    Log.d(buildLogTag(), String.format("Status: %s", status));
     if (status != Status.RUNNING) {
       return false;
     }
-    Log.d(buildLogTag(), String.format("CurrentCallable %s Parameter %s", mRunnable.mCurrentCallable, parameter));
     return mRunnable.mCurrentCallable != null && mRunnable.mCurrentCallable.mCallParameter.equals(parameter);
+  }
+
+  protected ParameterType getEnqueuedTask(ParameterType callParameter) {
+    synchronized (mTaskQueue) {
+      int index = mTaskQueue.indexOf(callParameter);
+      if(index > -1) {
+        return mTaskQueue.get(index).mCallParameter;
+      } else {
+        return null;
+      }
+    }
+  }
+  
+  protected ParameterType getEnqueuedTask(int index) {
+    synchronized (mTaskQueue) {
+      return mTaskQueue.get(index).mCallParameter;
+    }
+  }
+  
+  protected int getEnqueuedTaskPosition(ParameterType callParameter) {
+    synchronized (mTaskQueue) {
+      return mTaskQueue.indexOf(callParameter);
+    }
+  }
+  
+  protected ParameterType getActiveTask() {
+    if(mRunnable.mCurrentCallable != null) {
+      return mRunnable.mCurrentCallable.mCallParameter;
+    } else {
+      return null;
+    }
+      
   }
 }

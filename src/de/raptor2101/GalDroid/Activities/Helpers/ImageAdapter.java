@@ -16,13 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.  
  */
 
-package de.raptor2101.GalDroid.WebGallery;
+package de.raptor2101.GalDroid.Activities.Helpers;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -34,12 +32,12 @@ import android.widget.BaseAdapter;
 import de.raptor2101.GalDroid.Activities.GalDroidApp;
 import de.raptor2101.GalDroid.Activities.Views.GalleryImageView;
 import de.raptor2101.GalDroid.Activities.Views.GalleryImageViewListener;
+import de.raptor2101.GalDroid.WebGallery.ImageCache;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryDownloadObject;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryObject;
-import de.raptor2101.GalDroid.WebGallery.Interfaces.WebGallery;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.WebGallery.ImageSize;
 import de.raptor2101.GalDroid.WebGallery.Tasks.ImageLoaderTask;
-import de.raptor2101.GalDroid.WebGallery.Tasks.ImageLoaderTaskListener;
+import de.raptor2101.GalDroid.WebGallery.Tasks.ImageLoaderTask.ImageDownload;
 
 public class ImageAdapter extends BaseAdapter {
   private final static String ClassTag = "GalleryImageAdapter";
@@ -146,10 +144,9 @@ public class ImageAdapter extends BaseAdapter {
     }
 
     GalleryDownloadObject downloadObject = getDownloadObject(galleryObject);
-    boolean isLoaded = imageView.isLoaded();
-    boolean isDownloading = mImageLoaderTask.isDownloading(downloadObject);
-    Log.d(ClassTag, String.format("isLoaded: %s isDownloading: %s", isLoaded, isDownloading));
-    if (!isLoaded && !isDownloading) {
+    boolean isLoading = imageView.isLoading();
+    Log.d(ClassTag, String.format("%s isLoaded: %s", objectId, isLoading));
+    if (!isLoading) {
       Log.d(ClassTag, String.format("Init Reload", galleryObject.getObjectId()));
       loadGalleryImage(imageView, downloadObject);
     }
@@ -194,7 +191,14 @@ public class ImageAdapter extends BaseAdapter {
 
     Bitmap cachedBitmap = mCache.getBitmap(downloadObject.getUniqueId());
     if (cachedBitmap == null) {
-      mImageLoaderTask.download(downloadObject, mLayoutParams, imageView);
+      ImageDownload imageDownload = imageView.getImageDownload();
+      if(imageDownload != null) {
+        imageDownload.updateListener(null);
+      }
+      
+      imageDownload = mImageLoaderTask.download(downloadObject, mLayoutParams, imageView);
+      imageView.setImageDownload(imageDownload);
+      
     } else {
       imageView.onLoadingCompleted(downloadObject.getUniqueId(), cachedBitmap);
     }

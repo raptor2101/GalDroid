@@ -46,25 +46,27 @@ public class GalleryImageView extends LinearLayout implements ImageLoaderTaskLis
   private GalleryObject mGalleryObject;
   private WeakReference<GalleryImageViewListener> mListener;
   private boolean mLoaded;
-
-public GalleryImageView(Context context, boolean showTitle) {
+  private WeakReference<ImageLoaderTask.ImageDownload> mAssignedImageDownload;
+  
+  public GalleryImageView(Context context, boolean showTitle) {
     super(context);
     LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     inflater.inflate(R.layout.gallery_image_view, this);
 
     mProgressBar_determinate = (ProgressBar) findViewById(R.id.progressBar_Determinate);
     mProgressBar_indeterminate = (ProgressBar) findViewById(R.id.progressBar_Indeterminate);
-    
+
     mTitleTextView = (TextView) findViewById(R.id.text_Title);
     mImageView = (ImageView) findViewById(R.id.imageView_Image);
-    
+
     if (showTitle) {
       mTitleTextView.setVisibility(VISIBLE);
     } else {
       mTitleTextView.setVisibility(GONE);
     }
-    
+
     mListener = new WeakReference<GalleryImageViewListener>(null);
+    mAssignedImageDownload = new WeakReference<ImageLoaderTask.ImageDownload>(null);
   }
 
   public void setGalleryObject(GalleryObject galleryObject) {
@@ -84,7 +86,7 @@ public GalleryImageView(Context context, boolean showTitle) {
       mTitleTextView.setText(title);
     }
   }
-  
+
   @Override
   protected void onDetachedFromWindow() {
     super.onDetachedFromWindow();
@@ -92,12 +94,12 @@ public GalleryImageView(Context context, boolean showTitle) {
   }
 
   public void cleanup() {
-    if(mLoaded){
+    if (mLoaded) {
       Log.d(CLASS_TAG, String.format("Recycle %s", mGalleryObject.getObjectId()));
       mImageView.setImageBitmap(null);
       mImageView.destroyDrawingCache();
       mImageView.setVisibility(GONE);
-      mLoaded=false;
+      mLoaded = false;
     }
   }
 
@@ -130,16 +132,15 @@ public GalleryImageView(Context context, boolean showTitle) {
   public void onLoadingProgress(String uniqueId, int currentValue, int maxValue) {
     mProgressBar_determinate.setMax(maxValue);
     mProgressBar_determinate.setProgress(currentValue);
-    
-    if(maxValue != currentValue) {
+
+    if (maxValue != currentValue) {
       mProgressBar_indeterminate.setVisibility(GONE);
       mProgressBar_determinate.setVisibility(VISIBLE);
     } else {
       mProgressBar_indeterminate.setVisibility(VISIBLE);
       mProgressBar_determinate.setVisibility(GONE);
     }
-    
-    
+
     GalleryImageViewListener listener = mListener.get();
     if (listener != null) {
       listener.onLoadingProgress(mGalleryObject, currentValue, maxValue);
@@ -147,25 +148,27 @@ public GalleryImageView(Context context, boolean showTitle) {
   }
 
   public void onLoadingCompleted(String uniqueId, Bitmap bitmap) {
+    GalleryImageViewListener listener = mListener.get();
+    Log.d(CLASS_TAG, String.format("Loading done %s - Listener:  %s", uniqueId, listener != null));
     mProgressBar_indeterminate.setVisibility(GONE);
     mProgressBar_determinate.setVisibility(GONE);
-    mLoaded=true;
+    mLoaded = true;
     mImageView.setImageBitmap(bitmap);
     mImageView.setVisibility(VISIBLE);
-    Log.d(CLASS_TAG, String.format("Loading done %s", uniqueId));
-
-    GalleryImageViewListener listener = mListener.get();
+    mAssignedImageDownload = new WeakReference<ImageLoaderTask.ImageDownload>(null);
+    
     if (listener != null) {
       listener.onLoadingCompleted(mGalleryObject);
     }
   }
 
   public void onLoadingCancelled(String uniqueId) {
-    Log.d(CLASS_TAG, String.format("DownloadTask was cancalled %s", uniqueId));
+    GalleryImageViewListener listener = mListener.get();
+    Log.d(CLASS_TAG, String.format("Loading cancelled %s - Listener: %s", uniqueId, listener != null));
     mProgressBar_indeterminate.setVisibility(GONE);
     mProgressBar_determinate.setVisibility(GONE);
-
-    GalleryImageViewListener listener = mListener.get();
+    mAssignedImageDownload = new WeakReference<ImageLoaderTask.ImageDownload>(null);
+    
     if (listener != null) {
       listener.onLoadingCancelled(mGalleryObject);
     }
@@ -175,4 +178,15 @@ public GalleryImageView(Context context, boolean showTitle) {
     mListener = new WeakReference<GalleryImageViewListener>(listener);
   }
 
+  public void setImageDownload(ImageLoaderTask.ImageDownload imageDownload) {
+    mAssignedImageDownload = new WeakReference<ImageLoaderTask.ImageDownload>(imageDownload);
+  }
+  
+  public ImageLoaderTask.ImageDownload getImageDownload() {
+    return mAssignedImageDownload.get();
+  }
+
+  public boolean isLoading() {
+    return mAssignedImageDownload.get() != null;
+  }
 }

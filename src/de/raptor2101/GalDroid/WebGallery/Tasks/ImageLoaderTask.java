@@ -37,9 +37,9 @@ import de.raptor2101.GalDroid.WebGallery.Interfaces.WebGallery;
 public class ImageLoaderTask implements TaskInterface {
   protected final static String CLASS_TAG = "ImageLoaderTask";
 
-  private class ImageDownload{
+  public class ImageDownload{
     private final LayoutParams mLayoutParams;
-    private final WeakReference<ImageLoaderTaskListener> mListener;
+    private WeakReference<ImageLoaderTaskListener> mListener;
     private final GalleryDownloadObject mDownloadObject;
 
     public ImageDownload(GalleryDownloadObject downloadObject, LayoutParams layoutParams , ImageLoaderTaskListener listener) {
@@ -102,17 +102,24 @@ public class ImageLoaderTask implements TaskInterface {
     private ImageLoaderTask getOuterType() {
       return ImageLoaderTask.this;
     }
+
+    public void updateListener(ImageLoaderTaskListener listener) {
+      mListener = new WeakReference<ImageLoaderTaskListener>(listener);
+    }
   }
   
   private class DownloadTask extends RepeatingTask<ImageDownload, Progress, Bitmap> {
+    protected final static String CLASS_TAG = "ImageLoaderTask";
+    
     public DownloadTask() {
       mThreadName = "ImageLoaderTask";
     }
     @Override
     protected void onPreExecute(ImageDownload imageDownload) {
-      GalleryDownloadObject galleryDownloadObject = imageDownload.getDownloadObject();
-      Log.d(CLASS_TAG, String.format("%s - Task started", galleryDownloadObject));
       ImageLoaderTaskListener listener = imageDownload.getListener();
+      GalleryDownloadObject galleryDownloadObject = imageDownload.getDownloadObject();
+      Log.d(CLASS_TAG, String.format("%s - Task started - Listener %s", galleryDownloadObject, listener != null));
+      
       if (listener != null) {
         listener.onLoadingStarted(galleryDownloadObject.getUniqueId());
       }
@@ -193,9 +200,10 @@ public class ImageLoaderTask implements TaskInterface {
     
     @Override
     protected void onPostExecute(ImageDownload imageDownload, Bitmap bitmap) {
-      GalleryDownloadObject galleryDownloadObject = imageDownload.getDownloadObject();
-      Log.d(CLASS_TAG, String.format("%s - Task done", galleryDownloadObject));
       ImageLoaderTaskListener listener = imageDownload.getListener();
+      GalleryDownloadObject galleryDownloadObject = imageDownload.getDownloadObject();
+      Log.d(CLASS_TAG, String.format("%s - Task done - Listener %s", galleryDownloadObject, listener != null));
+      
       if (!isCancelled() && listener != null) {
         listener.onLoadingCompleted(galleryDownloadObject.getUniqueId(), bitmap);
       }
@@ -288,7 +296,6 @@ public class ImageLoaderTask implements TaskInterface {
         Log.d(CLASS_TAG, String.format("%s - Resize Image - done", galleryDownloadObject));
       }
     }
-    
   }
   
   private DownloadTask mDownloadTask;
@@ -301,10 +308,11 @@ public class ImageLoaderTask implements TaskInterface {
     mDownloadTask = new DownloadTask();
   }
 
-  public void download(GalleryDownloadObject galleryDownloadObject, LayoutParams layoutParams, ImageLoaderTaskListener listener) {
-    Log.d(CLASS_TAG, String.format("Enqueue download for %s", galleryDownloadObject));
+  public ImageDownload download(GalleryDownloadObject galleryDownloadObject, LayoutParams layoutParams, ImageLoaderTaskListener listener) {
+    Log.d(CLASS_TAG, String.format("Enqueue download for %s - Listener: %s", galleryDownloadObject, listener != null));
     ImageDownload imageDownload = new ImageDownload(galleryDownloadObject, layoutParams, listener);
     mDownloadTask.enqueueTask(imageDownload);
+    return imageDownload;
   }
 
   public boolean isDownloading(GalleryDownloadObject galleryDownloadObject) {
@@ -314,7 +322,6 @@ public class ImageLoaderTask implements TaskInterface {
     ImageDownload imageDownload = new ImageDownload(galleryDownloadObject, null, null);
     boolean isActive = mDownloadTask.isActive(imageDownload);
     boolean isEnqueued = mDownloadTask.isEnqueued(imageDownload);
-    Log.d(CLASS_TAG, String.format("isActive: %s isEnqueued %s", isActive, isEnqueued));
     return isActive || isEnqueued;
   }
 

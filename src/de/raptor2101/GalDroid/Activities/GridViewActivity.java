@@ -35,12 +35,12 @@ import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.GridView;
 import de.raptor2101.GalDroid.R;
+import de.raptor2101.GalDroid.Activities.Helpers.ImageAdapter;
+import de.raptor2101.GalDroid.Activities.Helpers.ImageAdapter.ScaleMode;
+import de.raptor2101.GalDroid.Activities.Helpers.ImageAdapter.TitleConfig;
 import de.raptor2101.GalDroid.Activities.Views.GalleryImageView;
 import de.raptor2101.GalDroid.Config.GalDroidPreference;
-import de.raptor2101.GalDroid.WebGallery.ImageAdapter;
-import de.raptor2101.GalDroid.WebGallery.ImageAdapter.ScaleMode;
 
-import de.raptor2101.GalDroid.WebGallery.ImageAdapter.TitleConfig;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryObject;
 import de.raptor2101.GalDroid.WebGallery.Tasks.ImageLoaderTask;
 
