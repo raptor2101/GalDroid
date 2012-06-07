@@ -147,7 +147,7 @@ public class ImageAdapter extends BaseAdapter {
 
     GalleryDownloadObject downloadObject = getDownloadObject(galleryObject);
     boolean isLoaded = imageView.isLoaded();
-    boolean isDownloading = mImageLoaderTask.isDownloading(downloadObject, mLayoutParams);
+    boolean isDownloading = mImageLoaderTask.isDownloading(downloadObject);
     Log.d(ClassTag, String.format("isLoaded: %s isDownloading: %s", isLoaded, isDownloading));
     if (!isLoaded && !isDownloading) {
       Log.d(ClassTag, String.format("Init Reload", galleryObject.getObjectId()));
@@ -180,7 +180,7 @@ public class ImageAdapter extends BaseAdapter {
       if (!originGalleryObject.getObjectId().equals(galleryObject.getObjectId())) {
         if (!imageView.isLoaded()) {
           Log.d(ClassTag, String.format("Abort downloadTask %s", imageView.getObjectId()));
-          mImageLoaderTask.cancel(getDownloadObject(originGalleryObject), mLayoutParams);
+          mImageLoaderTask.cancel(getDownloadObject(originGalleryObject));
         }
       }
     }

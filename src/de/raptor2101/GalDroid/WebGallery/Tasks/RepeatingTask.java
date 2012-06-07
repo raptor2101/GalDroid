@@ -11,7 +11,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
-public abstract class RepeatingTask<ParameterType, ProgressType, ResultType> implements WorkerTaskInterface {
+public abstract class RepeatingTask<ParameterType, ProgressType, ResultType> implements TaskInterface {
   protected static final String CLASS_TAG = "RepeatingTask";
   private static final int MESSAGE_POST_RESULT = 1;
   private static final int MESSAGE_POST_PROGRESS = 2;

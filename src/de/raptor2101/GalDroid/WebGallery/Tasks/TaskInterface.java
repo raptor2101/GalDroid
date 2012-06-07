@@ -1,6 +1,6 @@
 package de.raptor2101.GalDroid.WebGallery.Tasks;
 
-public interface WorkerTaskInterface {
+public interface TaskInterface {
   public enum Status {
     PENDING, RUNNING, SLEEPING, FINISHED, STOPPING
   }
