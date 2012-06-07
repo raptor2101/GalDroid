@@ -86,7 +86,6 @@ public class ImageInformationView extends TableLayout implements ImageInformatio
     } catch (InterruptedException e) {
       
     }
-    mLoadImageInformationTask = null;
   }
   
   public void setGalleryImageView(GalleryImageView imageView) {
