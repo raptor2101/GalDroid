@@ -183,7 +183,6 @@ public class ImageViewActivity extends GalleryActivity implements OnItemSelected
       mGalleryFullscreen.setSelection(position);
       view = mGalleryFullscreen.getSelectedView();
     }
-    Log.d("temp", String.format("SELECT position %d",position));
     mInformationView.setGalleryImageView((GalleryImageView) view);
   }
 
