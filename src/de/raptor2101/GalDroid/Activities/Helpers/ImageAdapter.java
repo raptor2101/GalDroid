@@ -61,6 +61,7 @@ public class ImageAdapter extends BaseAdapter {
   private List<GalleryObject> mGalleryObjects;
   private TitleConfig mTitleConfig;
   private LayoutParams mLayoutParams;
+  private ScaleMode mScaleMode;
   private ImageSize mImageSize;
 
   private WeakReference<GalleryImageViewListener> mListener;
@@ -79,7 +80,8 @@ public class ImageAdapter extends BaseAdapter {
 
     mTitleConfig = TitleConfig.ShowTitle;
     mImageSize = ImageSize.Thumbnail;
-    mLayoutParams = scaleMode == ScaleMode.ScaleSource ? layoutParams : null;
+    mScaleMode = scaleMode;
+    mLayoutParams = layoutParams;
 
     mListener = new WeakReference<GalleryImageViewListener>(null);
     mImageLoaderTask = loaderTask;
@@ -199,8 +201,8 @@ public class ImageAdapter extends BaseAdapter {
       if(imageDownload != null) {
         imageDownload.updateListener(null);
       }
-      
-      imageDownload = mImageLoaderTask.download(downloadObject, mLayoutParams, imageView);
+      LayoutParams layoutParams = mScaleMode == ScaleMode.ScaleSource ? mLayoutParams : null;
+      imageDownload = mImageLoaderTask.download(downloadObject, layoutParams, imageView);
       imageView.setImageDownload(imageDownload);
       
     } else {
