@@ -197,10 +197,15 @@ public abstract class RepeatingTask<ParameterType, ProgressType, ResultType> imp
     }
   }
 
-  protected void cancelCurrentTask() {
+  protected void cancelCurrentTask(boolean waitForCancel) throws InterruptedException {
     if(mRunnable.mCurrentCallable != null) {
       mIsCancelled = true;
       mThread.interrupt();
+    }
+    
+    while(waitForCancel && mIsCancelled) {
+      mThread.interrupt();
+      Thread.sleep(100);
     }
   }
 

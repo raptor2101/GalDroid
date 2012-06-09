@@ -315,6 +315,10 @@ public class ImageLoaderTask implements TaskInterface {
     return imageDownload;
   }
 
+  public ImageDownload getActiveDownload(){
+    return mDownloadTask.getActiveTask();
+  }
+  
   public boolean isDownloading(GalleryDownloadObject galleryDownloadObject) {
     if (galleryDownloadObject == null) {
       return false;
@@ -325,7 +329,7 @@ public class ImageLoaderTask implements TaskInterface {
     return isActive || isEnqueued;
   }
 
-  public void cancel(GalleryDownloadObject downloadObject) {
+  public void cancel(GalleryDownloadObject downloadObject, boolean waitForCancel) throws InterruptedException {
     if (downloadObject == null) {
       return;
     }
@@ -334,10 +338,14 @@ public class ImageLoaderTask implements TaskInterface {
     if (mDownloadTask.isEnqueued(imageDownload)) {
       mDownloadTask.removeEnqueuedTask(imageDownload);
     } else if (mDownloadTask.isActive(imageDownload)) {
-      mDownloadTask.cancelCurrentTask();
+      mDownloadTask.cancelCurrentTask(waitForCancel);
     }
   }
 
+  public void cancelActiveDownload(boolean waitForCancel) throws InterruptedException {
+    mDownloadTask.cancelCurrentTask(waitForCancel);
+  }
+  
   public Status getStatus() {
     return mDownloadTask.getStatus();
   }

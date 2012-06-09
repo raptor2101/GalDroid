@@ -204,11 +204,11 @@ public class ImageInformationLoaderTask extends RepeatingTask<GalleryObject, Voi
     return isActive || isEnqueued;
   }
 
-  public void cancel(GalleryObject galleryObject) {
+  public void cancel(GalleryObject galleryObject, boolean waitForCancel) throws InterruptedException {
     if (isEnqueued(galleryObject)) {
       removeEnqueuedTask(galleryObject);
     } else if (isActive(galleryObject)) {
-      cancelCurrentTask();
+      cancelCurrentTask(waitForCancel);
     }
   }
 }

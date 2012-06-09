@@ -109,7 +109,11 @@ public class ImageInformationView extends TableLayout implements ImageInformatio
     Log.d(CLASS_TAG, String.format("extractImageInformation: %s", requestedObject));
 
     if (mCurrentLoadingObject != null) {
-      mLoadImageInformationTask.cancel(mCurrentLoadingObject);
+      try {
+        mLoadImageInformationTask.cancel(mCurrentLoadingObject, false);
+      } catch (InterruptedException e) {
+        // nothing to do here
+      }
     }
 
     clearImageInformations();

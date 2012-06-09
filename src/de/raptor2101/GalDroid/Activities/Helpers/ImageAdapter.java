@@ -177,7 +177,11 @@ public class ImageAdapter extends BaseAdapter {
       if (!originGalleryObject.getObjectId().equals(galleryObject.getObjectId())) {
         if (!imageView.isLoaded()) {
           Log.d(ClassTag, String.format("Abort downloadTask %s", imageView.getObjectId()));
-          mImageLoaderTask.cancel(getDownloadObject(originGalleryObject));
+          try {
+            mImageLoaderTask.cancel(getDownloadObject(originGalleryObject), false);
+          } catch (InterruptedException e) {
+            // nothing to do here...
+          }
         }
       }
     }
