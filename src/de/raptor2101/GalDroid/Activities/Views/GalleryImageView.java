@@ -77,6 +77,12 @@ public class GalleryImageView extends LinearLayout implements ImageLoaderTaskLis
     this.setTitle(galleryObject.getTitle());
   }
 
+  public void resetLoading() {
+    mProgressBar_determinate.setVisibility(GONE);
+    mProgressBar_indeterminate.setVisibility(GONE);
+    mAssignedImageDownload = null;
+  }
+  
   public GalleryObject getGalleryObject() {
     return mGalleryObject;
   }

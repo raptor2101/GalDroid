@@ -192,6 +192,7 @@ public class ImageAdapter extends BaseAdapter {
 
   private void loadGalleryImage(GalleryImageView imageView, GalleryDownloadObject downloadObject) {
     if (downloadObject == null) {
+      imageView.resetLoading();
       return;
     }
 
