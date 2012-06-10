@@ -29,6 +29,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.AdapterView;
 import android.widget.TextView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
@@ -65,7 +66,13 @@ public class GridViewActivity extends GalleryActivity implements OnItemClickList
     mGridView.setOnItemClickListener(this);
 
     GalDroidApp app = (GalDroidApp) getApplicationContext();
-    mImageLoaderTask = new ImageLoaderTask(app.getWebGallery(), app.getImageCache());
+    
+    LayoutParams params = this.getWindow().getAttributes();
+    
+    int colums = params.width / 295;
+    int rows = params.height /295;
+    
+    mImageLoaderTask = new ImageLoaderTask(app.getWebGallery(), app.getImageCache(), (int)(rows*colums*1.5));
     mAdapter = new ImageAdapter(this, new GridView.LayoutParams(295, 295), ScaleMode.ScaleSource, mImageLoaderTask);
     mAdapter.setTitleConfig(TitleConfig.ShowTitle);
 

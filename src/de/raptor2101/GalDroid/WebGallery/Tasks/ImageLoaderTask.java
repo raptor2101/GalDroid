@@ -111,9 +111,11 @@ public class ImageLoaderTask implements TaskInterface {
   private class DownloadTask extends RepeatingTask<ImageDownload, Progress, Bitmap> {
     protected final static String CLASS_TAG = "ImageLoaderTask";
     
-    public DownloadTask() {
+    public DownloadTask(int maxEnqueuedDownloads) {
+      super(maxEnqueuedDownloads);
       mThreadName = "ImageLoaderTask";
     }
+    
     @Override
     protected void onPreExecute(ImageDownload imageDownload) {
       ImageLoaderTaskListener listener = imageDownload.getListener();
@@ -301,11 +303,13 @@ public class ImageLoaderTask implements TaskInterface {
   private DownloadTask mDownloadTask;
   private ImageCache mCache;
   private WebGallery mWebGallery;
+  
 
-  public ImageLoaderTask(WebGallery webGallery, ImageCache cache) {
+  public ImageLoaderTask(WebGallery webGallery, ImageCache cache, int maxEnqueuedDownloads) {
     mWebGallery = webGallery;
     mCache = cache;
-    mDownloadTask = new DownloadTask();
+    mDownloadTask = new DownloadTask(maxEnqueuedDownloads);
+    
   }
 
   public ImageDownload download(GalleryDownloadObject galleryDownloadObject, LayoutParams layoutParams, ImageLoaderTaskListener listener) {
@@ -333,7 +337,7 @@ public class ImageLoaderTask implements TaskInterface {
     if (downloadObject == null) {
       return;
     }
-
+    
     ImageDownload imageDownload = new ImageDownload(downloadObject, null, null);
     if (mDownloadTask.isEnqueued(imageDownload)) {
       mDownloadTask.removeEnqueuedTask(imageDownload);

@@ -44,7 +44,9 @@ import de.raptor2101.GalDroid.Activities.Helpers.ImageAdapter.TitleConfig;
 import de.raptor2101.GalDroid.Activities.Listeners.ImageViewOnTouchListener;
 import de.raptor2101.GalDroid.Activities.Views.GalleryImageView;
 import de.raptor2101.GalDroid.Activities.Views.ImageInformationView;
+import de.raptor2101.GalDroid.WebGallery.ImageCache;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryObject;
+import de.raptor2101.GalDroid.WebGallery.Interfaces.WebGallery;
 import de.raptor2101.GalDroid.WebGallery.Tasks.ImageLoaderTask;
 
 public class ImageViewActivity extends GalleryActivity implements OnItemSelectedListener, OnItemClickListener {
@@ -57,7 +59,9 @@ public class ImageViewActivity extends GalleryActivity implements OnItemSelected
   private ImageInformationView mInformationView;
 
   private ActionBarHider mActionBarHider;
-  private ImageLoaderTask mImageLoaderTask;
+  
+  private ImageLoaderTask mFullscrennImageLoaderTask;
+  private ImageLoaderTask mThumbnailImageLoaderTask;
 
   @Override
   public void onCreate(Bundle savedInstanceState) {
@@ -74,8 +78,12 @@ public class ImageViewActivity extends GalleryActivity implements OnItemSelected
     mActionBarHider = new ActionBarHider(actionBar);
 
     GalDroidApp app = (GalDroidApp) getApplication();
-    mImageLoaderTask = new ImageLoaderTask(app.getWebGallery(), app.getImageCache());
-
+    
+    WebGallery webGallery = app.getWebGallery();
+    ImageCache imageCache = app.getImageCache();
+    
+    
+    
     mInformationView = (ImageInformationView) findViewById(R.id.viewImageInformations);
     boolean showInfo = getIntent().getExtras().getBoolean(GalDroidApp.INTENT_EXTRA_SHOW_IMAGE_INFO);
     if (showInfo) {
@@ -85,19 +93,24 @@ public class ImageViewActivity extends GalleryActivity implements OnItemSelected
     }
     mInformationView.initialize();
 
+    LayoutParams params = this.getWindow().getAttributes();
+    
     mGalleryFullscreen = (Gallery) findViewById(R.id.singleImageGallery);
     mGalleryThumbnails = (Gallery) findViewById(R.id.thumbnailImageGallery);
+    
+    mFullscrennImageLoaderTask = new ImageLoaderTask(webGallery, imageCache, 5);
+    mThumbnailImageLoaderTask = new ImageLoaderTask(webGallery, imageCache, (int) ((params.width / 100) * 1.5));
+    
     mGalleryThumbnails.setWillNotCacheDrawing(true);
-
-    LayoutParams params = this.getWindow().getAttributes();
+    
 
     ImageViewOnTouchListener touchListener = new ImageViewOnTouchListener(mGalleryFullscreen, mGalleryThumbnails, params.height / 5f);
 
-    mAdapterFullscreen = new ImageAdapter(this, new Gallery.LayoutParams(params.width, params.height), ScaleMode.ScaleSource, mImageLoaderTask);
+    mAdapterFullscreen = new ImageAdapter(this, new Gallery.LayoutParams(params.width, params.height), ScaleMode.ScaleSource, mFullscrennImageLoaderTask);
     mAdapterFullscreen.setTitleConfig(TitleConfig.HideTitle);
     mAdapterFullscreen.setDisplayTarget(DisplayTarget.FullScreen);
 
-    mAdapterThumbnails = new ImageAdapter(this, new Gallery.LayoutParams(100, 100), ScaleMode.DontScale, mImageLoaderTask);
+    mAdapterThumbnails = new ImageAdapter(this, new Gallery.LayoutParams(100, 100), ScaleMode.DontScale, mThumbnailImageLoaderTask);
     mAdapterThumbnails.setTitleConfig(TitleConfig.HideTitle);
     mAdapterThumbnails.setDisplayTarget(DisplayTarget.Thumbnails);
 
@@ -136,7 +149,8 @@ public class ImageViewActivity extends GalleryActivity implements OnItemSelected
       adapter.refreshImages();
     }
     
-    mImageLoaderTask.start();
+    mFullscrennImageLoaderTask.start();
+    mThumbnailImageLoaderTask.start();
   }
   
   @Override
@@ -144,7 +158,8 @@ public class ImageViewActivity extends GalleryActivity implements OnItemSelected
     super.onPause();
     
     try {
-      mImageLoaderTask.stop(false);
+      mFullscrennImageLoaderTask.stop(false);
+      mThumbnailImageLoaderTask.stop(false);
     } catch (InterruptedException e) {
       
     }
@@ -155,7 +170,8 @@ public class ImageViewActivity extends GalleryActivity implements OnItemSelected
     super.onStop();
     
     try {
-      mImageLoaderTask.cancel(true);
+      mFullscrennImageLoaderTask.cancel(true);
+      mThumbnailImageLoaderTask.cancel(true);
     } catch (InterruptedException e) {
       
     }
@@ -214,7 +230,7 @@ public class ImageViewActivity extends GalleryActivity implements OnItemSelected
 
     mGalleryFullscreen.setSelection(currentIndex);
     mGalleryThumbnails.setSelection(currentIndex);
-    mImageLoaderTask.start();
+    mFullscrennImageLoaderTask.start();
   }
 
   public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {

@@ -65,6 +65,7 @@ public class ImageInformationLoaderTask extends RepeatingTask<GalleryObject, Voi
   private final WeakReference<ImageInformationLoaderTaskListener> mListener;
 
   public ImageInformationLoaderTask(ImageInformationLoaderTaskListener listener, WebGallery webGallery, ImageCache cache) {
+    super(1);
     mThreadName = "ImageInformationLoaderTask";
     mListener = new WeakReference<ImageInformationLoaderTaskListener>(listener);
     mWebGallery = webGallery;

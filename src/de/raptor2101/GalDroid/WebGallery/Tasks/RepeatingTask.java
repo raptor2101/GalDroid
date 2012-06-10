@@ -18,6 +18,12 @@ public abstract class RepeatingTask<ParameterType, ProgressType, ResultType> imp
   private static final int MESSAGE_POST_ERROR = 3;
   private static final int MESSAGE_PRE_EXECUTION = 4;
 
+  private final int mMaxEnqueuedTasks;
+  
+  public RepeatingTask(int maxEnquedTasks) {
+    mMaxEnqueuedTasks = maxEnquedTasks;
+  }
+  
   private class TaskMessage<MessageType> {
     public final ParameterType mParameter;
     public final MessageType mMessage;
@@ -106,7 +112,7 @@ public abstract class RepeatingTask<ParameterType, ProgressType, ResultType> imp
     }
   }
 
-  private final LinkedList<Task> mTaskQueue = new LinkedList<Task>();
+  protected final LinkedList<Task> mTaskQueue = new LinkedList<Task>();
 
   private class InternRunnable implements Runnable {
 
@@ -152,14 +158,14 @@ public abstract class RepeatingTask<ParameterType, ProgressType, ResultType> imp
     
     private Task waitForCallable() throws InterruptedException {
       synchronized (mTaskQueue) {
-        Log.d(this.buildLogTag(), "Looking for enqueued task");
+        Log.d(this.buildLogTag(), String.format("Looking for enqueued task, QueueSize: %d",mTaskQueue.size()));
         while (mTaskQueue.size() == 0) {
           mIsSleeping = true;
           Log.d(String.format("%s (%s)", CLASS_TAG, mThreadName), "Waiting for enqueued task");
           mTaskQueue.wait();
         }
         mIsSleeping = false;
-        Log.d(this.buildLogTag(), "Returning enqueued task");
+        Log.d(this.buildLogTag(), String.format("Returning enqueued task, QueueSize: %d",mTaskQueue.size()));
         return mTaskQueue.poll();
       }
     }
@@ -176,9 +182,14 @@ public abstract class RepeatingTask<ParameterType, ProgressType, ResultType> imp
 
   protected void enqueueTask(ParameterType parameter) {
     if (!mIsStopping) {
-      Log.d(buildLogTag(), String.format("Enqueuing %s", parameter));
+      Log.d(buildLogTag(), String.format("Enqueuing %s , QueueSize: %d", parameter, mTaskQueue.size()));
       synchronized (mTaskQueue) {
         mTaskQueue.add(new Task(parameter));
+        
+        while (mMaxEnqueuedTasks > 0 && mTaskQueue.size() > mMaxEnqueuedTasks) {
+          mTaskQueue.poll();
+        }
+        
         Log.d(buildLogTag(), "Notify waiting WorkerThread");
         mTaskQueue.notifyAll();
       }

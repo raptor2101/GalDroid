@@ -174,10 +174,12 @@ public class ImageAdapter extends BaseAdapter {
     GalleryImageView imageView = null;
     if (cachedView != null) {
       imageView = (GalleryImageView) cachedView;
-      Log.d(ClassTag, String.format("Cached View %s", imageView.getObjectId()));
       GalleryObject originGalleryObject = imageView.getGalleryObject();
-      if (!originGalleryObject.getObjectId().equals(galleryObject.getObjectId())) {
-        if (!imageView.isLoaded()) {
+      boolean equalsObject = originGalleryObject.getObjectId().equals(galleryObject.getObjectId());
+      boolean isLoaded = imageView.isLoaded();
+      Log.d(ClassTag, String.format("Cached View %s, GalleryObjectEquals %s, isLoaded %s", imageView.getObjectId(), equalsObject, isLoaded));
+      if (!equalsObject) {
+        if (!isLoaded) {
           Log.d(ClassTag, String.format("Abort downloadTask %s", imageView.getObjectId()));
           try {
             mImageLoaderTask.cancel(getDownloadObject(originGalleryObject), false);
