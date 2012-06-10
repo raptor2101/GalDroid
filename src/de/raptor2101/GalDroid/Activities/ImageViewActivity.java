@@ -121,7 +121,24 @@ public class ImageViewActivity extends GalleryActivity implements OnItemSelected
 
     super.onBackPressed();
   }
-
+  
+  @Override
+  protected void onResume() {
+    super.onResume();
+    
+    ImageAdapter adapter = (ImageAdapter) mGalleryFullscreen.getAdapter();
+    if (adapter != null) {
+      adapter.refreshImages();
+    }
+    
+    adapter = (ImageAdapter) mGalleryThumbnails.getAdapter();
+    if (adapter != null) {
+      adapter.refreshImages();
+    }
+    
+    mImageLoaderTask.start();
+  }
+  
   @Override
   protected void onPause() {
     super.onPause();
@@ -131,12 +148,6 @@ public class ImageViewActivity extends GalleryActivity implements OnItemSelected
     } catch (InterruptedException e) {
       
     }
-  }
-  
-  @Override
-  protected void onResume() {
-    super.onResume();
-    mImageLoaderTask.start();
   }
   
   @Override
