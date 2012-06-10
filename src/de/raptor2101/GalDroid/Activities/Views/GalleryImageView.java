@@ -122,7 +122,13 @@ public class GalleryImageView extends LinearLayout implements ImageLoaderTaskLis
 
   public void onLoadingStarted(String uniqueId) {
     Log.d(CLASS_TAG, String.format("Loading started %s", uniqueId));
-
+    
+    mProgressBar_determinate.setMax(100);
+    mProgressBar_determinate.setProgress(0);
+    
+    mProgressBar_indeterminate.setVisibility(GONE);
+    mProgressBar_determinate.setVisibility(VISIBLE);
+    
     GalleryImageViewListener listener = mListener.get();
     if (listener != null) {
       listener.onLoadingStarted(mGalleryObject);
@@ -130,20 +136,9 @@ public class GalleryImageView extends LinearLayout implements ImageLoaderTaskLis
   }
 
   public void onLoadingProgress(String uniqueId, int currentValue, int maxValue) {
-    mProgressBar_determinate.setMax(maxValue);
-    mProgressBar_determinate.setProgress(currentValue);
-
-    if (maxValue != currentValue) {
-      mProgressBar_indeterminate.setVisibility(GONE);
-      mProgressBar_determinate.setVisibility(VISIBLE);
-    } else {
-      mProgressBar_indeterminate.setVisibility(VISIBLE);
-      mProgressBar_determinate.setVisibility(GONE);
-    }
-
     GalleryImageViewListener listener = mListener.get();
     if (listener != null) {
-      listener.onLoadingProgress(mGalleryObject, currentValue, maxValue);
+      listener.onLoadingProgress(mGalleryObject, currentValue * 100 / maxValue , 100);
     }
   }
 
