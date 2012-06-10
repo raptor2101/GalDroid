@@ -81,18 +81,6 @@ public class GridViewActivity extends GalleryActivity implements OnItemClickList
   }
 
   @Override
-  protected void onResume() {
-    super.onResume();
-
-    ImageAdapter adapter = (ImageAdapter) mGridView.getAdapter();
-    if (adapter != null) {
-      adapter.refreshImages();
-    }
-    
-    mImageLoaderTask.start();
-  }
-
-  @Override
   public void onActivityResult(int requestCode, int resultCode, Intent data) {
     super.onActivityResult(requestCode, resultCode, data);
     switch (requestCode) {
@@ -153,6 +141,18 @@ public class GridViewActivity extends GalleryActivity implements OnItemClickList
       this.startActivity(intent);
     }
     return true;
+  }
+
+  @Override
+  protected void onResume() {
+    super.onResume();
+  
+    ImageAdapter adapter = (ImageAdapter) mGridView.getAdapter();
+    if (adapter != null) {
+      adapter.refreshImages();
+    }
+    
+    mImageLoaderTask.start();
   }
 
   protected void onPause() {
