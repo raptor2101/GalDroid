@@ -152,7 +152,7 @@ public class ImageInformationLoaderTask extends RepeatingTask<GalleryObject, Voi
       }
 
       try {
-        int whiteBalance = exif.getAttributeInt(ExifInterface.TAG_FLASH, 0);
+        int whiteBalance = exif.getAttributeInt(ExifInterface.TAG_WHITE_BALANCE, 0);
         if (whiteBalance == ExifInterface.WHITEBALANCE_AUTO) {
           imageInformation.mExifWhiteBalance = WhiteBalance.Auto;
         } else {
@@ -162,9 +162,10 @@ public class ImageInformationLoaderTask extends RepeatingTask<GalleryObject, Voi
         imageInformation.mExifWhiteBalance = WhiteBalance.Manual;
       }
 
+      imageInformation.mExifGpsAvailable = exif.getAttribute(ExifInterface.TAG_GPS_ALTITUDE_REF) != null;
       imageInformation.mExifGpsLat = parseDegMinSec(exif.getAttribute(ExifInterface.TAG_GPS_LATITUDE));
       imageInformation.mExifGpsLong = parseDegMinSec(exif.getAttribute(ExifInterface.TAG_GPS_LONGITUDE));
-      imageInformation.mExifHeight = parseHeight(exif.getAttribute(ExifInterface.TAG_GPS_ALTITUDE));
+      imageInformation.mExifHeight = parseHeight(exif.getAttribute(ExifInterface.TAG_GPS_ALTITUDE)); 
     } catch (Exception e) {
       Log.e(CLASS_TAG, String.format("Something goes wrong while decoding ExifInformations from %s", galleryObject), e);
     }

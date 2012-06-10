@@ -256,14 +256,28 @@ public class ImageInformationView extends TableLayout implements ImageInformatio
       } else {
         textField.setText(R.string.object_exif_whitebalance_manual);
       }
-      DegMinSec val = info.mExifGpsLat;
-      textField = (TextView) findViewById(R.id.textGeoLat);
-      textField.setText(String.format("%.0f° %.0f' %.2f\"", val.mDeg, val.mMin, val.mSec));
-      val = info.mExifGpsLong;
-      textField = (TextView) findViewById(R.id.textGeoLong);
-      textField.setText(String.format("%.0f° %.0f' %.2f\"", val.mDeg, val.mMin, val.mSec));
-      textField = (TextView) findViewById(R.id.textGeoHeight);
-      textField.setText(String.format("%.0f", info.mExifHeight));
+      
+      if(info.mExifGpsAvailable) {
+        DegMinSec val = info.mExifGpsLat;
+        textField = (TextView) findViewById(R.id.textGeoLat);
+        textField.setText(String.format("%.0f° %.0f' %.2f\"", val.mDeg, val.mMin, val.mSec));
+        
+        val = info.mExifGpsLong;
+        textField = (TextView) findViewById(R.id.textGeoLong);
+        textField.setText(String.format("%.0f° %.0f' %.2f\"", val.mDeg, val.mMin, val.mSec));
+        
+        textField = (TextView) findViewById(R.id.textGeoHeight);
+        textField.setText(String.format("%.0f m", info.mExifHeight));
+      } else {
+        textField = (TextView) findViewById(R.id.textGeoLat);
+        textField.setText("");
+        
+        textField = (TextView) findViewById(R.id.textGeoLong);
+        textField.setText("");
+        
+        textField = (TextView) findViewById(R.id.textGeoHeight);
+        textField.setText("");
+      }
       mProgressBarComments.setVisibility(VISIBLE);
       mProgressBarTags.setVisibility(VISIBLE);
       mImageInformationsLoaded = true;

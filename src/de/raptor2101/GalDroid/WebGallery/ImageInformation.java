@@ -24,6 +24,7 @@ public class ImageInformation {
   public String mExifMake;
   public double mExifFocalLength;
 
+  public boolean mExifGpsAvailable;
   public DegMinSec mExifGpsLat;
   public DegMinSec mExifGpsLong;
   public float mExifHeight;
