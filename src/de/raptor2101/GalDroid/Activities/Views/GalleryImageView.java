@@ -136,9 +136,12 @@ public class GalleryImageView extends LinearLayout implements ImageLoaderTaskLis
   }
 
   public void onLoadingProgress(String uniqueId, int currentValue, int maxValue) {
+    Log.d(CLASS_TAG, String.format("Progress %s %d %d", uniqueId, currentValue , maxValue));
+    mProgressBar_determinate.setMax(maxValue);
+    mProgressBar_determinate.setProgress(currentValue);
     GalleryImageViewListener listener = mListener.get();
     if (listener != null) {
-      listener.onLoadingProgress(mGalleryObject, currentValue * 100 / maxValue , 100);
+      listener.onLoadingProgress(mGalleryObject, currentValue , maxValue);
     }
   }
 
