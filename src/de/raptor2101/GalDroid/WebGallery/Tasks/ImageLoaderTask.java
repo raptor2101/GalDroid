@@ -153,12 +153,11 @@ public class ImageLoaderTask implements TaskInterface {
         if (inputStream == null) {
           DownloadImage(galleryDownloadObject);
           
-          LayoutParams layoutParams = imageDownload.getLayoutParams();
-          if(layoutParams != null) {
-            ScaleImage(galleryDownloadObject, layoutParams);
-          }
-          
-          inputStream = mCache.getFileStream(uniqueId);
+        }
+        
+        LayoutParams layoutParams = imageDownload.getLayoutParams();
+        if(layoutParams != null && inputStream != null) {
+          ScaleImage(galleryDownloadObject, layoutParams);
         }
 
         Options options = new Options();
@@ -175,7 +174,13 @@ public class ImageLoaderTask implements TaskInterface {
         }
 
         Log.d(CLASS_TAG, String.format("%s - Decoding local image", galleryDownloadObject));
-        Bitmap bitmap = BitmapFactory.decodeStream(inputStream, null, options);
+        Bitmap bitmap;
+        try {
+          inputStream = mCache.getFileStream(uniqueId);
+          bitmap = BitmapFactory.decodeStream(inputStream, null, options);
+        } finally {
+          inputStream.close();
+        }
         
         if (bitmap != null) {
           mCache.cacheBitmap(uniqueId, bitmap);
@@ -246,56 +251,51 @@ public class ImageLoaderTask implements TaskInterface {
     }
 
     private void ScaleImage(GalleryDownloadObject galleryDownloadObject, LayoutParams layoutParams) throws IOException {
-      
       Log.d(CLASS_TAG, String.format("%s - Decoding Bounds", galleryDownloadObject));
 
       String uniqueId = galleryDownloadObject.getUniqueId();
       FileInputStream bitmapStream = mCache.getFileStream(uniqueId);
-      Options options = new Options();
-      options.inJustDecodeBounds = true;
+      try {
+        Options options = new Options();
+        options.inJustDecodeBounds = true;
+        synchronized (mCache) {
+          if (isCancelled()) {
+            return;
+          }
 
-      synchronized (mCache) {
-        if (isCancelled()) {
-          return;
+          BitmapFactory.decodeStream(bitmapStream, null, options);
         }
-
-        BitmapFactory.decodeStream(bitmapStream, null, options);
-      }
-
-      bitmapStream.close();
-      Log.d(CLASS_TAG, String.format("%s - Decoding Bounds - done", galleryDownloadObject));
-
-      int imgHeight = options.outHeight;
-      int imgWidth = options.outWidth;
-
-      int highestLayoutDimension = layoutParams.height > layoutParams.width ? layoutParams.height : layoutParams.width;
-      int highestImageDimension = imgHeight > imgWidth ? imgHeight : imgWidth;
-
-      int sampleSize = highestImageDimension / highestLayoutDimension;
-
-      options = new Options();
-      options.inInputShareable = true;
-      options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-      options.inDither = true;
-      options.inPurgeable = true;
-      options.inPreferQualityOverSpeed = true;
-
-      if (sampleSize > 1) {
-        options.inSampleSize = sampleSize;
-      }
-
-      synchronized (mCache) {
-        if (isCancelled()) {
-          return;
-        }
-
-        bitmapStream = mCache.getFileStream(uniqueId);
-        Log.d(CLASS_TAG, String.format("%s - Resize Image", galleryDownloadObject));
-        Bitmap bitmap = BitmapFactory.decodeStream(bitmapStream, null, options);
         bitmapStream.close();
-        mCache.storeBitmap(uniqueId, bitmap);
-        bitmap.recycle();
-        Log.d(CLASS_TAG, String.format("%s - Resize Image - done", galleryDownloadObject));
+        Log.d(CLASS_TAG, String.format("%s - Decoding Bounds - done", galleryDownloadObject));
+        int imgHeight = options.outHeight;
+        int imgWidth = options.outWidth;
+        int highestLayoutDimension = layoutParams.height > layoutParams.width ? layoutParams.height : layoutParams.width;
+        int highestImageDimension = imgHeight > imgWidth ? imgHeight : imgWidth;
+        int sampleSize = highestImageDimension / highestLayoutDimension;
+        options = new Options();
+        options.inInputShareable = true;
+        options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+        options.inDither = true;
+        options.inPurgeable = true;
+        options.inPreferQualityOverSpeed = true;
+        if (sampleSize > 1) {
+          options.inSampleSize = sampleSize;
+        }
+        synchronized (mCache) {
+          if (isCancelled()) {
+            return;
+          }
+
+          bitmapStream = mCache.getFileStream(uniqueId);
+          Log.d(CLASS_TAG, String.format("%s - Resize Image", galleryDownloadObject));
+          Bitmap bitmap = BitmapFactory.decodeStream(bitmapStream, null, options);
+          
+          mCache.cacheBitmap(uniqueId, bitmap);
+          bitmap.recycle();
+          Log.d(CLASS_TAG, String.format("%s - Resize Image - done", galleryDownloadObject));
+        }
+      } finally {
+        bitmapStream.close();
       }
     }
   }
