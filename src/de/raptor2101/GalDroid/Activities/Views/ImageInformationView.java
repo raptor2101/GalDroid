@@ -53,6 +53,8 @@ public class ImageInformationView extends TableLayout implements ImageInformatio
 
   private GalleryObject mCurrentLoadingObject;
 
+  private GalleryObject mRequestedObject;
+
   public ImageInformationView(Context context, AttributeSet attrs) {
     super(context, attrs);
     initialize(context);
@@ -225,112 +227,99 @@ public class ImageInformationView extends TableLayout implements ImageInformatio
   }
 
   public void onImageInformationLoaded(GalleryObject galleryObject, ImageInformation info) {
-    Log.d(CLASS_TAG, String.format("ImageInformation loaded for %s", galleryObject));
-    TextView textField = (TextView) findViewById(R.id.textTitle);
-    textField.setText(info.mTitle);
-
-    textField = (TextView) findViewById(R.id.textUploadDate);
-    textField.setText(info.mUploadDate.toLocaleString());
-
-    textField = (TextView) findViewById(R.id.textExifCreateDate);
-    textField.setText(info.mExifCreateDate);
-
-    textField = (TextView) findViewById(R.id.textExifAperture);
-    textField.setText(info.mExifAperture);
-
-    textField = (TextView) findViewById(R.id.textExifExposure);
-
-    textField.setText(String.format("1/%.0fs", info.mExifExposure));
-
-    textField = (TextView) findViewById(R.id.textExifFlash);
-    textField.setText(String.format("%d", info.mExifFlash));
-
-    textField = (TextView) findViewById(R.id.textExifISO);
-    textField.setText(info.mExifIso);
-
-    textField = (TextView) findViewById(R.id.textExifModel);
-    textField.setText(info.mExifModel);
-
-    textField = (TextView) findViewById(R.id.textExifMake);
-    textField.setText(info.mExifMake);
-
-    textField = (TextView) findViewById(R.id.textExifFocalLength);
-    textField.setText(String.format("%.0fmm", info.mExifFocalLength));
-
-    textField = (TextView) findViewById(R.id.textExifWhiteBalance);
-    if (info.mExifWhiteBalance == WhiteBalance.Auto) {
-      textField.setText(R.string.object_exif_whitebalance_auto);
-    } else {
-      textField.setText(R.string.object_exif_whitebalance_manual);
+    GalleryImageView imageView = mCurrentSelectedImageView.get();
+    if (imageView != null && imageView.getGalleryObject().equals(galleryObject)) {
+      Log.d(CLASS_TAG, String.format("ImageInformation loaded for %s", galleryObject));
+      TextView textField = (TextView) findViewById(R.id.textTitle);
+      textField.setText(info.mTitle);
+      textField = (TextView) findViewById(R.id.textUploadDate);
+      textField.setText(info.mUploadDate.toLocaleString());
+      textField = (TextView) findViewById(R.id.textExifCreateDate);
+      textField.setText(info.mExifCreateDate);
+      textField = (TextView) findViewById(R.id.textExifAperture);
+      textField.setText(info.mExifAperture);
+      textField = (TextView) findViewById(R.id.textExifExposure);
+      textField.setText(String.format("1/%.0fs", info.mExifExposure));
+      textField = (TextView) findViewById(R.id.textExifFlash);
+      textField.setText(String.format("%d", info.mExifFlash));
+      textField = (TextView) findViewById(R.id.textExifISO);
+      textField.setText(info.mExifIso);
+      textField = (TextView) findViewById(R.id.textExifModel);
+      textField.setText(info.mExifModel);
+      textField = (TextView) findViewById(R.id.textExifMake);
+      textField.setText(info.mExifMake);
+      textField = (TextView) findViewById(R.id.textExifFocalLength);
+      textField.setText(String.format("%.0fmm", info.mExifFocalLength));
+      textField = (TextView) findViewById(R.id.textExifWhiteBalance);
+      if (info.mExifWhiteBalance == WhiteBalance.Auto) {
+        textField.setText(R.string.object_exif_whitebalance_auto);
+      } else {
+        textField.setText(R.string.object_exif_whitebalance_manual);
+      }
+      DegMinSec val = info.mExifGpsLat;
+      textField = (TextView) findViewById(R.id.textGeoLat);
+      textField.setText(String.format("%.0f° %.0f' %.2f\"", val.mDeg, val.mMin, val.mSec));
+      val = info.mExifGpsLong;
+      textField = (TextView) findViewById(R.id.textGeoLong);
+      textField.setText(String.format("%.0f° %.0f' %.2f\"", val.mDeg, val.mMin, val.mSec));
+      textField = (TextView) findViewById(R.id.textGeoHeight);
+      textField.setText(String.format("%.0f", info.mExifHeight));
+      mProgressBarComments.setVisibility(VISIBLE);
+      mProgressBarTags.setVisibility(VISIBLE);
+      mImageInformationsLoaded = true;
+      resetCurrentLoadingImage();
     }
-
-    DegMinSec val = info.mExifGpsLat;
-    textField = (TextView) findViewById(R.id.textGeoLat);
-    textField.setText(String.format("%.0f° %.0f' %.2f\"", val.mDeg, val.mMin, val.mSec));
-
-    val = info.mExifGpsLong;
-    textField = (TextView) findViewById(R.id.textGeoLong);
-    textField.setText(String.format("%.0f° %.0f' %.2f\"", val.mDeg, val.mMin, val.mSec));
-
-    textField = (TextView) findViewById(R.id.textGeoHeight);
-    textField.setText(String.format("%.0f", info.mExifHeight));
-
-    mProgressBarComments.setVisibility(VISIBLE);
-    mProgressBarTags.setVisibility(VISIBLE);
-    mImageInformationsLoaded = true;
-
-    resetCurrentLoadingImage();
   }
 
   public void onImageTagsLoaded(GalleryObject galleryObject, List<String> tags) {
-    Log.d(CLASS_TAG, String.format("Tags (Count: %d) loaded for %s", tags.size(), galleryObject));
-    StringBuilder stringBuilder = new StringBuilder(tags.size() * 10);
-    for (String tag : tags) {
-      stringBuilder.append(String.format("%s, ", tag));
+    GalleryImageView imageView = mCurrentSelectedImageView.get();
+    if (imageView != null && imageView.getGalleryObject().equals(galleryObject)) {
+      Log.d(CLASS_TAG, String.format("Tags (Count: %d) loaded for %s", tags.size(), galleryObject));
+      StringBuilder stringBuilder = new StringBuilder(tags.size() * 10);
+      for (String tag : tags) {
+        stringBuilder.append(String.format("%s, ", tag));
+      }
+      int length = stringBuilder.length();
+      if (length > 0) {
+        stringBuilder.delete(stringBuilder.length() - 2, stringBuilder.length());
+      }
+      mViewTags.setText(stringBuilder);
+      mProgressBarTags.setVisibility(View.GONE);
+      mViewTags.setVisibility(View.VISIBLE);
+      mTagsLoaded = true;
+      resetCurrentLoadingImage();
     }
-    int length = stringBuilder.length();
-    if (length > 0) {
-      stringBuilder.delete(stringBuilder.length() - 2, stringBuilder.length());
-    }
-
-    mViewTags.setText(stringBuilder);
-
-    mProgressBarTags.setVisibility(View.GONE);
-    mViewTags.setVisibility(View.VISIBLE);
-    mTagsLoaded = true;
-
-    resetCurrentLoadingImage();
   }
 
   public void onImageCommetsLoaded(GalleryObject galleryObject, List<GalleryObjectComment> comments) {
-    Log.d(CLASS_TAG, String.format("Comments (Count: %d) loaded for %s", comments.size(), galleryObject));
-    Context context = getContext();
-    LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+    GalleryImageView imageView = mCurrentSelectedImageView.get();
+    if (imageView != null && imageView.getGalleryObject().equals(galleryObject)) {
+      Log.d(CLASS_TAG, String.format("Comments (Count: %d) loaded for %s", comments.size(), galleryObject));
+      Context context = getContext();
+      LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+      DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.getDefault());
+      for (GalleryObjectComment comment : comments) {
+        View commentView = inflater.inflate(R.layout.comment_entry, null);
 
-    DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.getDefault());
+        TextView textAuthor = (TextView) commentView.findViewById(R.id.textCommentAuthor);
+        TextView textDate = (TextView) commentView.findViewById(R.id.textCommentPosted);
+        TextView textMessage = (TextView) commentView.findViewById(R.id.textCommentMessage);
 
-    for (GalleryObjectComment comment : comments) {
-      View commentView = inflater.inflate(R.layout.comment_entry, null);
+        textAuthor.setText(comment.getAuthorName());
+        textDate.setText(dateFormat.format(comment.getCreateDate()));
+        textMessage.setText(comment.getMessage());
 
-      TextView textAuthor = (TextView) commentView.findViewById(R.id.textCommentAuthor);
-      TextView textDate = (TextView) commentView.findViewById(R.id.textCommentPosted);
-      TextView textMessage = (TextView) commentView.findViewById(R.id.textCommentMessage);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        params.setMargins(0, 0, 0, 10);
+        commentView.setLayoutParams(params);
 
-      textAuthor.setText(comment.getAuthorName());
-      textDate.setText(dateFormat.format(comment.getCreateDate()));
-      textMessage.setText(comment.getMessage());
-
-      LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-      params.setMargins(0, 0, 0, 10);
-      commentView.setLayoutParams(params);
-
-      mViewComments.addView(commentView);
+        mViewComments.addView(commentView);
+      }
+      mViewComments.setVisibility(View.VISIBLE);
+      mProgressBarComments.setVisibility(GONE);
+      mCommentsLoaded = true;
+      resetCurrentLoadingImage();
     }
-    mViewComments.setVisibility(View.VISIBLE);
-    mProgressBarComments.setVisibility(GONE);
-    mCommentsLoaded = true;
-
-    resetCurrentLoadingImage();
   }
 
   private void resetCurrentLoadingImage() {
