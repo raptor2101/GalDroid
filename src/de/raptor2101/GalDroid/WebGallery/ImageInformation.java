@@ -1,10 +1,6 @@
 package de.raptor2101.GalDroid.WebGallery;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
-
-import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryObjectComment;
 
 public class ImageInformation {
   public enum WhiteBalance {

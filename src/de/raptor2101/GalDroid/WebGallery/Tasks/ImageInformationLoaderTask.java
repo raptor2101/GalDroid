@@ -2,7 +2,6 @@ package de.raptor2101.GalDroid.WebGallery.Tasks;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 import java.util.List;
 
 import android.media.ExifInterface;
@@ -13,7 +12,6 @@ import de.raptor2101.GalDroid.WebGallery.DegMinSec;
 import de.raptor2101.GalDroid.WebGallery.ImageCache;
 import de.raptor2101.GalDroid.WebGallery.ImageInformation;
 import de.raptor2101.GalDroid.WebGallery.ImageInformation.WhiteBalance;
-import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryDownloadObject;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryObject;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryObjectComment;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.WebGallery;

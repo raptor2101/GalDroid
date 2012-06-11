@@ -31,7 +31,6 @@ import android.view.Window;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.AdapterView;
-import android.widget.TextView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.GridView;
@@ -40,7 +39,6 @@ import de.raptor2101.GalDroid.Activities.Helpers.ImageAdapter;
 import de.raptor2101.GalDroid.Activities.Helpers.ImageAdapter.ScaleMode;
 import de.raptor2101.GalDroid.Activities.Helpers.ImageAdapter.TitleConfig;
 import de.raptor2101.GalDroid.Activities.Views.GalleryImageView;
-import de.raptor2101.GalDroid.Config.GalDroidPreference;
 
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryObject;
 import de.raptor2101.GalDroid.WebGallery.Tasks.ImageLoaderTask;

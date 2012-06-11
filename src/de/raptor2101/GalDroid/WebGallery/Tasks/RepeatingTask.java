@@ -1,10 +1,7 @@
 package de.raptor2101.GalDroid.WebGallery.Tasks;
 
 import java.lang.Thread.State;
-import java.util.ArrayDeque;
 import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
 import java.util.concurrent.Callable;
 
 import android.os.Handler;
