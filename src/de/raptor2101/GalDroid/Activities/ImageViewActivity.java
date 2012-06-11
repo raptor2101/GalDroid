@@ -24,6 +24,7 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -92,20 +93,21 @@ public class ImageViewActivity extends GalleryActivity implements OnItemSelected
     }
     mInformationView.initialize();
 
-    LayoutParams params = this.getWindow().getAttributes();
+    DisplayMetrics metrics = new DisplayMetrics();
+    getWindowManager().getDefaultDisplay().getMetrics(metrics);
     
     mGalleryFullscreen = (Gallery) findViewById(R.id.singleImageGallery);
     mGalleryThumbnails = (Gallery) findViewById(R.id.thumbnailImageGallery);
     
     mFullscrennImageLoaderTask = new ImageLoaderTask(webGallery, imageCache, 5);
-    mThumbnailImageLoaderTask = new ImageLoaderTask(webGallery, imageCache, (int) ((params.width / 100) * 1.5));
+    mThumbnailImageLoaderTask = new ImageLoaderTask(webGallery, imageCache, (int) ((metrics.widthPixels / 100) * 1.5));
     
     mGalleryThumbnails.setWillNotCacheDrawing(true);
     
 
-    ImageViewOnTouchListener touchListener = new ImageViewOnTouchListener(mGalleryFullscreen, mGalleryThumbnails, params.height / 5f);
+    ImageViewOnTouchListener touchListener = new ImageViewOnTouchListener(mGalleryFullscreen, mGalleryThumbnails, metrics.heightPixels / 5f);
 
-    mAdapterFullscreen = new ImageAdapter(this, new Gallery.LayoutParams(params.width, params.height), ScaleMode.ScaleSource, mFullscrennImageLoaderTask);
+    mAdapterFullscreen = new ImageAdapter(this, new Gallery.LayoutParams(metrics.widthPixels, metrics.heightPixels), ScaleMode.ScaleSource, mFullscrennImageLoaderTask);
     mAdapterFullscreen.setTitleConfig(TitleConfig.HideTitle);
     mAdapterFullscreen.setDisplayTarget(DisplayTarget.FullScreen);
 
