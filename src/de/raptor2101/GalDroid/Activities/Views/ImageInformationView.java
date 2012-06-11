@@ -6,9 +6,6 @@ import java.util.List;
 import java.util.Locale;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.os.Handler;
-import android.os.Message;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -26,7 +23,6 @@ import de.raptor2101.GalDroid.WebGallery.ImageInformation.WhiteBalance;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryObject;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryObjectComment;
 import de.raptor2101.GalDroid.WebGallery.Tasks.ImageInformationLoaderTaskListener;
-import de.raptor2101.GalDroid.WebGallery.Tasks.ImageLoaderTaskListener;
 import de.raptor2101.GalDroid.WebGallery.Tasks.ImageInformationLoaderTask;
 
 public class ImageInformationView extends TableLayout implements ImageInformationLoaderTaskListener, GalleryImageViewListener {
@@ -52,8 +48,6 @@ public class ImageInformationView extends TableLayout implements ImageInformatio
   private boolean mCommentsLoaded;
 
   private GalleryObject mCurrentLoadingObject;
-
-  private GalleryObject mRequestedObject;
 
   public ImageInformationView(Context context, AttributeSet attrs) {
     super(context, attrs);
@@ -348,12 +342,10 @@ public class ImageInformationView extends TableLayout implements ImageInformatio
   }
 
   public void onLoadingStarted(GalleryObject galleryObject) {
-    // TODO Auto-generated method stub
 
   }
 
   public void onLoadingProgress(GalleryObject galleryObject, int currentValue, int maxValue) {
-    // TODO Auto-generated method stub
 
   }
 
@@ -366,7 +358,6 @@ public class ImageInformationView extends TableLayout implements ImageInformatio
   }
 
   public void onLoadingCancelled(GalleryObject galleryObject) {
-    // TODO Auto-generated method stub
 
   }
 
