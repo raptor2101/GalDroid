@@ -34,6 +34,8 @@ import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryObject;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryDownloadObject;
 
 public abstract class Entity implements GalleryObject {
+  private static final long serialVersionUID = 632836774464520503L;
+  
   private final Pattern mPatternExtractTagId = Pattern.compile("tag_item/(\\d+),\\d+");
   private final String mRootLink;
   private final String mTitle;

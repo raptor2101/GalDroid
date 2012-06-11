@@ -28,7 +28,8 @@ import org.json.JSONObject;
 import de.raptor2101.GalDroid.WebGallery.Gallery3.Gallery3Imp;
 
 public class AlbumEntity extends Entity {
-
+  private static final long serialVersionUID = 1118284867802421954L;
+  
   private final List<String> mMembers;
 
   public AlbumEntity(JSONObject jsonObject, Gallery3Imp gallery3) throws JSONException {

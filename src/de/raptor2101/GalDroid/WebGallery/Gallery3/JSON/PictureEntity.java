@@ -26,6 +26,7 @@ import de.raptor2101.GalDroid.WebGallery.Gallery3.Gallery3Imp;
 import android.util.FloatMath;
 
 public class PictureEntity extends Entity {
+  private static final long serialVersionUID = -7313965114397469045L;
 
   public PictureEntity(JSONObject jsonObject, Gallery3Imp gallery3) throws JSONException {
     super(jsonObject, gallery3);
