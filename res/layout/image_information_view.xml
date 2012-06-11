@@ -38,7 +38,7 @@
                 android:id="@+id/textTitle"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:gravity="left" />
+                android:gravity="left"/>
         </TableRow>
 
         <TableRow>
@@ -48,13 +48,14 @@
                 android:layout_height="wrap_content"
                 android:gravity="left"
                 android:text="@string/object_uploaddate"
-                android:textStyle="bold" />
+                android:textStyle="bold" 
+                android:layout_marginRight="2dp"/>
 
             <TextView
                 android:id="@+id/textUploadDate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:gravity="left" />
+                android:gravity="left"/>
         </TableRow>
 
         <TableRow>
