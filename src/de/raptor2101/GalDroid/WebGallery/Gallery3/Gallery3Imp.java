@@ -225,7 +225,7 @@ public class Gallery3Imp implements WebGallery {
       List<String> tagLinks = entity.getTagLinks();
       int linkCount = tagLinks.size();
       ArrayList<String> tags = new ArrayList<String>(linkCount);
-      ArrayList<JSONObject> jsonObjects = new ArrayList<JSONObject>(linkCount);
+      
       if (linkCount > 0) {
         for (int i = 0; i < linkCount; i++) {
           try {
@@ -255,7 +255,7 @@ public class Gallery3Imp implements WebGallery {
       JSONObject jsonObject = restCall.loadJSONObject();
       JSONArray jsonItemComments = jsonObject.getJSONArray("members");
       int commentCount = jsonItemComments.length();
-      ArrayList<JSONObject> jsonObjects = new ArrayList<JSONObject>(commentCount);
+      
       ArrayList<GalleryObjectComment> comments = new ArrayList<GalleryObjectComment>(commentCount);
       ArrayList<String> authors = new ArrayList<String>(commentCount);
 
