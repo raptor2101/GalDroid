@@ -25,6 +25,7 @@
     <string name="object_uploaddate">Released</string>
     <string name="object_comments">Comments</string>
     <string name="menu_image_info">Additional Info</string>
+	<string name="menu_image_share">Share &#8230;</string>
     <string name="object_informations">Gallery Informations</string>
     <string name="object_exif_informations">EXIF Informationen</string>
     <string name="object_exif_createdate">Createdate</string>

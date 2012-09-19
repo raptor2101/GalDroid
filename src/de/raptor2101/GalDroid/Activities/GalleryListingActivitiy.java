@@ -19,6 +19,7 @@
 package de.raptor2101.GalDroid.Activities;
 
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 
 import android.app.ListActivity;
 import android.app.ProgressDialog;
@@ -119,19 +120,34 @@ public class GalleryListingActivitiy extends ListActivity implements CacheTaskLi
     try {
       GalDroidApp app = (GalDroidApp) getApplication();
       app.Initialize(this);
-      setListAdapter(new ArrayAdapter<String>(this, R.layout.gallery_listing_activity, GalDroidPreference.getGalleryNames()));
-
-      ImageCache cache = app.getImageCache();
-      if (cache.isCleanUpNeeded()) {
-        CreateProgressDialog(R.string.menu_cleanup_cache);
-        CleanUpCacheTask task = new CleanUpCacheTask(cache, this);
-        task.execute();
+      List<String> names = GalDroidPreference.getGalleryNames();
+      
+      if(names.size() == 0) {
+        Intent intent = new Intent(this, EditGalleryActivity.class);
+        this.startActivity(intent);
       }
+      else
+      {
+        showNames(app, names);
+      }
+      
+      
     } catch (NoSuchAlgorithmException e) {
       e.printStackTrace();
     }
 
     super.onResume();
+  }
+  
+  private void showNames(GalDroidApp app, List<String> names) {
+    setListAdapter(new ArrayAdapter<String>(this, R.layout.gallery_listing_activity, GalDroidPreference.getGalleryNames()));
+
+    ImageCache cache = app.getImageCache();
+    if (cache.isCleanUpNeeded()) {
+      CreateProgressDialog(R.string.menu_cleanup_cache);
+      CleanUpCacheTask task = new CleanUpCacheTask(cache, this);
+      task.execute();
+    }
   }
 
   public void onCacheOperationStart(int elementCount) {
