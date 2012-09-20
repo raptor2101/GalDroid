@@ -172,15 +172,6 @@ public class GridViewActivity extends GalleryActivity implements OnItemClickList
       mImageLoaderTask.download(image, null, this);
     }
   }
-  
-  private void callShareIntentActivity(File file) {
-    Intent intent = new Intent();
-    intent.setAction(android.content.Intent.ACTION_VIEW);
-    // TODO: ermittle den typen richtig oder convertiere das file...    
-    intent.setDataAndType(Uri.fromFile(file), "image/jpeg");
-    intent = Intent.createChooser(intent, "Share Image");
-    this.startActivity(intent);
-  }
 
   private void callAdditionalInfoActivity(GalleryImageView imageView) {
     Intent intent = null;

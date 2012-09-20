@@ -7,6 +7,14 @@
         android:title="@string/menu_image_info"
         android:icon="@drawable/ic_options_menu_info"
         android:showAsAction="always"
-        android:checkable="false"></item>
+        android:checkable="false" />
+    <item android:id="@+id/item_additional_share_object"
+        android:checked="false" 
+        android:visible="true" 
+        android:enabled="true" 
+        android:title="@string/menu_image_share"
+        android:icon="@drawable/ic_action_share"
+        android:showAsAction="always"
+        android:checkable="false" /> 
 
 </menu>

@@ -18,6 +18,7 @@
 
 package de.raptor2101.GalDroid.Activities;
 
+import java.io.File;
 import java.io.Serializable;
 import java.lang.ref.WeakReference;
 import java.security.NoSuchAlgorithmException;
@@ -30,7 +31,11 @@ import de.raptor2101.GalDroid.WebGallery.Tasks.GalleryLoaderTask;
 import de.raptor2101.GalDroid.WebGallery.Tasks.GalleryLoaderTaskListener;
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.ContentValues;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.ViewGroup.LayoutParams;
 
@@ -202,5 +207,19 @@ public abstract class GalleryActivity extends Activity {
   
   public void dismissProgressBar() {
     mProgressDialog.dismiss();
+  }
+  
+
+  
+  protected void callShareIntentActivity(File file) {
+    ContentValues values = new ContentValues(2);
+    values.put(MediaStore.Images.Media.MIME_TYPE, "image/png");
+    values.put(MediaStore.Images.Media.DATA, file.getAbsolutePath());
+    Uri uri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+    Intent intent = new Intent(Intent.ACTION_SEND);
+    intent.setType("image/png");
+    intent.putExtra(Intent.EXTRA_STREAM, uri);
+    intent = Intent.createChooser(intent, "Share Image");
+    this.startActivity(intent);
   }
 }

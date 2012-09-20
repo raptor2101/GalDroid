@@ -58,7 +58,7 @@ public class ImageViewActivity extends GalleryActivity implements OnItemSelected
   private ImageInformationView mInformationView;
 
   private ActionBarHider mActionBarHider;
-  
+
   private ImageLoaderTask mFullscrennImageLoaderTask;
   private ImageLoaderTask mThumbnailImageLoaderTask;
 
@@ -77,12 +77,10 @@ public class ImageViewActivity extends GalleryActivity implements OnItemSelected
     mActionBarHider = new ActionBarHider(actionBar);
 
     GalDroidApp app = (GalDroidApp) getApplication();
-    
+
     WebGallery webGallery = app.getWebGallery();
     ImageCache imageCache = app.getImageCache();
-    
-    
-    
+
     mInformationView = (ImageInformationView) findViewById(R.id.viewImageInformations);
     boolean showInfo = getIntent().getExtras().getBoolean(GalDroidApp.INTENT_EXTRA_SHOW_IMAGE_INFO);
     if (showInfo) {
@@ -94,15 +92,14 @@ public class ImageViewActivity extends GalleryActivity implements OnItemSelected
 
     DisplayMetrics metrics = new DisplayMetrics();
     getWindowManager().getDefaultDisplay().getMetrics(metrics);
-    
+
     mGalleryFullscreen = (Gallery) findViewById(R.id.singleImageGallery);
     mGalleryThumbnails = (Gallery) findViewById(R.id.thumbnailImageGallery);
-    
+
     mFullscrennImageLoaderTask = new ImageLoaderTask(webGallery, imageCache, 5);
     mThumbnailImageLoaderTask = new ImageLoaderTask(webGallery, imageCache, (int) ((metrics.widthPixels / 100) * 1.5));
-    
+
     mGalleryThumbnails.setWillNotCacheDrawing(true);
-    
 
     ImageViewOnTouchListener touchListener = new ImageViewOnTouchListener(mGalleryFullscreen, mGalleryThumbnails, metrics.heightPixels / 5f);
 
@@ -127,61 +124,61 @@ public class ImageViewActivity extends GalleryActivity implements OnItemSelected
   public void onBackPressed() {
     ImageAdapter adapter = (ImageAdapter) mGalleryFullscreen.getAdapter();
     adapter.cleanUp();
-    
+
     Intent resultIntent = new Intent(this, ImageViewActivity.class);
     resultIntent.putExtra(GalDroidApp.INTENT_EXTRA_DISPLAY_INDEX, getCurrentIndex());
     setResult(Activity.RESULT_OK, resultIntent);
 
     super.onBackPressed();
   }
-  
+
   @Override
   protected void onResume() {
     super.onResume();
-    
+
     ImageAdapter adapter = (ImageAdapter) mGalleryFullscreen.getAdapter();
     if (adapter != null) {
       adapter.refreshImages();
     }
-    
+
     adapter = (ImageAdapter) mGalleryThumbnails.getAdapter();
     if (adapter != null) {
       adapter.refreshImages();
     }
-    
+
     mFullscrennImageLoaderTask.start();
     mThumbnailImageLoaderTask.start();
   }
-  
+
   @Override
   protected void onPause() {
     super.onPause();
-    
+
     try {
       mFullscrennImageLoaderTask.stop(false);
       mThumbnailImageLoaderTask.stop(false);
     } catch (InterruptedException e) {
-      
+
     }
   }
-  
+
   @Override
   protected void onStop() {
     super.onStop();
-    
+
     try {
       mFullscrennImageLoaderTask.cancel(true);
       mThumbnailImageLoaderTask.cancel(true);
     } catch (InterruptedException e) {
-      
+
     }
-    
+
     ImageAdapter adapter = (ImageAdapter) mGalleryFullscreen.getAdapter();
     adapter.cleanUp();
     adapter = (ImageAdapter) mGalleryThumbnails.getAdapter();
     adapter.cleanUp();
   }
-  
+
   @Override
   public boolean onCreateOptionsMenu(Menu menu) {
     MenuInflater inflater = getMenuInflater();
@@ -191,12 +188,21 @@ public class ImageViewActivity extends GalleryActivity implements OnItemSelected
 
   @Override
   public boolean onOptionsItemSelected(MenuItem item) {
-    if (item.getItemId() == R.id.item_additional_info_object) {
+    switch (item.getItemId()) {
+    case R.id.item_additional_info_object:
       if (mInformationView.getVisibility() == View.GONE) {
         mInformationView.setVisibility(View.VISIBLE);
       } else {
         mInformationView.setVisibility(View.GONE);
       }
+      break;
+    case R.id.item_additional_share_object:
+      GalleryImageView view = (GalleryImageView) mGalleryFullscreen.getSelectedView();
+      String uniqueId = view.getGalleryObject().getImage().getUniqueId();
+      GalDroidApp app = (GalDroidApp) getApplicationContext();
+      ImageCache cache = app.getImageCache();
+      callShareIntentActivity(cache.getFile(uniqueId));
+      break;
     }
     return true;
   }
