@@ -195,12 +195,12 @@ public abstract class GalleryActivity extends Activity {
     mProgressDialog.show();
   }
   
-  public void setProgress(int current, int max) {
+  public void updateProgressBar(int current, int max) {
     mProgressDialog.setMax(max);
     mProgressDialog.setProgress(current);
   }
   
-  public void dismissProgress() {
+  public void dismissProgressBar() {
     mProgressDialog.dismiss();
   }
 }
