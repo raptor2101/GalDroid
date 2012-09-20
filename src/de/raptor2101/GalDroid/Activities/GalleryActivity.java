@@ -186,6 +186,21 @@ public abstract class GalleryActivity extends Activity {
     } else {
       return null;
     }
-
+  }
+  
+  public void showProgressBar(int textId) {
+    mProgressDialog.setTitle(R.string.progress_title_load_gallery);
+    mProgressDialog.setMax(100);
+    mProgressDialog.setProgress(0);
+    mProgressDialog.show();
+  }
+  
+  public void setProgress(int current, int max) {
+    mProgressDialog.setMax(max);
+    mProgressDialog.setProgress(current);
+  }
+  
+  public void dismissProgress() {
+    mProgressDialog.dismiss();
   }
 }
