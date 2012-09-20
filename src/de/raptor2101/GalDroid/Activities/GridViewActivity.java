@@ -18,10 +18,13 @@
 
 package de.raptor2101.GalDroid.Activities;
 
+import java.io.File;
 import java.util.List;
 
 import android.app.ActionBar;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.ContextMenu;
@@ -30,7 +33,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.ContextMenu.ContextMenuInfo;
-import android.view.ViewGroup.LayoutParams;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
@@ -41,10 +43,14 @@ import de.raptor2101.GalDroid.Activities.Helpers.ImageAdapter.ScaleMode;
 import de.raptor2101.GalDroid.Activities.Helpers.ImageAdapter.TitleConfig;
 import de.raptor2101.GalDroid.Activities.Views.GalleryImageView;
 
+import de.raptor2101.GalDroid.WebGallery.ImageCache;
+import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryDownloadObject;
 import de.raptor2101.GalDroid.WebGallery.Interfaces.GalleryObject;
+import de.raptor2101.GalDroid.WebGallery.Interfaces.WebGallery;
 import de.raptor2101.GalDroid.WebGallery.Tasks.ImageLoaderTask;
+import de.raptor2101.GalDroid.WebGallery.Tasks.ImageLoaderTaskListener;
 
-public class GridViewActivity extends GalleryActivity implements OnItemClickListener {
+public class GridViewActivity extends GalleryActivity implements OnItemClickListener, ImageLoaderTaskListener {
 
   private static final int CURRENT_INDEX = 0;
   private GridView mGridView;
@@ -135,19 +141,55 @@ public class GridViewActivity extends GalleryActivity implements OnItemClickList
 
   @Override
   public boolean onContextItemSelected(MenuItem item) {
-
     AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
     GalleryImageView imageView = (GalleryImageView) info.targetView;
-
-    if (item.getItemId() == R.id.item_additional_info_object) {
-
-      Intent intent = new Intent(this, ImageViewActivity.class);
-      intent.putExtra(GalDroidApp.INTENT_EXTRA_DISPLAY_GALLERY, getDisplayedGallery());
-      intent.putExtra(GalDroidApp.INTENT_EXTRA_DISPLAY_OBJECT, imageView.getGalleryObject());
-      intent.putExtra(GalDroidApp.INTENT_EXTRA_SHOW_IMAGE_INFO, true);
-      this.startActivity(intent);
+    
+    
+    switch (item.getItemId()){
+    case R.id.item_additional_info_object: 
+      callAdditionalInfoActivity(imageView);
+      break;
+    case R.id.item_additional_share_object:
+      callShareIntentActivity(imageView);
+      break;
     }
+    
+    
     return true;
+  }
+
+  private void callShareIntentActivity(GalleryImageView imageView) {
+    
+    
+    GalDroidApp app = (GalDroidApp) getApplicationContext();
+    ImageCache cache = app.getImageCache();
+    
+    
+    GalleryDownloadObject image = imageView.getGalleryObject().getImage();
+    File file = cache.getFile(image.getUniqueId());
+    if (file.exists()) {
+      callShareIntentActivity(file);
+    } else {
+      mImageLoaderTask.download(image, null, this);
+    }
+  }
+  
+  private void callShareIntentActivity(File file) {
+    Intent intent = new Intent();
+    intent.setAction(android.content.Intent.ACTION_VIEW);
+    // TODO: ermittle den typen richtig oder convertiere das file...    
+    intent.setDataAndType(Uri.fromFile(file), "image/jpeg");
+    intent = Intent.createChooser(intent, "Share Image");
+    this.startActivity(intent);
+  }
+
+  private void callAdditionalInfoActivity(GalleryImageView imageView) {
+    Intent intent = null;
+    intent = new Intent(this, ImageViewActivity.class);
+    intent.putExtra(GalDroidApp.INTENT_EXTRA_DISPLAY_GALLERY, getDisplayedGallery());
+    intent.putExtra(GalDroidApp.INTENT_EXTRA_DISPLAY_OBJECT, imageView.getGalleryObject());
+    intent.putExtra(GalDroidApp.INTENT_EXTRA_SHOW_IMAGE_INFO, true);
+    this.startActivity(intent);
   }
 
   @Override
@@ -183,5 +225,31 @@ public class GridViewActivity extends GalleryActivity implements OnItemClickList
     }
     
     mAdapter.cleanUp();
+  }
+
+  public void onLoadingStarted(String uniqueId) {
+    showProgressBar(R.string.progress_title_load_image);
+  }
+
+  public void onLoadingProgress(String uniqueId, int currentValue, int maxValue) {
+    
+    updateProgressBar(currentValue, maxValue);
+    
+  }
+
+  public void onLoadingCompleted(String uniqueId, Bitmap bitmap) {
+    GalDroidApp app = (GalDroidApp) getApplicationContext();
+    ImageCache cache = app.getImageCache();
+    
+    File file = cache.getFile(uniqueId);
+    if (file.exists()) {
+      callShareIntentActivity(file);
+    }
+    
+    dismissProgressBar();
+  }
+
+  public void onLoadingCancelled(String uniqueId) {
+    dismissProgressBar();
   }
 }
