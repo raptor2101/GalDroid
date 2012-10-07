@@ -77,7 +77,7 @@ public class GalleryImageView extends LinearLayout implements ImageLoaderTaskLis
   public void resetLoading() {
     mProgressBar_determinate.setVisibility(GONE);
     mProgressBar_indeterminate.setVisibility(GONE);
-    mAssignedImageDownload = null;
+    mAssignedImageDownload = new WeakReference<ImageLoaderTask.ImageDownload>(null);
   }
   
   public GalleryObject getGalleryObject() {
